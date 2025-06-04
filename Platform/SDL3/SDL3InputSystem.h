@@ -33,7 +33,7 @@ namespace CynicEngine
         Vector2f GetReleativeMove() const override;
         Vector2f GetMouseScrollWheel() const override;
 
-        void SetReleativeMode(bool isActive) override;
+        void SetReleativeMode(Window* pWindow,bool isActive) override;
         bool IsReleativeMode() const override;
 
     private:
@@ -85,8 +85,8 @@ namespace CynicEngine
         ~SDL3InputSystem() override;
 
         void Init() override;
-        void PreUpdate(Window *pWindow) override;
-        void PostUpdate() override;
+        void PreTick(Window *pWindow) override;
+        void PostTick() override;
     private:
         void ProcessEvent(Window* pWindow);
     };

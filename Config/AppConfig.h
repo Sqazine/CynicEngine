@@ -16,6 +16,6 @@ namespace CynicEngine
         }
 
     private:
-        bool mRefreshOnlyWindowIsActive{false};
+        bool mRefreshOnlyWindowIsActive{true};
     };
 }

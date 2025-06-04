@@ -9,16 +9,6 @@
 #include "Platform/InputSystem.h"
 namespace CynicEngine
 {
-    enum class AppState
-    {
-        INIT,
-        PROCESS_INPUT,
-        UPDATE,
-        DRAW,
-        EXIT,
-        PAUSE,
-    };
-
     class EditorApp : public Singleton<EditorApp>
     {
     public:
@@ -30,12 +20,19 @@ namespace CynicEngine
         InputSystem *GetInputSystem() const;
 
     private:
+        enum class AppState
+        {
+            TICK,
+            PAUSE,
+            QUIT
+        };
+
         void Init();
-        void PreUpdate();
-        void Update();
+        void PreTick();
+        void Tick();
         void Render();
         void RenderGizmo();
-        void PostUpdate();
+        void PostTick();
         void Destroy();
 
         AppState mState;

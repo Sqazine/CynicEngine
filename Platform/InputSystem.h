@@ -352,7 +352,7 @@ namespace CynicEngine
         virtual Vector2f GetReleativeMove() const = 0;
         virtual Vector2f GetMouseScrollWheel() const = 0;
 
-        virtual void SetReleativeMode(bool isActive) = 0;
+        virtual void SetReleativeMode(Window* pWindow,bool isActive) = 0;
         virtual bool IsReleativeMode() const = 0;
     };
 
@@ -398,8 +398,8 @@ namespace CynicEngine
     protected:
         friend class EditorApp;
         virtual void Init() = 0;
-        virtual void PreUpdate(Window *pWindow) = 0;
-        virtual void PostUpdate() = 0;
+        virtual void PreTick(Window *pWindow) = 0;
+        virtual void PostTick() = 0;
         std::unique_ptr<Keyboard> mKeyboard;
         std::unique_ptr<Mouse> mMouse;
         std::vector<std::unique_ptr<Controller>> mControllers;

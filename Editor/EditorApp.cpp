@@ -7,20 +7,23 @@ namespace CynicEngine
     void EditorApp::Run()
     {
         Init();
-        while (mState != AppState::EXIT)
+        while (mState != AppState::QUIT)
         {
-            PreUpdate();
-            Update();
-            Render();
-            RenderGizmo();
-            PostUpdate();
+            PreTick();
+            if (mState == AppState::TICK)
+            {
+                Tick();
+                Render();
+                RenderGizmo();
+            }
+            PostTick();
         }
         Destroy();
     }
 
     void EditorApp::Quit()
     {
-        mState = AppState::EXIT;
+        mState = AppState::QUIT;
     }
 
     Window *EditorApp::GetWindow() const
@@ -37,16 +40,12 @@ namespace CynicEngine
     {
         mWindow.reset(Window::Create());
         mWindow->Show();
-        
+
         mInputSystem.reset(InputSystem::Create());
     }
 
-    void EditorApp::Update()
+    void EditorApp::Tick()
     {
-        if (AppConfig::GetInstance().IsRefreshOnlyWindowIsActive() && GetWindow()->HasEvent(Window::Event::MIN))
-            mState = AppState::PAUSE;
-        else if (GetWindow()->HasEvent(Window::Event::ENTER | Window::Event::EXPOSE))
-            mState = AppState::UPDATE;
     }
 
     void EditorApp::Render()
@@ -61,17 +60,22 @@ namespace CynicEngine
     {
     }
 
-    void EditorApp::PreUpdate()
+    void EditorApp::PreTick()
     {
-        mInputSystem->PreUpdate(mWindow.get());
+        mInputSystem->PreTick(mWindow.get());
+
+        if (AppConfig::GetInstance().IsRefreshOnlyWindowIsActive() && GetWindow()->HasEvent(Window::Event::MIN))
+            mState = AppState::PAUSE;
+        if (mState == AppState::PAUSE && GetWindow()->HasEvent(Window::Event::ENTER | Window::Event::EXPOSE))
+            mState = AppState::TICK;
     }
 
-    void EditorApp::PostUpdate()
+    void EditorApp::PostTick()
     {
         if (mWindow->HasEvent(Window::Event::CLOSE))
             Quit();
 
         mWindow->ClearEvent();
-        mInputSystem->PostUpdate();
+        mInputSystem->PostTick();
     }
 }

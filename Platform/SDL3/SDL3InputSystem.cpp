@@ -1,4 +1,5 @@
 #include "SDL3InputSystem.h"
+#include "SDL3Window.h"
 #include <memory>
 #include <iostream>
 #include "Platform/InputSystem.h"
@@ -198,13 +199,16 @@ namespace CynicEngine
         return mMouseScrollWheel;
     }
 
-    void SDL3Mouse::SetReleativeMode(bool isActive)
+    void SDL3Mouse::SetReleativeMode(Window *pWindow, bool isActive)
     {
-        // mIsRelative = isActive;
-        // if (isActive)
-        //     SDL_SetRelativeMouseMode(SDL_TRUE);
-        // else
-        //     SDL_SetRelativeMouseMode(SDL_FALSE);
+        mIsRelative = isActive;
+        
+        auto sdlWindow = static_cast<SDL3Window *>(pWindow)->GetHandle();
+
+        if (isActive)
+            SDL_SetWindowRelativeMouseMode(sdlWindow, true);
+        else
+            SDL_SetWindowRelativeMouseMode(sdlWindow, false);
     }
 
     bool SDL3Mouse::IsReleativeMode() const
@@ -289,9 +293,9 @@ namespace CynicEngine
         memset(((SDL3Keyboard *)mKeyboard.get())->mPreKeyState, 0, SDL_SCANCODE_COUNT);
     }
 
-    void SDL3InputSystem::PreUpdate(Window *pWindow)
+    void SDL3InputSystem::PreTick(Window *pWindow)
     {
-        memcpy_s(((SDL3Keyboard *)mKeyboard.get())->mPreKeyState, SDL_SCANCODE_COUNT, ((SDL3Keyboard *)mKeyboard.get())->mCurKeyState, SDL_SCANCODE_COUNT);
+        memcpy(((SDL3Keyboard *)mKeyboard.get())->mPreKeyState, ((SDL3Keyboard *)mKeyboard.get())->mCurKeyState, SDL_SCANCODE_COUNT);
         ((SDL3Mouse *)mMouse.get())->mPreButtons = ((SDL3Mouse *)mMouse.get())->mCurButtons;
         ((SDL3Mouse *)mMouse.get())->mPrePos = ((SDL3Mouse *)mMouse.get())->mCurPos;
         ((SDL3Mouse *)mMouse.get())->mMouseScrollWheel = Vector2f::ZERO;
@@ -299,7 +303,7 @@ namespace CynicEngine
         ProcessEvent(pWindow);
     }
 
-    void SDL3InputSystem::PostUpdate()
+    void SDL3InputSystem::PostTick()
     {
         Vector2f p = Vector2f::ZERO;
         if (!((SDL3Mouse *)mMouse.get())->mIsRelative)
@@ -336,6 +340,15 @@ namespace CynicEngine
                 break;
             case SDL_EVENT_WINDOW_MOVED:
                 pWindow->SetEvent(Window::Event::MOVE);
+                break;
+            case SDL_EVENT_WINDOW_EXPOSED:
+                pWindow->SetEvent(Window::Event::EXPOSE);
+                break;
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                pWindow->SetEvent(Window::Event::ENTER);
+                break;
+            case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                pWindow->SetEvent(Window::Event::LEAVE);
                 break;
             default:
                 break;
