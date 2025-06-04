@@ -11,6 +11,12 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# The build directory is where CMake generates the build system files.
+build/
+
+# Visual Studio Code specific files
+.vscode/
+
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
