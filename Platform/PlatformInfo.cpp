@@ -1,0 +1,15 @@
+#include "PlatformInfo.h"
+#include "SDL3/SDL3PlatformInfo.h"
+namespace CynicEngine
+{
+    HardwareInfo *HardwareInfo::Create()
+    {
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_LINUX)
+        auto sdl3HardwareInfo = new SDL3HardwareInfo();
+        sdl3HardwareInfo->ObtainDisplayInfo();
+        return sdl3HardwareInfo;
+#else
+#error "Not Support Platform, only windows is available now!"
+#endif
+    }
+}

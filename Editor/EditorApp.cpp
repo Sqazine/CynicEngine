@@ -1,6 +1,7 @@
 #include "EditorApp.h"
 #include "Core/Logger.h"
 #include "Config/AppConfig.h"
+#include "Platform/PlatformInfo.h"
 
 namespace CynicEngine
 {
@@ -38,6 +39,8 @@ namespace CynicEngine
 
     void EditorApp::Init()
     {
+        PlatformInfo::GetInstance().Init();
+
         mWindow.reset(Window::Create());
         mWindow->Show();
 
@@ -58,6 +61,7 @@ namespace CynicEngine
 
     void EditorApp::Destroy()
     {
+        PlatformInfo::GetInstance().Destroy();
     }
 
     void EditorApp::PreTick()

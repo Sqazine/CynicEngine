@@ -1,37 +1,29 @@
 #include "SDL3Window.h"
+#include "Platform/PlatformInfo.h"
 namespace CynicEngine
 {
     SDL3Window::SDL3Window()
         : mHandle(nullptr), mIsShown(false), mTitle("CynicEngine")
     {
-        int numDisplays = 0;
-        auto displays = SDL_GetDisplays(&numDisplays);
-
-        if(numDisplays <= 0)
-        {
-            CYNIC_ENGINE_LOG_ERROR("Failed to get displays: {}", SDL_GetError());
-            return;
-        }
-
-        SDL_Rect rect;
-        auto ret = SDL_GetDisplayBounds(displays[0], &rect);
+        auto defaultDisplayInfo = PlatformInfo::GetInstance().GetHardwareInfo()->GetDisplayInfos()[0];
 
         uint32_t windowFlag = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE;
 
-        auto aspect = 4.0 / 3.0;
+        auto aspect = 4.0f / 3.0f;
+        auto ratio = 1.0f / aspect;
 
         int32_t actualWidth;
         int32_t actualHeight;
 
-        if (rect.w > rect.h)
+        if (defaultDisplayInfo.width > defaultDisplayInfo.height)
         {
-            actualHeight = rect.h * 0.75;
-            actualWidth = actualHeight * aspect;
+            actualHeight = static_cast<int32_t>(defaultDisplayInfo.height * ratio);
+            actualWidth = static_cast<int32_t>(actualHeight * aspect);
         }
         else
         {
-            actualWidth = rect.w * 0.75;
-            actualHeight = actualWidth / aspect;
+            actualWidth = static_cast<int32_t>(defaultDisplayInfo.width * ratio);
+            actualHeight = static_cast<int32_t>(actualWidth / aspect);
         }
 
         mHandle = SDL_CreateWindow(mTitle.c_str(), actualWidth, actualHeight, windowFlag);
