@@ -69,22 +69,13 @@ namespace CynicEngine
             }
         }
     }
-#ifndef NDEBUG
 #define CYNIC_ENGINE_LOG_ERROR(fmt, ...)                                                \
     do                                                                                  \
     {                                                                                   \
         CynicEngine::Logger::Log(CynicEngine::Logger::Kind::ERROR, fmt, ##__VA_ARGS__); \
         assert(0);                                                                      \
     } while (false);
-#else
-#define CYNIC_ENGINE_LOG_ERROR(fmt, ...)                                                \
-    do                                                                                  \
-    {                                                                                   \
-        CynicEngine::Logger::Log(CynicEngine::Logger::Kind::ERROR, fmt, ##__VA_ARGS__); \
-        exit(1);                                                                        \
-    } while (false);
-#endif // NDEBUG
-
+    
 #define CYNIC_ENGINE_LOG_WARN(fmt, ...)                                                \
     do                                                                                 \
     {                                                                                  \

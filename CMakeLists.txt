@@ -45,6 +45,7 @@ option(CYNIC_ENGINE_UTF8_ENCODE "use utf8 encode" ON)
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rd")
 set(SDL_INC_DIR "${THIRD_PARTY_DIR}/SDL/include")
 
+find_package(Vulkan REQUIRED)
 add_subdirectory(${THIRD_PARTY_DIR}/SDL)
 
 if(WIN32)
@@ -57,6 +58,8 @@ endif()
 file(GLOB CONFIG_SRC "${CMAKE_SOURCE_DIR}/Config/*.cpp" "${CMAKE_SOURCE_DIR}/Config/*.h")
 file(GLOB CORE_SRC "${CMAKE_SOURCE_DIR}/Core/*.cpp" "${CMAKE_SOURCE_DIR}/Core/*.h")
 file(GLOB EDITOR_SRC "${CMAKE_SOURCE_DIR}/Editor/*.cpp" "${CMAKE_SOURCE_DIR}/Editor/*.h")
+file(GLOB GFX_SRC "${CMAKE_SOURCE_DIR}/Gfx/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/*.h")
+file(GLOB GFX_VULKAN_SRC "${CMAKE_SOURCE_DIR}/Gfx/VK/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/VK/*.h")
 file(GLOB MATH_SRC "${CMAKE_SOURCE_DIR}/Math/*.cpp" "${CMAKE_SOURCE_DIR}/Math/*.h")
 file(GLOB PLATFORM_SRC "${CMAKE_SOURCE_DIR}/Platform/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/*.h")
 file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.h")
@@ -64,30 +67,40 @@ file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_S
 source_group("Config" FILES ${CONFIG_SRC})
 source_group("Core" FILES ${CORE_SRC})
 source_group("Editor" FILES ${EDITOR_SRC})
+source_group("Gfx" FILES ${GFX_SRC})
+source_group("Gfx/VK" FILES ${GFX_VULKAN_SRC})
 source_group("Math" FILES ${MATH_SRC})
 source_group("Platform" FILES ${PLATFORM_SRC})
 source_group("Platform/SDL3" FILES ${PLATFORM_SDL3_SRC})
 
-add_executable(${PROJECT_NAME}  ${CONFIG_SRC}
-                                ${CORE_SRC}
-                                ${EDITOR_SRC}
-                                ${MATH_SRC}
-                                ${PLATFORM_SRC}
-                                ${PLATFORM_SDL3_SRC})
-                    
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_SOURCE_DIR}
+set(CYNIC_SRC
+    ${CONFIG_SRC}
+    ${CORE_SRC}
+    ${EDITOR_SRC}
+    ${GFX_SRC}
+    ${GFX_VULKAN_SRC}
+    ${MATH_SRC}
+    ${PLATFORM_SRC}
+    ${PLATFORM_SDL3_SRC}
+)
+
+add_executable(${PROJECT_NAME} ${CYNIC_SRC})
+
+set(CYNIC_INC_DIRS ${CMAKE_SOURCE_DIR}
     Core
     Editor
+    Gfx
+    Gfx/VK
     Math
     Platform
-    Platform/SDL
-
-    ${SDL_INC_DIR}
-)
+    Platform/SDL3
+    ${SDL_INC_DIR})
+                    
+target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     SDL3::SDL3
+    Vulkan::Vulkan
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_PLATFORM})
