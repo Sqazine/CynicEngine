@@ -87,16 +87,4 @@ namespace CynicEngine
             mIsShown = false;
         }
     }
-    std::vector<const char *> SDL3Window::GetVulkanRequiredWindowInstanceExtension() const
-    {
-        uint32_t extensionCount;
-
-        auto rawExts = SDL_Vulkan_GetInstanceExtensions(&extensionCount);
-        std::vector<const char *> result(extensionCount);
-        for (size_t i = 0; i < extensionCount; ++i)
-        {
-            result[i] = rawExts[i];
-        }
-        return result;
-    }
 }

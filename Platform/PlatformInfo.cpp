@@ -12,4 +12,13 @@ namespace CynicEngine
 #error "Not Support Platform, only windows is available now!"
 #endif
     }
+
+    VulkanPlatformInfo *VulkanPlatformInfo::Create()
+    {
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_LINUX)
+       return new SDL3VulkanPlatformInfo();
+#else
+#error "Not Support Platform, only windows is available now!"
+#endif
+    }
 }

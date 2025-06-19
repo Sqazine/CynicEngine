@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <vulkan/vulkan.h>
 #include "Core/Singleton.h"
 #include "Core/Marco.h"
 
@@ -58,7 +59,7 @@ namespace CynicEngine
 
     protected:
         virtual void ObtainDisplayInfo() = 0;
-        
+
         //TODO: Implement these methods in derived classes
         // virtual void ObtainCpuInfo() = 0;
         // virtual void ObtainMemoryInfo() = 0;
@@ -68,12 +69,25 @@ namespace CynicEngine
         MemoryInfo mMemoryInfo;
     };
 
+    class VulkanPlatformInfo
+    {
+    public:
+        VulkanPlatformInfo() = default;
+        virtual ~VulkanPlatformInfo() = default;
+
+        static VulkanPlatformInfo *Create();
+
+        virtual std::vector<const char *> GetWindowInstanceExtension() = 0;
+        virtual VkSurfaceKHR CreateSurface(void *windowHandle, VkInstance instance) = 0;
+    };
+
     class PlatformInfo : public Singleton<PlatformInfo>
     {
     public:
         void Init()
         {
             mHardwareInfo.reset(HardwareInfo::Create());
+            mVulkanPlatformInfo.reset(VulkanPlatformInfo::Create());
         }
 
         void Destroy()
@@ -86,7 +100,14 @@ namespace CynicEngine
             return mHardwareInfo.get();
         }
 
+        VulkanPlatformInfo *GetVulkanPlatformInfo() const
+        {
+            return mVulkanPlatformInfo.get();
+        }
+
     private:
         std::unique_ptr<HardwareInfo> mHardwareInfo;
+
+        std::unique_ptr<VulkanPlatformInfo> mVulkanPlatformInfo;
     };
 }

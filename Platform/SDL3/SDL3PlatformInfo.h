@@ -1,10 +1,35 @@
 #pragma once
 
 #include "Platform/PlatformInfo.h"
+#include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL.h>
 #include "Core/Logger.h"
 namespace CynicEngine
 {
+    class SDL3VulkanPlatformInfo : public VulkanPlatformInfo
+    {
+        std::vector<const char *> GetWindowInstanceExtension()
+        {
+            uint32_t extensionCount;
+
+            auto rawExts = SDL_Vulkan_GetInstanceExtensions(&extensionCount);
+            std::vector<const char *> result(extensionCount);
+            for (size_t i = 0; i < extensionCount; ++i)
+            {
+                result[i] = rawExts[i];
+            }
+            return result;
+        }
+
+        VkSurfaceKHR CreateSurface(void *windowHandle, VkInstance instance)
+        {
+            SDL_Window *sdlWindow = static_cast<SDL_Window *>(windowHandle);
+            VkSurfaceKHR result;
+            SDL_Vulkan_CreateSurface(sdlWindow, instance, nullptr, &result);
+            return result;
+        }
+    };
+
     class SDL3HardwareInfo : public HardwareInfo
     {
     public:

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Version.h"
 #include "Core/Logger.h"
+#include "Platform/PlatformInfo.h"
 
 namespace CynicEngine
 {
@@ -239,6 +240,17 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 	void GfxVulkanDevice::EnumeratePhysicalDevices()
 	{
+		uint32_t count;
+		vkEnumeratePhysicalDevices(mInstance,&count,nullptr);
+
+		std::vector<VkPhysicalDevice> physicalDeviceHandleList(count);
+		vkEnumeratePhysicalDevices(mInstance, &count, physicalDeviceHandleList.data());
+
+		mPhysicalDeviceList.resize(count);
+		for (int32_t i = 0; i < mPhysicalDeviceList.size(); ++i)
+		{
+			mPhysicalDeviceList[i] = EnumeratePhysicalDeviceSpecFor(physicalDeviceHandleList[i]);
+		}
 	}
 
 	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()
@@ -298,13 +310,55 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 	std::vector<const char *> GfxVulkanDevice::GetRequiredInstanceExtensions()
 	{
-		std::vector<const char *> result = mWindow->GetVulkanRequiredWindowInstanceExtension();
+		std::vector<const char *> result = PlatformInfo::GetInstance().GetVulkanPlatformInfo()->GetWindowInstanceExtension();
 		result.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #ifndef NDEBUG
 		result.insert(result.end(), mDebugRequiredInstanceExtensions.begin(), mDebugRequiredInstanceExtensions.end());
 #endif
 
 		CheckRequiredInstanceExtensionsIsSatisfied(result);
+		return result;
+	}
+
+	PhysicalDeviceSpecification GfxVulkanDevice::EnumeratePhysicalDeviceSpecFor(VkPhysicalDevice device)
+	{
+		PhysicalDeviceSpecification result;
+		result.handle = device;
+
+		vkGetPhysicalDeviceProperties(device, &result.deviceProperties);
+		vkGetPhysicalDeviceMemoryProperties(device, &result.memoryProperties);
+		vkGetPhysicalDeviceFeatures(device, &result.features);
+
+		uint32_t physicalDeviceExtCount = 0;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &physicalDeviceExtCount, nullptr);
+		result.deviceExtensions.resize(physicalDeviceExtCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &physicalDeviceExtCount, result.deviceExtensions.data());
+
+		uint32_t queueFamilyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(result.handle, &queueFamilyCount, nullptr);
+		result.queueFamilyProperties.resize(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(result.handle, &queueFamilyCount, result.queueFamilyProperties.data());
+
+		uint32_t i = 0;
+		for (const auto &queueFamily : result.queueFamilyProperties)
+		{
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				result.queueFamilyIndices.graphicsFamilyIdx = i;
+			if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT)
+				result.queueFamilyIndices.computeFamilyIdx = i;
+			if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
+				result.queueFamilyIndices.transferFamilyIdx = i;
+
+			// VkBool32 surfaceSupported;
+			// VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.handle, i, mSurface, &surfaceSupported));
+			// if (surfaceSupported)
+			// 	result.queueFamilyIndices.presentFamilyIdx = i;
+
+			if (result.queueFamilyIndices.IsComplete())
+				break;
+			i++;
+		}
+
 		return result;
 	}
 }
