@@ -1,5 +1,6 @@
 #include "SDL3Window.h"
 #include "Platform/PlatformInfo.h"
+#include "SDL3/SDL_vulkan.h"
 namespace CynicEngine
 {
     SDL3Window::SDL3Window()
@@ -85,5 +86,17 @@ namespace CynicEngine
             SDL_HideWindow(mHandle);
             mIsShown = false;
         }
+    }
+    std::vector<const char *> SDL3Window::GetVulkanRequiredWindowInstanceExtension() const
+    {
+        uint32_t extensionCount;
+
+        auto rawExts = SDL_Vulkan_GetInstanceExtensions(&extensionCount);
+        std::vector<const char *> result(extensionCount);
+        for (size_t i = 0; i < extensionCount; ++i)
+        {
+            result[i] = rawExts[i];
+        }
+        return result;
     }
 }

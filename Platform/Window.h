@@ -62,6 +62,8 @@ namespace CynicEngine
             mEvent = Event::NONE;
         }
 
+        virtual std::vector<const char *> GetVulkanRequiredWindowInstanceExtension() const = 0;
+
     protected:
         Event mEvent{Event::NONE};
     };

@@ -7,6 +7,7 @@
 #include "Math/Vector2.h"
 #include "Platform/Window.h"
 #include "Platform/InputSystem.h"
+#include "Render/Renderer.h"
 namespace CynicEngine
 {
     class EditorApp : public Singleton<EditorApp>
@@ -39,5 +40,7 @@ namespace CynicEngine
 
         std::unique_ptr<Window> mWindow;
         std::unique_ptr<InputSystem> mInputSystem;
+
+        std::unique_ptr<Renderer> mRenderer;
     };
 }

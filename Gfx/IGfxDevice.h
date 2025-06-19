@@ -1,27 +1,32 @@
 
 #pragma once
+#include "Platform/Window.h"
 
-enum class GfxBackend
+namespace CynicEngine
 {
-    VULKAN,
-    D3D12,
-};
+	enum class GfxBackend
+	{
+		VULKAN,
+		D3D12,
+	};
 
-struct GfxDeviceDesc
-{
-    GfxBackend backend;
-};
+	struct GfxDeviceDesc
+	{
+		GfxBackend backend;
+	};
 
-class IGfxDevice
-{
-public:
-    IGfxDevice(const GfxDeviceDesc &desc);
-    virtual ~IGfxDevice() = default;
+	class IGfxDevice
+	{
+	public:
+		IGfxDevice(const GfxDeviceDesc &desc, const Window *window);
+		virtual ~IGfxDevice() = default;
 
-    static IGfxDevice *Create(const GfxDeviceDesc &desc);
+		static IGfxDevice *Create(const GfxDeviceDesc &desc, const Window *window);
 
-    const GfxDeviceDesc &GetDesc() const;
+		const GfxDeviceDesc &GetDesc() const;
 
-private:
-    GfxDeviceDesc mDesc;
-};
+	protected:
+		GfxDeviceDesc mDesc;
+		const Window *mWindow;
+	};
+}

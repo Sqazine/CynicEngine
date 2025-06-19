@@ -2,32 +2,36 @@
 #include <utility>
 #include "Core/Logger.h"
 #include "Gfx/VK/GfxVulkanDevice.h"
-IGfxDevice::IGfxDevice(const GfxDeviceDesc &desc)
-    : mDesc(desc)
-{
-}
 
-IGfxDevice *IGfxDevice::Create(const GfxDeviceDesc &desc)
+namespace CynicEngine
 {
-    switch (desc.backend)
-    {
-    case GfxBackend::VULKAN:
-        // Create Vulkan device
-        return new GfxVulkanDevice(desc);
-    case GfxBackend::D3D12:
-        // Create D3D12 device
-        CYNIC_ENGINE_LOG_ERROR("Not implemented D3D12 device creation yet");
-        break;
-    default:
-        CYNIC_ENGINE_LOG_ERROR("Unreachable GfxBackend: %d", static_cast<int>(desc.backend));
-        break;
-    }
+	IGfxDevice::IGfxDevice(const GfxDeviceDesc &desc, const Window *window)
+		: mDesc(desc), mWindow(window)
+	{
+	}
 
-    CYNIC_ENGINE_LOG_ERROR("Unreachable GfxBackend: %d", static_cast<int>(desc.backend));
-    return nullptr;
-}
+	IGfxDevice *IGfxDevice::Create(const GfxDeviceDesc &desc, const Window *window)
+	{
+		switch (desc.backend)
+		{
+		case GfxBackend::VULKAN:
+			// Create Vulkan device
+			return new GfxVulkanDevice(desc, window);
+		case GfxBackend::D3D12:
+			// Create D3D12 device
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+			break;
+		default:
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(desc.backend));
+			break;
+		}
 
-const GfxDeviceDesc &IGfxDevice::GetDesc() const
-{
-    return mDesc;
+		CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(desc.backend));
+		return nullptr;
+	}
+
+	const GfxDeviceDesc &IGfxDevice::GetDesc() const
+	{
+		return mDesc;
+	}
 }

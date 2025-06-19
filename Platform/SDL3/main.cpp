@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     if (SDL_Init(SDL_INIT_VIDEO) == false)
-        CYNIC_ENGINE_LOG_ERROR("Failed to init sdl3.");
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Failed to init SDL3."));
 
     CynicEngine::EditorApp::GetInstance().Run();
 

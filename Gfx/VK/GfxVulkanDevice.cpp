@@ -1,22 +1,310 @@
 #include "GfxVulkanDevice.h"
+#include <iostream>
+#include "Version.h"
+#include "Core/Logger.h"
 
-GfxVulkanDevice::GfxVulkanDevice(const GfxDeviceDesc &desc)
-    : IGfxDevice(desc)
+namespace CynicEngine
 {
-    CreateInstance();
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallbackFunc(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
+{
+
+	Logger::Kind loggerKind;
+
+	switch (messageSeverity)
+	{
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+		loggerKind = Logger::Kind::ERROR;
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+		loggerKind = Logger::Kind::WARN;
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+		loggerKind = Logger::Kind::INFO;
+		break;
+	default:
+		break;
+	}
+
+	STRING tags;
+
+	switch (messageType)
+	{
+	case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+		tags += TEXT("[GENERAL]");
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+		tags += TEXT("[VALIDATION]");
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+		tags += TEXT("[PERFORMANCE]");
+		break;
+	default:
+		break;
+	}
+
+	switch (pCallbackData->pObjects->objectType)
+	{
+	case VK_OBJECT_TYPE_INSTANCE:
+		tags += TEXT("[INSTANCE]");
+		break;
+	case VK_OBJECT_TYPE_PHYSICAL_DEVICE:
+		tags += TEXT("[PHYSICAL_DEVICE]");
+		break;
+	case VK_OBJECT_TYPE_DEVICE:
+		tags += TEXT("[DEVICE]");
+		break;
+	case VK_OBJECT_TYPE_QUEUE:
+		tags += TEXT("[QUEUE]");
+		break;
+	case VK_OBJECT_TYPE_SEMAPHORE:
+		tags += TEXT("[SEMAPHORE]");
+		break;
+	case VK_OBJECT_TYPE_COMMAND_BUFFER:
+		tags += TEXT("[COMMAND_BUFFER]");
+		break;
+	case VK_OBJECT_TYPE_FENCE:
+		tags += TEXT("[FENCE]");
+		break;
+	case VK_OBJECT_TYPE_DEVICE_MEMORY:
+		tags += TEXT("[DEVICE_MEMORY]");
+		break;
+	case VK_OBJECT_TYPE_BUFFER:
+		tags += TEXT("[BUFFER]");
+		break;
+	case VK_OBJECT_TYPE_IMAGE:
+		tags += TEXT("[IMAGE]");
+		break;
+	case VK_OBJECT_TYPE_EVENT:
+		tags += TEXT("[EVENT]");
+		break;
+	case VK_OBJECT_TYPE_QUERY_POOL:
+		tags += TEXT("[QUERY_POOL]");
+		break;
+	case VK_OBJECT_TYPE_BUFFER_VIEW:
+		tags += TEXT("[BUFFER_VIEW]");
+		break;
+	case VK_OBJECT_TYPE_IMAGE_VIEW:
+		tags += TEXT("[IMAGE_VIEW]");
+		break;
+	case VK_OBJECT_TYPE_SHADER_MODULE:
+		tags += TEXT("[SHADER_MODULE]");
+		break;
+	case VK_OBJECT_TYPE_PIPELINE_CACHE:
+		tags += TEXT("[PIPELINE_CACHE]");
+		break;
+	case VK_OBJECT_TYPE_PIPELINE_LAYOUT:
+		tags += TEXT("[PIPELINE_LAYOUT]");
+		break;
+	case VK_OBJECT_TYPE_RENDER_PASS:
+		tags += TEXT("[RENDER_PASS]");
+		break;
+	case VK_OBJECT_TYPE_PIPELINE:
+		tags += TEXT("[PIPELINE]");
+		break;
+	case VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT:
+		tags += TEXT("[DESCRIPTOR_SET_LAYOUT]");
+		break;
+	case VK_OBJECT_TYPE_SAMPLER:
+		tags += TEXT("[SAMPLER]");
+		break;
+	case VK_OBJECT_TYPE_DESCRIPTOR_POOL:
+		tags += TEXT("[DESCRIPTOR_POOL]");
+		break;
+	case VK_OBJECT_TYPE_DESCRIPTOR_SET:
+		tags += TEXT("[DESCRIPTOR_SET]");
+		break;
+	case VK_OBJECT_TYPE_FRAMEBUFFER:
+		tags += TEXT("[FRAMEBUFFER]");
+		break;
+	case VK_OBJECT_TYPE_COMMAND_POOL:
+		tags += TEXT("[COMMAND_POOL]");
+		break;
+	case VK_OBJECT_TYPE_SURFACE_KHR:
+		tags += TEXT("[SURFACE_KHR]");
+		break;
+	case VK_OBJECT_TYPE_SWAPCHAIN_KHR:
+		tags += TEXT("[SWAPCHAIN_KHR]");
+		break;
+	case VK_OBJECT_TYPE_DISPLAY_KHR:
+		tags += TEXT("[DISPLAY_KHR]");
+		break;
+	case VK_OBJECT_TYPE_DISPLAY_MODE_KHR:
+		tags += TEXT("[DISPLAY_MODE_KHR]");
+		break;
+	default:
+		break;
+	}
+
+	Logger::Log(loggerKind,TEXT("Vulkan Valication Layer {}:{}"),tags.c_str(), pCallbackData->pMessage);
+
+	return VK_FALSE;
 }
 
-void GfxVulkanDevice::CreateInstance()
+VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
 {
-    vk::ApplicationInfo appInfo;
-    appInfo.pApplicationName = "Cynic Engine";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "Cynic Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+	if (func != nullptr)
+	{
+		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+	}
+	else
+	{
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+}
 
-    vk::InstanceCreateInfo createInfo;
-    createInfo.pApplicationInfo = &appInfo;
+void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
+{
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+	if (func != nullptr)
+	{
+		func(instance, debugMessenger, pAllocator);
+	}
+}
 
-    mInstance = vk::createInstanceUnique(createInfo);
+	GfxVulkanDevice::GfxVulkanDevice(const GfxDeviceDesc &desc, const Window *window)
+		: IGfxDevice(desc, window)
+	{
+		CreateInstance();
+#ifndef NDEBUG
+		CreateDebugMessengerLayer();
+#endif
+		EnumeratePhysicalDevices();
+	}
+
+	GfxVulkanDevice::~GfxVulkanDevice()
+	{
+#ifndef NDEBUG
+		DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
+#endif
+		vkDestroyInstance(mInstance, nullptr);
+	}
+
+	void GfxVulkanDevice::CreateInstance()
+	{
+		{
+			uint32_t count = 0;
+			vkEnumerateInstanceLayerProperties(&count, nullptr);
+			mInstanceLayers.resize(count);
+			vkEnumerateInstanceLayerProperties(&count, mInstanceLayers.data());
+		}
+		{
+			uint32_t count = 0;
+			vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
+			mInstanceExtensions.resize(count);
+			vkEnumerateInstanceExtensionProperties(nullptr, &count, mInstanceExtensions.data());
+		}
+
+		VkApplicationInfo appInfo{};
+		appInfo.pApplicationName = "Cynic Engine";			   //TODO: Get application name from config
+		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0); // TODO: Get application version from config
+		appInfo.pEngineName = "Cynic Engine";
+		appInfo.engineVersion = CYNIC_ENGINE_VERSION_BINARY;
+		appInfo.apiVersion = VK_API_VERSION_1_4;
+
+		VkInstanceCreateInfo instanceCreateInfo{};
+		ZeroVulkanStruct(instanceCreateInfo, VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
+		instanceCreateInfo.pNext = nullptr;
+		instanceCreateInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+		instanceCreateInfo.pApplicationInfo = &appInfo;
+
+#ifndef NDEBUG
+		CheckInstanceValidationLayersIsSatisfied();
+		auto debugInfo = PopulateDebugMessengerCreateInfo();
+
+		instanceCreateInfo.enabledLayerCount = mValidationInstanceLayers.size();
+		instanceCreateInfo.ppEnabledLayerNames = mValidationInstanceLayers.data();
+		instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugInfo;
+#else
+		instanceCreateInfo.enabledLayerCount = 0;
+		instanceCreateInfo.ppEnabledLayerNames = nullptr;
+#endif
+
+		auto requiredInstanceExtensions = GetRequiredInstanceExtensions();
+		instanceCreateInfo.enabledExtensionCount = requiredInstanceExtensions.size();
+		instanceCreateInfo.ppEnabledExtensionNames = requiredInstanceExtensions.data();
+
+		vkCreateInstance(&instanceCreateInfo, nullptr, &mInstance);
+	}
+
+#ifndef NDEBUG
+	void GfxVulkanDevice::CreateDebugMessengerLayer()
+	{
+		auto debugInfo = PopulateDebugMessengerCreateInfo();
+		CreateDebugUtilsMessengerEXT(mInstance, &debugInfo, nullptr, &mDebugMessenger);
+	}
+#endif
+
+	void GfxVulkanDevice::EnumeratePhysicalDevices()
+	{
+	}
+
+	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()
+	{
+		for (const char *layerName : mValidationInstanceLayers)
+		{
+			bool layerFound = false;
+
+			for (const auto &layerProperties : mInstanceLayers)
+			{
+				if (strcmp(layerName, layerProperties.layerName) == 0)
+				{
+					layerFound = true;
+					break;
+				}
+			}
+
+			if (!layerFound)
+			{
+				CYNIC_ENGINE_LOG_ERROR(TEXT("Missing Vulkan Validation Layer:{}"), layerName);
+			}
+		}
+	}
+
+	void GfxVulkanDevice::CheckRequiredInstanceExtensionsIsSatisfied(const std::vector<const char *> &extensions)
+	{
+		for (const char *extensionName : extensions)
+		{
+			bool isFound = false;
+
+			for (const auto &extensionProperties : mInstanceExtensions)
+			{
+				if (strcmp(extensionName, extensionProperties.extensionName) == 0)
+				{
+					isFound = true;
+					break;
+				}
+			}
+
+			if (!isFound)
+			{
+				CYNIC_ENGINE_LOG_ERROR(TEXT("Missing Vulkan Instance Extension:%s"), extensionName);
+			}
+		}
+	}
+
+	VkDebugUtilsMessengerCreateInfoEXT GfxVulkanDevice::PopulateDebugMessengerCreateInfo()
+	{
+		VkDebugUtilsMessengerCreateInfoEXT info = {};
+		ZeroVulkanStruct(info, VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
+		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		info.pfnUserCallback = DebugCallbackFunc;
+
+		return info;
+	}
+
+	std::vector<const char *> GfxVulkanDevice::GetRequiredInstanceExtensions()
+	{
+		std::vector<const char *> result = mWindow->GetVulkanRequiredWindowInstanceExtension();
+		result.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#ifndef NDEBUG
+		result.insert(result.end(), mDebugRequiredInstanceExtensions.begin(), mDebugRequiredInstanceExtensions.end());
+#endif
+
+		CheckRequiredInstanceExtensionsIsSatisfied(result);
+		return result;
+	}
 }

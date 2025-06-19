@@ -15,7 +15,7 @@ namespace CynicEngine
 
             if (numDisplays <= 0)
             {
-                CYNIC_ENGINE_LOG_ERROR("Failed to get displays: {}", SDL_GetError());
+                CYNIC_ENGINE_LOG_ERROR(TEXT("Failed to get displays: {}"), SDL_GetError());
                 return;
             }
 

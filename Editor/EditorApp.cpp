@@ -45,6 +45,8 @@ namespace CynicEngine
         mWindow->Show();
 
         mInputSystem.reset(InputSystem::Create());
+
+        mRenderer = std::make_unique<Renderer>(mWindow.get());
     }
 
     void EditorApp::Tick()

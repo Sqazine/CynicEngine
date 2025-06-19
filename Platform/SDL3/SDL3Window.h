@@ -23,6 +23,8 @@ namespace CynicEngine
 		void Show() override;
 		void Hide() override;
 
+		std::vector<const char *> GetVulkanRequiredWindowInstanceExtension() const override;
+
 	private:
 		SDL_Window *mHandle;
 		std::string mTitle = "CynicEngine";
