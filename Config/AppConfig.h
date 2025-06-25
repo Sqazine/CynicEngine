@@ -3,7 +3,7 @@
 #include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
-    struct RenderConfig
+    struct GfxConfig
     {
         GfxBackend backend{GfxBackend::VULKAN};
     };
@@ -20,18 +20,18 @@ namespace CynicEngine
             return mRefreshOnlyWindowIsActive;
         }
 
-        const RenderConfig &GetRenderConfig() const
+        const GfxConfig &GetGfxConfig() const
         {
-            return mRenderConfig;
+            return mGfxConfig;
         }
 
-        void SetRenderConfig(const RenderConfig &config)
+        void SetGfxConfig(const GfxConfig &config)
         {
-            mRenderConfig = config;
+            mGfxConfig = config;
         }
 
     private:
         bool mRefreshOnlyWindowIsActive{true};
-        RenderConfig mRenderConfig;
+        GfxConfig mGfxConfig;
     };
 }

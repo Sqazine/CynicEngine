@@ -8,6 +8,7 @@ namespace CynicEngine
 	{
 		VULKAN,
 		D3D12,
+		METAL,
 	};
 
 	struct GfxDeviceDesc

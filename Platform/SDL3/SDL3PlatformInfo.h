@@ -4,6 +4,8 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL.h>
 #include "Core/Logger.h"
+#include "SDL3Window.h"
+#include "Platform/Window.h"
 namespace CynicEngine
 {
     class SDL3VulkanPlatformInfo : public VulkanPlatformInfo
@@ -21,9 +23,9 @@ namespace CynicEngine
             return result;
         }
 
-        VkSurfaceKHR CreateSurface(void *windowHandle, VkInstance instance)
+        VkSurfaceKHR CreateSurface(const Window *window, VkInstance instance)
         {
-            SDL_Window *sdlWindow = static_cast<SDL_Window *>(windowHandle);
+            SDL_Window *sdlWindow = static_cast<const SDL3Window *>(window)->GetHandle();
             VkSurfaceKHR result;
             SDL_Vulkan_CreateSurface(sdlWindow, instance, nullptr, &result);
             return result;

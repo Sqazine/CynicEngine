@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include "Core/Singleton.h"
 #include "Core/Marco.h"
-
+#include "Window.h"
 namespace CynicEngine
 {
     struct DisplayInfo
@@ -78,7 +78,7 @@ namespace CynicEngine
         static VulkanPlatformInfo *Create();
 
         virtual std::vector<const char *> GetWindowInstanceExtension() = 0;
-        virtual VkSurfaceKHR CreateSurface(void *windowHandle, VkInstance instance) = 0;
+        virtual VkSurfaceKHR CreateSurface(const Window *window, VkInstance instance) = 0;
     };
 
     class PlatformInfo : public Singleton<PlatformInfo>

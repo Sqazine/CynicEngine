@@ -6,10 +6,10 @@ namespace CynicEngine
     Renderer::Renderer(const Window *window)
     :mWindow(window)
     {
-        const RenderConfig &renderConfig = AppConfig::GetInstance().GetRenderConfig();
+        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
 
         GfxDeviceDesc gfxDeviceDesc;
-        gfxDeviceDesc.backend = renderConfig.backend;
+        gfxDeviceDesc.backend = gfxConfig.backend;
 
         mGfxDevice.reset(IGfxDevice::Create(gfxDeviceDesc,mWindow));
     }

@@ -18,7 +18,7 @@ namespace CynicEngine
 		void Resize(const Vector2f &extent) override;
 		void Resize(uint32_t w, uint32_t h) override;
 		Vector2f GetSize() override;
-		SDL_Window *GetHandle();
+		SDL_Window *GetHandle() const;
 
 		void Show() override;
 		void Hide() override;

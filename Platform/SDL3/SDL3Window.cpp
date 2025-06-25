@@ -1,6 +1,7 @@
 #include "SDL3Window.h"
 #include "Platform/PlatformInfo.h"
 #include "SDL3/SDL_vulkan.h"
+#include "Config/AppConfig.h"
 namespace CynicEngine
 {
     SDL3Window::SDL3Window()
@@ -9,6 +10,22 @@ namespace CynicEngine
         auto defaultDisplayInfo = PlatformInfo::GetInstance().GetHardwareInfo()->GetDisplayInfos()[0];
 
         uint32_t windowFlag = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE;
+        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+        switch (gfxConfig.backend)
+        {
+        case GfxBackend::VULKAN:
+            windowFlag |= SDL_WINDOW_VULKAN;
+            break;
+        case GfxBackend::METAL:
+            windowFlag |= SDL_WINDOW_METAL;
+            break;
+        case GfxBackend::D3D12:
+            CYNIC_ENGINE_LOG_INFO(TEXT("D3D12 backend doesn't need Window flag in SDL3Window."));
+            break;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+            return;
+        }
 
         auto aspect = 4.0f / 3.0f;
         auto ratio = 1.0f / aspect;
@@ -66,7 +83,7 @@ namespace CynicEngine
         return Vector2f(static_cast<float>(x), static_cast<float>(y));
     }
 
-    SDL_Window *SDL3Window::GetHandle()
+    SDL_Window *SDL3Window::GetHandle() const
     {
         return mHandle;
     }

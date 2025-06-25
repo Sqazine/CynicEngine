@@ -7,163 +7,162 @@
 namespace CynicEngine
 {
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallbackFunc(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
-{
-
-	Logger::Kind loggerKind;
-
-	switch (messageSeverity)
+	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallbackFunc(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
 	{
-	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-		loggerKind = Logger::Kind::ERROR;
-		break;
-	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-		loggerKind = Logger::Kind::WARN;
-		break;
-	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-		loggerKind = Logger::Kind::INFO;
-		break;
-	default:
-		break;
+		Logger::Kind loggerKind;
+
+		switch (messageSeverity)
+		{
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+			loggerKind = Logger::Kind::ERROR;
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+			loggerKind = Logger::Kind::WARN;
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+			loggerKind = Logger::Kind::INFO;
+			break;
+		default:
+			break;
+		}
+
+		STRING tags;
+
+		switch (messageType)
+		{
+		case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+			tags += TEXT("[GENERAL]");
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+			tags += TEXT("[VALIDATION]");
+			break;
+		case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+			tags += TEXT("[PERFORMANCE]");
+			break;
+		default:
+			break;
+		}
+
+		switch (pCallbackData->pObjects->objectType)
+		{
+		case VK_OBJECT_TYPE_INSTANCE:
+			tags += TEXT("[INSTANCE]");
+			break;
+		case VK_OBJECT_TYPE_PHYSICAL_DEVICE:
+			tags += TEXT("[PHYSICAL_DEVICE]");
+			break;
+		case VK_OBJECT_TYPE_DEVICE:
+			tags += TEXT("[DEVICE]");
+			break;
+		case VK_OBJECT_TYPE_QUEUE:
+			tags += TEXT("[QUEUE]");
+			break;
+		case VK_OBJECT_TYPE_SEMAPHORE:
+			tags += TEXT("[SEMAPHORE]");
+			break;
+		case VK_OBJECT_TYPE_COMMAND_BUFFER:
+			tags += TEXT("[COMMAND_BUFFER]");
+			break;
+		case VK_OBJECT_TYPE_FENCE:
+			tags += TEXT("[FENCE]");
+			break;
+		case VK_OBJECT_TYPE_DEVICE_MEMORY:
+			tags += TEXT("[DEVICE_MEMORY]");
+			break;
+		case VK_OBJECT_TYPE_BUFFER:
+			tags += TEXT("[BUFFER]");
+			break;
+		case VK_OBJECT_TYPE_IMAGE:
+			tags += TEXT("[IMAGE]");
+			break;
+		case VK_OBJECT_TYPE_EVENT:
+			tags += TEXT("[EVENT]");
+			break;
+		case VK_OBJECT_TYPE_QUERY_POOL:
+			tags += TEXT("[QUERY_POOL]");
+			break;
+		case VK_OBJECT_TYPE_BUFFER_VIEW:
+			tags += TEXT("[BUFFER_VIEW]");
+			break;
+		case VK_OBJECT_TYPE_IMAGE_VIEW:
+			tags += TEXT("[IMAGE_VIEW]");
+			break;
+		case VK_OBJECT_TYPE_SHADER_MODULE:
+			tags += TEXT("[SHADER_MODULE]");
+			break;
+		case VK_OBJECT_TYPE_PIPELINE_CACHE:
+			tags += TEXT("[PIPELINE_CACHE]");
+			break;
+		case VK_OBJECT_TYPE_PIPELINE_LAYOUT:
+			tags += TEXT("[PIPELINE_LAYOUT]");
+			break;
+		case VK_OBJECT_TYPE_RENDER_PASS:
+			tags += TEXT("[RENDER_PASS]");
+			break;
+		case VK_OBJECT_TYPE_PIPELINE:
+			tags += TEXT("[PIPELINE]");
+			break;
+		case VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT:
+			tags += TEXT("[DESCRIPTOR_SET_LAYOUT]");
+			break;
+		case VK_OBJECT_TYPE_SAMPLER:
+			tags += TEXT("[SAMPLER]");
+			break;
+		case VK_OBJECT_TYPE_DESCRIPTOR_POOL:
+			tags += TEXT("[DESCRIPTOR_POOL]");
+			break;
+		case VK_OBJECT_TYPE_DESCRIPTOR_SET:
+			tags += TEXT("[DESCRIPTOR_SET]");
+			break;
+		case VK_OBJECT_TYPE_FRAMEBUFFER:
+			tags += TEXT("[FRAMEBUFFER]");
+			break;
+		case VK_OBJECT_TYPE_COMMAND_POOL:
+			tags += TEXT("[COMMAND_POOL]");
+			break;
+		case VK_OBJECT_TYPE_SURFACE_KHR:
+			tags += TEXT("[SURFACE_KHR]");
+			break;
+		case VK_OBJECT_TYPE_SWAPCHAIN_KHR:
+			tags += TEXT("[SWAPCHAIN_KHR]");
+			break;
+		case VK_OBJECT_TYPE_DISPLAY_KHR:
+			tags += TEXT("[DISPLAY_KHR]");
+			break;
+		case VK_OBJECT_TYPE_DISPLAY_MODE_KHR:
+			tags += TEXT("[DISPLAY_MODE_KHR]");
+			break;
+		default:
+			break;
+		}
+
+		Logger::Log(loggerKind, TEXT("Vulkan Valication Layer {}:{}"), tags.c_str(), pCallbackData->pMessage);
+
+		return VK_FALSE;
 	}
 
-	STRING tags;
-
-	switch (messageType)
+	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
 	{
-	case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
-		tags += TEXT("[GENERAL]");
-		break;
-	case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
-		tags += TEXT("[VALIDATION]");
-		break;
-	case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
-		tags += TEXT("[PERFORMANCE]");
-		break;
-	default:
-		break;
+		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+		if (func != nullptr)
+		{
+			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+		}
+		else
+		{
+			return VK_ERROR_EXTENSION_NOT_PRESENT;
+		}
 	}
 
-	switch (pCallbackData->pObjects->objectType)
+	void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
 	{
-	case VK_OBJECT_TYPE_INSTANCE:
-		tags += TEXT("[INSTANCE]");
-		break;
-	case VK_OBJECT_TYPE_PHYSICAL_DEVICE:
-		tags += TEXT("[PHYSICAL_DEVICE]");
-		break;
-	case VK_OBJECT_TYPE_DEVICE:
-		tags += TEXT("[DEVICE]");
-		break;
-	case VK_OBJECT_TYPE_QUEUE:
-		tags += TEXT("[QUEUE]");
-		break;
-	case VK_OBJECT_TYPE_SEMAPHORE:
-		tags += TEXT("[SEMAPHORE]");
-		break;
-	case VK_OBJECT_TYPE_COMMAND_BUFFER:
-		tags += TEXT("[COMMAND_BUFFER]");
-		break;
-	case VK_OBJECT_TYPE_FENCE:
-		tags += TEXT("[FENCE]");
-		break;
-	case VK_OBJECT_TYPE_DEVICE_MEMORY:
-		tags += TEXT("[DEVICE_MEMORY]");
-		break;
-	case VK_OBJECT_TYPE_BUFFER:
-		tags += TEXT("[BUFFER]");
-		break;
-	case VK_OBJECT_TYPE_IMAGE:
-		tags += TEXT("[IMAGE]");
-		break;
-	case VK_OBJECT_TYPE_EVENT:
-		tags += TEXT("[EVENT]");
-		break;
-	case VK_OBJECT_TYPE_QUERY_POOL:
-		tags += TEXT("[QUERY_POOL]");
-		break;
-	case VK_OBJECT_TYPE_BUFFER_VIEW:
-		tags += TEXT("[BUFFER_VIEW]");
-		break;
-	case VK_OBJECT_TYPE_IMAGE_VIEW:
-		tags += TEXT("[IMAGE_VIEW]");
-		break;
-	case VK_OBJECT_TYPE_SHADER_MODULE:
-		tags += TEXT("[SHADER_MODULE]");
-		break;
-	case VK_OBJECT_TYPE_PIPELINE_CACHE:
-		tags += TEXT("[PIPELINE_CACHE]");
-		break;
-	case VK_OBJECT_TYPE_PIPELINE_LAYOUT:
-		tags += TEXT("[PIPELINE_LAYOUT]");
-		break;
-	case VK_OBJECT_TYPE_RENDER_PASS:
-		tags += TEXT("[RENDER_PASS]");
-		break;
-	case VK_OBJECT_TYPE_PIPELINE:
-		tags += TEXT("[PIPELINE]");
-		break;
-	case VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT:
-		tags += TEXT("[DESCRIPTOR_SET_LAYOUT]");
-		break;
-	case VK_OBJECT_TYPE_SAMPLER:
-		tags += TEXT("[SAMPLER]");
-		break;
-	case VK_OBJECT_TYPE_DESCRIPTOR_POOL:
-		tags += TEXT("[DESCRIPTOR_POOL]");
-		break;
-	case VK_OBJECT_TYPE_DESCRIPTOR_SET:
-		tags += TEXT("[DESCRIPTOR_SET]");
-		break;
-	case VK_OBJECT_TYPE_FRAMEBUFFER:
-		tags += TEXT("[FRAMEBUFFER]");
-		break;
-	case VK_OBJECT_TYPE_COMMAND_POOL:
-		tags += TEXT("[COMMAND_POOL]");
-		break;
-	case VK_OBJECT_TYPE_SURFACE_KHR:
-		tags += TEXT("[SURFACE_KHR]");
-		break;
-	case VK_OBJECT_TYPE_SWAPCHAIN_KHR:
-		tags += TEXT("[SWAPCHAIN_KHR]");
-		break;
-	case VK_OBJECT_TYPE_DISPLAY_KHR:
-		tags += TEXT("[DISPLAY_KHR]");
-		break;
-	case VK_OBJECT_TYPE_DISPLAY_MODE_KHR:
-		tags += TEXT("[DISPLAY_MODE_KHR]");
-		break;
-	default:
-		break;
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+		if (func != nullptr)
+		{
+			func(instance, debugMessenger, pAllocator);
+		}
 	}
-
-	Logger::Log(loggerKind,TEXT("Vulkan Valication Layer {}:{}"),tags.c_str(), pCallbackData->pMessage);
-
-	return VK_FALSE;
-}
-
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
-{
-	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-	if (func != nullptr)
-	{
-		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-	}
-	else
-	{
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-}
-
-void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
-{
-	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-	if (func != nullptr)
-	{
-		func(instance, debugMessenger, pAllocator);
-	}
-}
 
 	GfxVulkanDevice::GfxVulkanDevice(const GfxDeviceDesc &desc, const Window *window)
 		: IGfxDevice(desc, window)
@@ -172,11 +171,15 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 #ifndef NDEBUG
 		CreateDebugMessengerLayer();
 #endif
+		CreateSurface();
 		EnumeratePhysicalDevices();
+		SelectPhysicalDevice();
+		CreateLogicDevice();
 	}
 
 	GfxVulkanDevice::~GfxVulkanDevice()
 	{
+		vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
 #ifndef NDEBUG
 		DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
 #endif
@@ -215,7 +218,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 		CheckInstanceValidationLayersIsSatisfied();
 		auto debugInfo = PopulateDebugMessengerCreateInfo();
 
-		instanceCreateInfo.enabledLayerCount = mValidationInstanceLayers.size();
+		instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(mValidationInstanceLayers.size());
 		instanceCreateInfo.ppEnabledLayerNames = mValidationInstanceLayers.data();
 		instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugInfo;
 #else
@@ -224,7 +227,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 #endif
 
 		auto requiredInstanceExtensions = GetRequiredInstanceExtensions();
-		instanceCreateInfo.enabledExtensionCount = requiredInstanceExtensions.size();
+		instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredInstanceExtensions.size());
 		instanceCreateInfo.ppEnabledExtensionNames = requiredInstanceExtensions.data();
 
 		vkCreateInstance(&instanceCreateInfo, nullptr, &mInstance);
@@ -238,19 +241,63 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 #endif
 
+	void GfxVulkanDevice::CreateSurface()
+	{
+		VulkanPlatformInfo *platformInfo = PlatformInfo::GetInstance().GetVulkanPlatformInfo();
+		mSurface = platformInfo->CreateSurface(mWindow, mInstance);
+	}
+
 	void GfxVulkanDevice::EnumeratePhysicalDevices()
 	{
 		uint32_t count;
-		vkEnumeratePhysicalDevices(mInstance,&count,nullptr);
+		vkEnumeratePhysicalDevices(mInstance, &count, nullptr);
 
 		std::vector<VkPhysicalDevice> physicalDeviceHandleList(count);
 		vkEnumeratePhysicalDevices(mInstance, &count, physicalDeviceHandleList.data());
 
-		mPhysicalDeviceList.resize(count);
-		for (int32_t i = 0; i < mPhysicalDeviceList.size(); ++i)
+		mPhysicalDeviceSpecificationList.resize(count);
+		for (int32_t i = 0; i < mPhysicalDeviceSpecificationList.size(); ++i)
 		{
-			mPhysicalDeviceList[i] = EnumeratePhysicalDeviceSpecFor(physicalDeviceHandleList[i]);
+			mPhysicalDeviceSpecificationList[i] = EnumeratePhysicalDeviceSpecificationFor(physicalDeviceHandleList[i]);
+
+			const auto &spec = mPhysicalDeviceSpecificationList[i];
 		}
+
+		DumpPhysicalDeviceSpecifications();
+	}
+
+	void GfxVulkanDevice::SelectPhysicalDevice()
+	{
+		if (mPhysicalDeviceSpecificationList.empty())
+		{
+			CYNIC_ENGINE_LOG_ERROR(TEXT("No Vulkan physical device found!"));
+		}
+		else if (mPhysicalDeviceSpecificationList.size() == 1)
+		{
+			mSelectedPhysicalDeviceIndex = 0;
+			CYNIC_ENGINE_LOG_INFO(TEXT("Only one Vulkan physical device found, using it."));
+		}
+		else
+		{
+			for (size_t i = 0; i < mPhysicalDeviceSpecificationList.size(); ++i)
+			{
+				const auto &spec = mPhysicalDeviceSpecificationList[i];
+				if (spec.deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+				{
+					mSelectedPhysicalDeviceIndex = i;
+					break;
+				}
+			}
+		}
+
+		const auto &finalSelectedSpec = mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex];
+		CYNIC_ENGINE_LOG_INFO(TEXT("Selected Vulkan physical device {}: {}, Type: {}, API Version: {}, Driver Version: {}"),
+							  mSelectedPhysicalDeviceIndex, finalSelectedSpec.deviceProperties.deviceName, finalSelectedSpec.deviceProperties.deviceType,
+							  finalSelectedSpec.deviceProperties.apiVersion, finalSelectedSpec.deviceProperties.driverVersion);
+	}
+
+	void GfxVulkanDevice::CreateLogicDevice()
+	{
 	}
 
 	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()
@@ -320,7 +367,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 		return result;
 	}
 
-	PhysicalDeviceSpecification GfxVulkanDevice::EnumeratePhysicalDeviceSpecFor(VkPhysicalDevice device)
+	PhysicalDeviceSpecification GfxVulkanDevice::EnumeratePhysicalDeviceSpecificationFor(VkPhysicalDevice device)
 	{
 		PhysicalDeviceSpecification result;
 		result.handle = device;
@@ -349,10 +396,10 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 			if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
 				result.queueFamilyIndices.transferFamilyIdx = i;
 
-			// VkBool32 surfaceSupported;
-			// VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.handle, i, mSurface, &surfaceSupported));
-			// if (surfaceSupported)
-			// 	result.queueFamilyIndices.presentFamilyIdx = i;
+			VkBool32 surfaceSupported;
+			VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.handle, i, mSurface, &surfaceSupported));
+			if (surfaceSupported)
+				result.queueFamilyIndices.presentFamilyIdx = i;
 
 			if (result.queueFamilyIndices.IsComplete())
 				break;
@@ -360,5 +407,18 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 		}
 
 		return result;
+	}
+
+	void GfxVulkanDevice::DumpPhysicalDeviceSpecifications()
+	{
+		CYNIC_ENGINE_LOG_INFO(TEXT("Physical Devices infos:"));
+
+		for (int32_t i = 0; i < mPhysicalDeviceSpecificationList.size(); ++i)
+		{
+			const auto &spec = mPhysicalDeviceSpecificationList[i];
+			CYNIC_ENGINE_LOG_INFO(TEXT("Physical Device {}: {}, Type: {}, API Version: {}, Driver Version: {}"),
+								  i, spec.deviceProperties.deviceName, spec.deviceProperties.deviceType,
+								  spec.deviceProperties.apiVersion, spec.deviceProperties.driverVersion);
+		}
 	}
 }
