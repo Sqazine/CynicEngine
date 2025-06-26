@@ -175,10 +175,12 @@ namespace CynicEngine
 		EnumeratePhysicalDevices();
 		SelectPhysicalDevice();
 		CreateLogicDevice();
+		CreateQueues();
 	}
 
 	GfxVulkanDevice::~GfxVulkanDevice()
 	{
+		vkDestroyDevice(mLogicDevice, nullptr);
 		vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
 #ifndef NDEBUG
 		DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
@@ -298,6 +300,42 @@ namespace CynicEngine
 
 	void GfxVulkanDevice::CreateLogicDevice()
 	{
+		const auto &finalSelectedSpec = mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex];
+
+		const float queuePriority = 1.0f;
+		VkDeviceQueueCreateInfo deviceQueueInfo;
+		ZeroVulkanStruct(deviceQueueInfo, VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO);
+		deviceQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		deviceQueueInfo.queueCount = 1;
+		deviceQueueInfo.pQueuePriorities = &queuePriority;
+
+		VkDeviceCreateInfo deviceInfo;
+		ZeroVulkanStruct(deviceInfo, VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO);
+		deviceInfo.pNext = nullptr;
+		deviceInfo.queueCreateInfoCount = 1;
+		deviceInfo.pQueueCreateInfos = &deviceQueueInfo;
+		deviceInfo.enabledExtensionCount = (uint32_t)mDeviceExtensions.size();
+		deviceInfo.ppEnabledExtensionNames = mDeviceExtensions.data();
+		deviceInfo.pEnabledFeatures = nullptr;
+
+		VK_CHECK(vkCreateDevice(finalSelectedSpec.handle, &deviceInfo, nullptr, &mLogicDevice));
+	}
+
+	void GfxVulkanDevice::CreateQueues()
+	{
+		const auto &finalSelectedSpec = mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex];
+
+		if (finalSelectedSpec.queueFamilyIndices.graphicsFamilyIdx.has_value())
+			mGraphicsQueue = std::make_unique<GfxVulkanGraphicsQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.graphicsFamilyIdx.value());
+		if (finalSelectedSpec.queueFamilyIndices.computeFamilyIdx.has_value())
+			mComputeQueue = std::make_unique<GfxVulkanComputeQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.computeFamilyIdx.value());
+		if (finalSelectedSpec.queueFamilyIndices.transferFamilyIdx.has_value())
+			mTransferQueue = std::make_unique<GfxVulkanTransferQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.transferFamilyIdx.value());
+		if (finalSelectedSpec.queueFamilyIndices.presentFamilyIdx.has_value())
+			mPresentQueue = std::make_unique<GfxVulkanPresentQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.presentFamilyIdx.value());
+		else
+
+			CYNIC_ENGINE_LOG_ERROR(TEXT("No queue family index found!"));
 	}
 
 	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()

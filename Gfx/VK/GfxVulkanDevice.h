@@ -48,6 +48,7 @@ namespace CynicEngine
 	public:
 		GfxVulkanDevice(const GfxDeviceDesc &desc, const Window *window);
 		~GfxVulkanDevice() override;
+
 	private:
 		void CreateInstance();
 #ifndef NDEBUG
@@ -57,6 +58,7 @@ namespace CynicEngine
 		void EnumeratePhysicalDevices();
 		void SelectPhysicalDevice();
 		void CreateLogicDevice();
+		void CreateQueues();
 
 		std::vector<VkLayerProperties> mInstanceLayers;
 		std::vector<VkExtensionProperties> mInstanceExtensions;
@@ -77,6 +79,17 @@ namespace CynicEngine
 #endif
 		std::vector<PhysicalDeviceSpecification> mPhysicalDeviceSpecificationList;
 		size_t mSelectedPhysicalDeviceIndex = 0;
+
+		const std::vector<const char *> mDeviceExtensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		};
+
+		VkDevice mLogicDevice;
+
+		std::unique_ptr<GfxVulkanGraphicsQueue> mGraphicsQueue;
+		std::unique_ptr<GfxVulkanComputeQueue> mComputeQueue;
+		std::unique_ptr<GfxVulkanTransferQueue> mTransferQueue;
+		std::unique_ptr<GfxVulkanPresentQueue> mPresentQueue;
 
 	private:
 		void CheckInstanceValidationLayersIsSatisfied();
