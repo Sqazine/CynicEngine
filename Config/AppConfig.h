@@ -3,10 +3,18 @@
 #include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
+    enum class GfxBackend
+    {
+        VULKAN,
+        D3D12,
+        METAL,
+    };
     struct GfxConfig
     {
         GfxBackend backend{GfxBackend::VULKAN};
+        bool vSync{false};
     };
+    
     class AppConfig : public Singleton<AppConfig>
     {
     public:

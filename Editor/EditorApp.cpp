@@ -14,8 +14,10 @@ namespace CynicEngine
             if (mState == AppState::TICK)
             {
                 Tick();
+                mRenderer->BeginRender();
                 Render();
                 RenderGizmo();
+                mRenderer->EndRender();
             }
             PostTick();
         }
@@ -55,6 +57,7 @@ namespace CynicEngine
 
     void EditorApp::Render()
     {
+        mRenderer->Render();
     }
 
     void EditorApp::RenderGizmo()

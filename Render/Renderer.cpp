@@ -3,14 +3,25 @@
 
 namespace CynicEngine
 {
-    Renderer::Renderer(const Window *window)
-    :mWindow(window)
+    Renderer::Renderer(Window *window)
+        : mWindow(window)
     {
-        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
-
-        GfxDeviceDesc gfxDeviceDesc;
-        gfxDeviceDesc.backend = gfxConfig.backend;
-
-        mGfxDevice.reset(IGfxDevice::Create(gfxDeviceDesc,mWindow));
+        mGfxDevice.reset(IGfxDevice::Create(mWindow));
+        mGfxSwapChain.reset(IGfxSwapChain::Create(mGfxDevice.get(), mWindow));
     }
+
+    void Renderer::BeginRender()
+    {
+        mGfxSwapChain->BeginFrame();
+    }
+
+    void Renderer::Render()
+    {
+    }
+
+    void Renderer::EndRender()
+    {
+        mGfxSwapChain->EndFrame();
+    }
+
 } // namespace CynicEngine

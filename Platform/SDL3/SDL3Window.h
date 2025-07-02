@@ -15,9 +15,9 @@ namespace CynicEngine
 
 		void SetTitle(std::string_view str) override;
 		std::string_view GetTitle() const override;
-		void Resize(const Vector2f &extent) override;
+		void Resize(const Vector2u32 &extent) override;
 		void Resize(uint32_t w, uint32_t h) override;
-		Vector2f GetSize() override;
+		Vector2u32 GetSize() override;
 		SDL_Window *GetHandle() const;
 
 		void Show() override;

@@ -164,24 +164,22 @@ namespace CynicEngine
 		}
 	}
 
-	GfxVulkanDevice::GfxVulkanDevice(const GfxDeviceDesc &desc, const Window *window)
-		: IGfxDevice(desc, window)
+	GfxVulkanDevice::GfxVulkanDevice(const Window *window)
+		: IGfxDevice(window)
 	{
 		CreateInstance();
 #ifndef NDEBUG
 		CreateDebugMessengerLayer();
 #endif
-		CreateSurface();
 		EnumeratePhysicalDevices();
 		SelectPhysicalDevice();
 		CreateLogicDevice();
-		CreateQueues();
+		GetQueues();
 	}
 
 	GfxVulkanDevice::~GfxVulkanDevice()
 	{
 		vkDestroyDevice(mLogicDevice, nullptr);
-		vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
 #ifndef NDEBUG
 		DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
 #endif
@@ -242,12 +240,6 @@ namespace CynicEngine
 		CreateDebugUtilsMessengerEXT(mInstance, &debugInfo, nullptr, &mDebugMessenger);
 	}
 #endif
-
-	void GfxVulkanDevice::CreateSurface()
-	{
-		VulkanPlatformInfo *platformInfo = PlatformInfo::GetInstance().GetVulkanPlatformInfo();
-		mSurface = platformInfo->CreateSurface(mWindow, mInstance);
-	}
 
 	void GfxVulkanDevice::EnumeratePhysicalDevices()
 	{
@@ -321,21 +313,26 @@ namespace CynicEngine
 		VK_CHECK(vkCreateDevice(finalSelectedSpec.handle, &deviceInfo, nullptr, &mLogicDevice));
 	}
 
-	void GfxVulkanDevice::CreateQueues()
+	void GfxVulkanDevice::GetQueues()
 	{
 		const auto &finalSelectedSpec = mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex];
 
 		if (finalSelectedSpec.queueFamilyIndices.graphicsFamilyIdx.has_value())
-			mGraphicsQueue = std::make_unique<GfxVulkanGraphicsQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.graphicsFamilyIdx.value());
+		{
+			vkGetDeviceQueue(mLogicDevice, finalSelectedSpec.queueFamilyIndices.graphicsFamilyIdx.value(), 0, &mGraphicsQueue);
+		}
 		if (finalSelectedSpec.queueFamilyIndices.computeFamilyIdx.has_value())
-			mComputeQueue = std::make_unique<GfxVulkanComputeQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.computeFamilyIdx.value());
+		{
+			vkGetDeviceQueue(mLogicDevice, finalSelectedSpec.queueFamilyIndices.computeFamilyIdx.value(), 0, &mComputeQueue);
+		}
 		if (finalSelectedSpec.queueFamilyIndices.transferFamilyIdx.has_value())
-			mTransferQueue = std::make_unique<GfxVulkanTransferQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.transferFamilyIdx.value());
-		if (finalSelectedSpec.queueFamilyIndices.presentFamilyIdx.has_value())
-			mPresentQueue = std::make_unique<GfxVulkanPresentQueue>(mLogicDevice, finalSelectedSpec.queueFamilyIndices.presentFamilyIdx.value());
+		{
+			vkGetDeviceQueue(mLogicDevice, finalSelectedSpec.queueFamilyIndices.transferFamilyIdx.value(), 0, &mTransferQueue);
+		}
 		else
-
-			CYNIC_ENGINE_LOG_ERROR(TEXT("No queue family index found!"));
+		{
+			CYNIC_ENGINE_LOG_ERROR(TEXT("No present queue found for the selected physical device!"));
+		}
 	}
 
 	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()
@@ -433,11 +430,6 @@ namespace CynicEngine
 				result.queueFamilyIndices.computeFamilyIdx = i;
 			if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
 				result.queueFamilyIndices.transferFamilyIdx = i;
-
-			VkBool32 surfaceSupported;
-			VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.handle, i, mSurface, &surfaceSupported));
-			if (surfaceSupported)
-				result.queueFamilyIndices.presentFamilyIdx = i;
 
 			if (result.queueFamilyIndices.IsComplete())
 				break;

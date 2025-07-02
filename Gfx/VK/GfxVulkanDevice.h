@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <vulkan/vulkan.h>
+#include <memory>
 #include "Gfx/IGfxDevice.h"
 #include "GfxVulkanCommon.h"
 
@@ -11,24 +12,22 @@ namespace CynicEngine
 		std::optional<uint32_t> graphicsFamilyIdx;
 		std::optional<uint32_t> computeFamilyIdx;
 		std::optional<uint32_t> transferFamilyIdx;
-		std::optional<uint32_t> presentFamilyIdx;
 
 		bool IsComplete() const
 		{
 			return graphicsFamilyIdx.has_value() &&
 				   computeFamilyIdx.has_value() &&
-				   transferFamilyIdx.has_value() &&
-				   presentFamilyIdx.has_value();
+				   transferFamilyIdx.has_value();
 		}
 
 		bool IsSameFamilyIndex() const
 		{
-			return graphicsFamilyIdx.value() == computeFamilyIdx.value() && computeFamilyIdx.value() == transferFamilyIdx.value() && transferFamilyIdx.value() == presentFamilyIdx.value();
+			return graphicsFamilyIdx.value() == computeFamilyIdx.value() && computeFamilyIdx.value() == transferFamilyIdx.value();
 		}
 
 		std::vector<uint32_t> IndexArray() const
 		{
-			return {graphicsFamilyIdx.value(), computeFamilyIdx.value(), transferFamilyIdx.value(), presentFamilyIdx.value()};
+			return {graphicsFamilyIdx.value(), computeFamilyIdx.value(), transferFamilyIdx.value()};
 		}
 	};
 
@@ -46,25 +45,29 @@ namespace CynicEngine
 	class GfxVulkanDevice : public IGfxDevice
 	{
 	public:
-		GfxVulkanDevice(const GfxDeviceDesc &desc, const Window *window);
+		GfxVulkanDevice(const Window *window);
 		~GfxVulkanDevice() override;
 
+		VkDevice GetLogicDevice() const { return mLogicDevice; }
+		VkInstance GetInstance() const { return mInstance; }
+
+		const VkQueue& GetGraphicsQueue() const { return mGraphicsQueue; }
+		const VkQueue& GetComputeQueue() const { return mComputeQueue; }	
+		const VkQueue& GetTransferQueue() const { return mTransferQueue; }
+		const PhysicalDeviceSpecification& GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
 	private:
 		void CreateInstance();
 #ifndef NDEBUG
 		void CreateDebugMessengerLayer();
 #endif
-		void CreateSurface();
 		void EnumeratePhysicalDevices();
 		void SelectPhysicalDevice();
 		void CreateLogicDevice();
-		void CreateQueues();
+		void GetQueues();
 
 		std::vector<VkLayerProperties> mInstanceLayers;
 		std::vector<VkExtensionProperties> mInstanceExtensions;
 		VkInstance mInstance;
-
-		VkSurfaceKHR mSurface;
 
 #ifndef NDEBUG
 		const std::vector<const char *> mValidationInstanceLayers = {
@@ -86,10 +89,9 @@ namespace CynicEngine
 
 		VkDevice mLogicDevice;
 
-		std::unique_ptr<GfxVulkanGraphicsQueue> mGraphicsQueue;
-		std::unique_ptr<GfxVulkanComputeQueue> mComputeQueue;
-		std::unique_ptr<GfxVulkanTransferQueue> mTransferQueue;
-		std::unique_ptr<GfxVulkanPresentQueue> mPresentQueue;
+		VkQueue mGraphicsQueue;
+		VkQueue mComputeQueue;
+		VkQueue mTransferQueue;
 
 	private:
 		void CheckInstanceValidationLayersIsSatisfied();

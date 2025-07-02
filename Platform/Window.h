@@ -30,9 +30,9 @@ namespace CynicEngine
 
         virtual void SetTitle(std::string_view str) = 0;
         virtual std::string_view GetTitle() const = 0;
-        virtual void Resize(const Vector2f &extent) = 0;
+        virtual void Resize(const Vector2u32 &extent) = 0;
         virtual void Resize(uint32_t w, uint32_t h) = 0;
-        virtual Vector2f GetSize() = 0;
+        virtual Vector2u32 GetSize() = 0;
 
         virtual void Show() = 0;
         virtual void Hide() = 0;

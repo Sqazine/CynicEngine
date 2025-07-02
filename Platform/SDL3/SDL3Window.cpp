@@ -64,9 +64,9 @@ namespace CynicEngine
         return SDL_GetWindowTitle(mHandle);
     }
 
-    void SDL3Window::Resize(const Vector2f &extent)
+    void SDL3Window::Resize(const Vector2u32 &extent)
     {
-        Resize(static_cast<uint32_t>(extent.x), static_cast<uint32_t>(extent.y));
+        Resize(extent.x, extent.y);
     }
 
     void SDL3Window::Resize(uint32_t w, uint32_t h)
@@ -76,11 +76,11 @@ namespace CynicEngine
         SetEvent(Event::RESIZE);
     }
 
-    Vector2f SDL3Window::GetSize()
+    Vector2u32 SDL3Window::GetSize()
     {
         int32_t x, y;
         SDL_GetWindowSize(mHandle, &x, &y);
-        return Vector2f(static_cast<float>(x), static_cast<float>(y));
+        return Vector2u32(static_cast<uint32_t>(x), static_cast<uint32_t>(y));
     }
 
     SDL_Window *SDL3Window::GetHandle() const

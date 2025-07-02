@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "Core/Common.h"
 #include "Core/Logger.h"
+#include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
 
@@ -51,11 +52,11 @@ namespace CynicEngine
         }
     }
 
-#define VK_CHECK(r)                                                                                       \
-    do                                                                                                    \
-    {                                                                                                     \
-        VkResult vkResult = (r);                                                                               \
-        if (vkResult != VK_SUCCESS)                                                                            \
+#define VK_CHECK(r)                                                                                         \
+    do                                                                                                      \
+    {                                                                                                       \
+        VkResult vkResult = (r);                                                                            \
+        if (vkResult != VK_SUCCESS)                                                                         \
             CYNIC_ENGINE_LOG_ERROR(TEXT("[{}]File:{} Line:{}"), GetErrorCode(vkResult), __FILE__, __LINE__) \
     } while (false);
 
@@ -90,4 +91,4 @@ namespace CynicEngine
         (int32_t &)Struct.sType = VkStructureType;
         memset(((uint8_t *)&Struct) + sizeof(VkStructureType), 0, sizeof(T) - sizeof(VkStructureType));
     }
-}
+} // namespace CynicEngine
