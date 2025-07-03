@@ -47,15 +47,21 @@ option(CYNIC_ENGINE_UTF8_ENCODE "use utf8 encode" ON)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rd")
 set(SDL_INC_DIR "${THIRD_PARTY_DIR}/SDL/include")
+set(CYS_INC_DIR "${THIRD_PARTY_DIR}/CynicScript")
 
 find_package(Vulkan REQUIRED)
 add_subdirectory(${THIRD_PARTY_DIR}/SDL)
+add_subdirectory(${THIRD_PARTY_DIR}/CynicScript)
 
-if(WIN32)
+if(MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
     set_property(TARGET SDL_uclibc PROPERTY FOLDER 3rd/SDL3)
     set_property(TARGET SDL3-shared PROPERTY FOLDER 3rd/SDL3)
     set_property(TARGET SDL3_test PROPERTY FOLDER 3rd/SDL3)
+
+    set_property(TARGET ${CYS_LIB_NAME} PROPERTY FOLDER 3rd/CynicScript)
+    set_property(TARGET ${CYS_EXE_NAME} PROPERTY FOLDER 3rd/CynicScript)
 endif()
 
 file(GLOB GENERATED_SRC "${GENERATED_DIR}/*.cpp" "${GENERATED_DIR}/*.h")
@@ -105,13 +111,16 @@ set(CYNIC_INC_DIRS ${CMAKE_SOURCE_DIR}
     Platform
     Platform/SDL3
     Render
-    ${SDL_INC_DIR})
+    ${SDL_INC_DIR}
+    ${CYS_INC_DIR}
+)
                     
 target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     SDL3::SDL3
     Vulkan::Vulkan
+    ${CYS_LIB_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_PLATFORM} ${VULKAN_HPP_DISPATCH_LOADER_DYNAMIC} ${VULKAN_HPP_ENABLE_DYNAMIC_LOADER_TOOL})
