@@ -51,10 +51,11 @@ namespace CynicEngine
 		VkDevice GetLogicDevice() const { return mLogicDevice; }
 		VkInstance GetInstance() const { return mInstance; }
 
-		const VkQueue& GetGraphicsQueue() const { return mGraphicsQueue; }
-		const VkQueue& GetComputeQueue() const { return mComputeQueue; }	
-		const VkQueue& GetTransferQueue() const { return mTransferQueue; }
-		const PhysicalDeviceSpecification& GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
+		const VkQueue &GetGraphicsQueue() const { return mGraphicsQueue; }
+		const VkQueue &GetComputeQueue() const { return mComputeQueue; }
+		const VkQueue &GetTransferQueue() const { return mTransferQueue; }
+		const PhysicalDeviceSpecification &GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
+
 	private:
 		void CreateInstance();
 #ifndef NDEBUG
@@ -94,7 +95,9 @@ namespace CynicEngine
 		VkQueue mTransferQueue;
 
 	private:
+#ifndef NDEBUG
 		void CheckInstanceValidationLayersIsSatisfied();
+#endif
 		void CheckRequiredInstanceExtensionsIsSatisfied(const std::vector<const char *> &extensions);
 
 		VkDebugUtilsMessengerCreateInfoEXT PopulateDebugMessengerCreateInfo();

@@ -13,6 +13,9 @@ namespace CynicEngine
     {
         GfxBackend backend{GfxBackend::VULKAN};
         bool vSync{false};
+#ifndef NDEBUG
+        bool enableGpuValidation{false};
+#endif
     };
     
     class AppConfig : public Singleton<AppConfig>

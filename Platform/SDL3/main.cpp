@@ -1,5 +1,5 @@
 #include <SDL3/SDL.h>
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Editor/EditorApp.h"
 int main(int argc, char *argv[])
 {

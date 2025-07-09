@@ -70,6 +70,7 @@ file(GLOB CORE_SRC "${CMAKE_SOURCE_DIR}/Core/*.cpp" "${CMAKE_SOURCE_DIR}/Core/*.
 file(GLOB EDITOR_SRC "${CMAKE_SOURCE_DIR}/Editor/*.cpp" "${CMAKE_SOURCE_DIR}/Editor/*.h")
 file(GLOB GFX_SRC "${CMAKE_SOURCE_DIR}/Gfx/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/*.h")
 file(GLOB GFX_VULKAN_SRC "${CMAKE_SOURCE_DIR}/Gfx/VK/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/VK/*.h")
+file(GLOB LOGGER_SRC "${CMAKE_SOURCE_DIR}/Logger/*.cpp" "${CMAKE_SOURCE_DIR}/Logger/*.h")
 file(GLOB MATH_SRC "${CMAKE_SOURCE_DIR}/Math/*.cpp" "${CMAKE_SOURCE_DIR}/Math/*.h")
 file(GLOB PLATFORM_SRC "${CMAKE_SOURCE_DIR}/Platform/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/*.h")
 file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.h")
@@ -81,6 +82,7 @@ source_group("Core" FILES ${CORE_SRC})
 source_group("Editor" FILES ${EDITOR_SRC})
 source_group("Gfx" FILES ${GFX_SRC})
 source_group("Gfx/VK" FILES ${GFX_VULKAN_SRC})
+source_group("Logger" FILES ${LOGGER_SRC})
 source_group("Math" FILES ${MATH_SRC})
 source_group("Platform" FILES ${PLATFORM_SRC})
 source_group("Platform/SDL3" FILES ${PLATFORM_SDL3_SRC})
@@ -93,6 +95,7 @@ set(CYNIC_SRC
     ${EDITOR_SRC}
     ${GFX_SRC}
     ${GFX_VULKAN_SRC}
+    ${LOGGER_SRC}
     ${MATH_SRC}
     ${PLATFORM_SRC}
     ${PLATFORM_SDL3_SRC}
@@ -107,6 +110,7 @@ set(CYNIC_INC_DIRS ${CMAKE_SOURCE_DIR}
     Editor
     Gfx
     Gfx/VK
+    Logger
     Math
     Platform
     Platform/SDL3

@@ -1,6 +1,6 @@
 #include "IGfxDevice.h"
 #include <utility>
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Gfx/VK/GfxVulkanDevice.h"
 #include "Config/AppConfig.h"
 

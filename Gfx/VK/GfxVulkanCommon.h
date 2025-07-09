@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "Core/Common.h"
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
@@ -65,8 +65,7 @@ namespace CynicEngine
         funcName = reinterpret_cast<PFN_##funcName>(vkGetInstanceProcAddr(instance, "" #funcName)); \
         if (funcName == nullptr)                                                                    \
         {                                                                                           \
-            const std::string name = #funcName;                                                     \
-            std::cout << "Failed to resolve function " << name << std::endl;                        \
+            CYNIC_ENGINE_LOG_WARN(TEXT("Failed to resolve function {}", TEXT(#funcName)));          \
         }                                                                                           \
     }
 
@@ -75,8 +74,7 @@ namespace CynicEngine
         funcName = reinterpret_cast<PFN_##funcName>(vkGetDeviceProcAddr(device, "" #funcName)); \
         if (funcName == nullptr)                                                                \
         {                                                                                       \
-            const std::string name = #funcName;                                                 \
-            std::cout << "Failed to resolve function " << name << std::endl;                    \
+            CYNIC_ENGINE_LOG_WARN(TEXT("Failed to resolve function {}", TEXT(#funcName)));      \
         }                                                                                       \
     }
 

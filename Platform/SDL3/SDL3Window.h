@@ -3,7 +3,7 @@
 #include <string_view>
 #include <SDL3/SDL.h>
 #include "Math/Vector2.h"
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Platform/Window.h"
 namespace CynicEngine
 {

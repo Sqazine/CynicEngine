@@ -1,5 +1,5 @@
 #include "EditorApp.h"
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Config/AppConfig.h"
 #include "Platform/PlatformInfo.h"
 

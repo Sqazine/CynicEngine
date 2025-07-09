@@ -1,12 +1,12 @@
 #include "GfxVulkanDevice.h"
 #include <iostream>
 #include "Version.h"
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Platform/PlatformInfo.h"
-
+#include "Config/AppConfig.h"
 namespace CynicEngine
 {
-
+#ifndef NDEBUG
 	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallbackFunc(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
 	{
 		Logger::Kind loggerKind;
@@ -141,7 +141,6 @@ namespace CynicEngine
 
 		return VK_FALSE;
 	}
-
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -163,13 +162,15 @@ namespace CynicEngine
 			func(instance, debugMessenger, pAllocator);
 		}
 	}
+#endif
 
 	GfxVulkanDevice::GfxVulkanDevice(const Window *window)
 		: IGfxDevice(window)
 	{
 		CreateInstance();
 #ifndef NDEBUG
-		CreateDebugMessengerLayer();
+		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
+			CreateDebugMessengerLayer();
 #endif
 		EnumeratePhysicalDevices();
 		SelectPhysicalDevice();
@@ -181,7 +182,8 @@ namespace CynicEngine
 	{
 		vkDestroyDevice(mLogicDevice, nullptr);
 #ifndef NDEBUG
-		DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
+		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
+			DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);
 #endif
 		vkDestroyInstance(mInstance, nullptr);
 	}
@@ -215,12 +217,20 @@ namespace CynicEngine
 		instanceCreateInfo.pApplicationInfo = &appInfo;
 
 #ifndef NDEBUG
-		CheckInstanceValidationLayersIsSatisfied();
-		auto debugInfo = PopulateDebugMessengerCreateInfo();
+		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
+		{
+			CheckInstanceValidationLayersIsSatisfied();
+			auto debugInfo = PopulateDebugMessengerCreateInfo();
 
-		instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(mValidationInstanceLayers.size());
-		instanceCreateInfo.ppEnabledLayerNames = mValidationInstanceLayers.data();
-		instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugInfo;
+			instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(mValidationInstanceLayers.size());
+			instanceCreateInfo.ppEnabledLayerNames = mValidationInstanceLayers.data();
+			instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugInfo;
+		}
+		else
+		{
+			instanceCreateInfo.enabledLayerCount = 0;
+			instanceCreateInfo.ppEnabledLayerNames = nullptr;
+		}
 #else
 		instanceCreateInfo.enabledLayerCount = 0;
 		instanceCreateInfo.ppEnabledLayerNames = nullptr;
@@ -334,7 +344,7 @@ namespace CynicEngine
 			CYNIC_ENGINE_LOG_ERROR(TEXT("No present queue found for the selected physical device!"));
 		}
 	}
-
+#ifndef NDEBUG
 	void GfxVulkanDevice::CheckInstanceValidationLayersIsSatisfied()
 	{
 		for (const char *layerName : mValidationInstanceLayers)
@@ -356,6 +366,7 @@ namespace CynicEngine
 			}
 		}
 	}
+#endif
 
 	void GfxVulkanDevice::CheckRequiredInstanceExtensionsIsSatisfied(const std::vector<const char *> &extensions)
 	{
@@ -395,7 +406,8 @@ namespace CynicEngine
 		std::vector<const char *> result = PlatformInfo::GetInstance().GetVulkanPlatformInfo()->GetWindowInstanceExtension();
 		result.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #ifndef NDEBUG
-		result.insert(result.end(), mDebugRequiredInstanceExtensions.begin(), mDebugRequiredInstanceExtensions.end());
+		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
+			result.insert(result.end(), mDebugRequiredInstanceExtensions.begin(), mDebugRequiredInstanceExtensions.end());
 #endif
 
 		CheckRequiredInstanceExtensionsIsSatisfied(result);

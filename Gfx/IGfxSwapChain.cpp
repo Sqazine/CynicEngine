@@ -1,6 +1,6 @@
 #include "IGfxSwapChain.h"
 #include "Config/AppConfig.h"
-#include "Core/Logger.h"
+#include "Logger/Logger.h"
 #include "Core/Marco.h"
 #include "Gfx/VK/GfxVulkanSwapChain.h"
 namespace CynicEngine
