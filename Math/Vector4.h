@@ -55,6 +55,11 @@ public:
 	static Vector4<T> Abs(const Vector4<T> &v);
 
 	static const Vector4<T> ZERO;
+	static const Vector4<T> ONE;
+	static const Vector4<T> UNIT_X;
+	static const Vector4<T> UNIT_Y;
+	static const Vector4<T> UNIT_Z;
+	static const Vector4<T> UNIT_W;
 };
 
 typedef Vector4<float> Vector4f;
@@ -70,6 +75,21 @@ typedef Vector4<uint8_t> Vector4u8;
 
 template <typename T>
 const Vector4<T> Vector4<T>::ZERO = Vector4<T>();
+
+template <typename T>
+const Vector4<T> Vector4<T>::ONE = Vector4<T>(static_cast<T>(1.0f));
+
+template <typename T>
+const Vector4<T> Vector4<T>::UNIT_X = Vector4<T>(static_cast<T>(1.0f), static_cast<T>(0.0f), static_cast<T>(0.0f), static_cast<T>(0.0f));
+
+template <typename T>
+const Vector4<T> Vector4<T>::UNIT_Y = Vector4<T>(static_cast<T>(0.0f), static_cast<T>(1.0f), static_cast<T>(0.0f), static_cast<T>(0.0f));
+
+template <typename T>
+const Vector4<T> Vector4<T>::UNIT_Z = Vector4<T>(static_cast<T>(0.0f), static_cast<T>(0.0f), static_cast<T>(1.0f), static_cast<T>(0.0f));
+
+template <typename T>
+const Vector4<T> Vector4<T>::UNIT_W = Vector4<T>(static_cast<T>(0.0f), static_cast<T>(0.0f), static_cast<T>(0.0f), static_cast<T>(1.0f));
 
 template <typename T>
 inline Vector4<T>::Vector4()
@@ -270,7 +290,6 @@ template <typename T>
 template <typename T2>
 inline Vector4<T> &Vector4<T>::operator=(const Vector4<T2> &right)
 {
-
 	x = right.x;
 	y = right.y;
 	z = right.z;

@@ -30,19 +30,18 @@ namespace CynicEngine
 
         uint32_t GetNextFrameIndex() const;
 
-        
-        private:
+    private:
         void CreateSurface();
         void ObtainPresentQueue();
         void CreateSwapChain();
         void CreateSyncObjects();
-        
+
         SwapChainDetails QuerySwapChainDetails();
-        
+
         VkSurfaceFormatKHR ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
         VkPresentModeKHR ChooseSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
         VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-        
+
         void Resize(uint32_t width, uint32_t height);
         VkResult AcquireNextImage(const GfxVulkanSemaphore *semaphore = nullptr, const GfxVulkanFence *fence = nullptr);
         void Present(const GfxVulkanSemaphore *waitFor = nullptr);

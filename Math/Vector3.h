@@ -72,6 +72,7 @@ public:
 	T Length() const;
 
 	static const Vector3<T> ZERO;
+	static const Vector3<T> ONE;
 	static const Vector3<T> UNIT_X;
 	static const Vector3<T> UNIT_Y;
 	static const Vector3<T> UNIT_Z;
@@ -90,10 +91,16 @@ typedef Vector3<uint8_t> Vector3u8;
 
 template <typename T>
 const Vector3<T> Vector3<T>::ZERO = Vector3<T>();
+
+template <typename T>
+const Vector3<T> Vector3<T>::ONE = Vector3<T>(static_cast<T>(1.0f));
+
 template <typename T>
 const Vector3<T> Vector3<T>::UNIT_X = Vector3<T>(static_cast<T>(1.0f), static_cast<T>(0.0f), static_cast<T>(0.0f));
+
 template <typename T>
 const Vector3<T> Vector3<T>::UNIT_Y = Vector3<T>(static_cast<T>(0.0f), static_cast<T>(1.0f), static_cast<T>(0.0f));
+
 template <typename T>
 const Vector3<T> Vector3<T>::UNIT_Z = Vector3<T>(static_cast<T>(0.0f), static_cast<T>(0.0f), static_cast<T>(1.0f));
 
@@ -206,13 +213,11 @@ inline bool operator==(const Vector3<T> &left, const Vector3<T2> &right)
 	return left.x == right.x && left.y == right.y && left.z == right.z;
 }
 
-
 template <typename T, typename T2>
 inline bool operator!=(const Vector3<T> &left, const Vector3<T2> &right)
 {
-	return !(left==right);
+	return !(left == right);
 }
-
 
 template <typename T>
 inline std::ostream &operator<<(std::ostream &stream, const Vector3<T> &right)

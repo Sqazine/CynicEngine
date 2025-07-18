@@ -54,6 +54,7 @@ namespace CynicEngine
 		const VkQueue &GetGraphicsQueue() const { return mGraphicsQueue; }
 		const VkQueue &GetComputeQueue() const { return mComputeQueue; }
 		const VkQueue &GetTransferQueue() const { return mTransferQueue; }
+		
 		const PhysicalDeviceSpecification &GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
 
 	private:

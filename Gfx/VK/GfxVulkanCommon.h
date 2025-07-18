@@ -1,11 +1,10 @@
 #pragma once
 #include <cstdint>
+#include <vulkan/vulkan.h>
 #include "Core/Common.h"
 #include "Logger/Logger.h"
-#include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
-
     inline STRING_VIEW GetErrorCode(const VkResult result)
     {
         switch (result)
@@ -89,4 +88,6 @@ namespace CynicEngine
         (int32_t &)Struct.sType = VkStructureType;
         memset(((uint8_t *)&Struct) + sizeof(VkStructureType), 0, sizeof(T) - sizeof(VkStructureType));
     }
+
+    uint32_t GetVulkanQueueFamilyIndex(const class GfxVulkanDevice *device,enum class GfxCommandType type);
 } // namespace CynicEngine

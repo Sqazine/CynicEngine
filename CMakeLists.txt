@@ -48,10 +48,14 @@ option(CYNIC_ENGINE_UTF8_ENCODE "use utf8 encode" ON)
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rd")
 set(SDL_INC_DIR "${THIRD_PARTY_DIR}/SDL/include")
 set(CYS_INC_DIR "${THIRD_PARTY_DIR}/CynicScript")
+set(SPIRV_REFLECT_INC_DIR "${THIRD_PARTY_DIR}/SPIRV-Reflect")
+
+set(SPIRV_REFLECT_STATIC_LIB ON)
 
 find_package(Vulkan REQUIRED)
-add_subdirectory(${THIRD_PARTY_DIR}/SDL)
-add_subdirectory(${THIRD_PARTY_DIR}/CynicScript)
+add_subdirectory(${THIRD_PARTY_DIR}/SDL EXCLUDE_FROM_ALL)
+add_subdirectory(${THIRD_PARTY_DIR}/SPIRV-Reflect EXCLUDE_FROM_ALL)
+add_subdirectory(${THIRD_PARTY_DIR}/CynicScript EXCLUDE_FROM_ALL)
 
 if(MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -59,6 +63,8 @@ if(MSVC)
     set_property(TARGET SDL_uclibc PROPERTY FOLDER 3rd/SDL3)
     set_property(TARGET SDL3-shared PROPERTY FOLDER 3rd/SDL3)
     set_property(TARGET SDL3_test PROPERTY FOLDER 3rd/SDL3)
+
+    set_property(TARGET spirv-reflect PROPERTY FOLDER 3rd/SPIRV-Reflect)
 
     set_property(TARGET ${CYS_LIB_NAME} PROPERTY FOLDER 3rd/CynicScript)
     set_property(TARGET ${CYS_EXE_NAME} PROPERTY FOLDER 3rd/CynicScript)
@@ -75,6 +81,7 @@ file(GLOB MATH_SRC "${CMAKE_SOURCE_DIR}/Math/*.cpp" "${CMAKE_SOURCE_DIR}/Math/*.
 file(GLOB PLATFORM_SRC "${CMAKE_SOURCE_DIR}/Platform/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/*.h")
 file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.h")
 file(GLOB RENDER_SRC "${CMAKE_SOURCE_DIR}/Render/*.cpp" "${CMAKE_SOURCE_DIR}/Render/*.h")
+file(GLOB FRAME_GRAPH_SRC "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.cpp" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.h")
 
 source_group("generated" FILES ${GENERATED_SRC})
 source_group("Config" FILES ${CONFIG_SRC})
@@ -87,6 +94,7 @@ source_group("Math" FILES ${MATH_SRC})
 source_group("Platform" FILES ${PLATFORM_SRC})
 source_group("Platform/SDL3" FILES ${PLATFORM_SDL3_SRC})
 source_group("Render" FILES ${RENDER_SRC})
+source_group("Render/FrameGraph" FILES ${FRAME_GRAPH_SRC})
 
 set(CYNIC_SRC
     ${GENERATED_SRC}
@@ -100,6 +108,7 @@ set(CYNIC_SRC
     ${PLATFORM_SRC}
     ${PLATFORM_SDL3_SRC}
     ${RENDER_SRC}
+    ${FRAME_GRAPH_SRC}
 )
 
 add_executable(${PROJECT_NAME} ${CYNIC_SRC})
@@ -115,8 +124,11 @@ set(CYNIC_INC_DIRS ${CMAKE_SOURCE_DIR}
     Platform
     Platform/SDL3
     Render
+    Render/FrameGraph
+
     ${SDL_INC_DIR}
     ${CYS_INC_DIR}
+    ${SPIRV_REFLECT_INC_DIR}
 )
                     
 target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS})
@@ -124,6 +136,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
     SDL3::SDL3
     Vulkan::Vulkan
+    spirv-reflect-static
     ${CYS_LIB_NAME}
 )
 
@@ -141,3 +154,5 @@ if(${CURRENT_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
     endif()
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 endif()
+
+add_subdirectory(Test)
