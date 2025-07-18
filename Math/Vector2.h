@@ -71,6 +71,7 @@ public:
 	static T Cross(const Vector2<T> &left, const Vector2<T> &right);
 
 	static const Vector2<T> ZERO;
+	static const Vector2<T> ONE;
 	static const Vector2<T> UNIT_X;
 	static const Vector2<T> UNIT_Y;
 };
@@ -88,6 +89,9 @@ typedef Vector2<uint64_t> Vector2u64;
 
 template <typename T>
 const Vector2<T> Vector2<T>::ZERO = Vector2<T>();
+
+template <typename T>
+const Vector2<T> Vector2<T>::ONE = Vector2<T>(static_cast<T>(1.0f));
 
 template <typename T>
 const Vector2<T> Vector2<T>::UNIT_X = Vector2<T>(static_cast<T>(1.0f), static_cast<T>(0.0f));

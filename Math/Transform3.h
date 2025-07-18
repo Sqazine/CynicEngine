@@ -15,55 +15,55 @@ template <typename T>
 class DualQuaternion;
 
 template <typename T>
-class Transform
+class Transform3
 {
 public:
 	Vector3<T> position;
 	Quaternion<T> rotation;
 	Vector3<T> scale;
 
-	Transform();
-	Transform(const Vector3<T> &p, const Quaternion<T> &r, const Vector3<T> &s);
+	Transform3();
+	Transform3(const Vector3<T> &p, const Quaternion<T> &r, const Vector3<T> &s);
 
-	static Transform<T> Combine(const Transform<T> &a, const Transform<T> &b);
-	static Transform<T> Inverse(const Transform<T> &t);
-	static Transform<T> Interpolate(const Transform<T> &a, const Transform<T> &b, float t);
+	static Transform3<T> Combine(const Transform3<T> &a, const Transform3<T> &b);
+	static Transform3<T> Inverse(const Transform3<T> &t);
+	static Transform3<T> Interpolate(const Transform3<T> &a, const Transform3<T> &b, float t);
 
-	static Matrix4<T> ToMatrix4(const Transform<T> &trans);
+	static Matrix4<T> ToMatrix4(const Transform3<T> &trans);
 
-	static Vector3<T> TransformPoint(const Transform<T> &a, const Vector3<T> &b);
-	static Vector3<T> TransformVector(const Transform<T> &a, const Vector3<T> &b);
+	static Vector3<T> TransformPoint(const Transform3<T> &a, const Vector3<T> &b);
+	static Vector3<T> TransformVector(const Transform3<T> &a, const Vector3<T> &b);
 
 	static Vector3<T> TransformPoint(const DualQuaternion<T> &dq, const Vector3<T> &b);
 	static Vector3<T> TransformVector(const DualQuaternion<T> &dq, const Vector3<T> &b);
 
-	static DualQuaternion<T> TransformToDualQuaternion(const Transform<T> &t);
+	static DualQuaternion<T> ToDualQuaternion(const Transform3<T> &t);
 };
 
-typedef Transform<float> Transformf;
-typedef Transform<double> Transformd;
-typedef Transform<int32_t> Transformi32;
-typedef Transform<uint32_t> Transformu32;
-typedef Transform<int16_t> Transformi16;
-typedef Transform<uint16_t> Transformu16;
-typedef Transform<int8_t> Transformi8;
-typedef Transform<uint8_t> Transformu8;
+typedef Transform3<float> Transform3f;
+typedef Transform3<double> Transform3d;
+typedef Transform3<int32_t> Transform3i32;
+typedef Transform3<uint32_t> Transform3u32;
+typedef Transform3<int16_t> Transform3i16;
+typedef Transform3<uint16_t> Transform3u16;
+typedef Transform3<int8_t> Transform3i8;
+typedef Transform3<uint8_t> Transform3u8;
 
 template <typename T>
-inline Transform<T>::Transform()
+inline Transform3<T>::Transform3()
 	: position(Vector3<T>::ZERO), rotation(Quaternion<T>::ZERO), scale(Vector3<T>(static_cast<T>(1.0f)))
 {
 }
 
 template <typename T>
-inline Transform<T>::Transform(const Vector3<T> &p, const Quaternion<T> &r, const Vector3<T> &s)
+inline Transform3<T>::Transform3(const Vector3<T> &p, const Quaternion<T> &r, const Vector3<T> &s)
 	: position(p), rotation(r), scale(s)
 {
 }
 template <typename T>
-inline Transform<T> Transform<T>::Combine(const Transform<T> &a, const Transform<T> &b)
+inline Transform3<T> Transform3<T>::Combine(const Transform3<T> &a, const Transform3<T> &b)
 {
-	Transform<T> tmp;
+	Transform3<T> tmp;
 	tmp.scale = a.scale * b.scale;
 	tmp.rotation = Quaternionf::Concatenate(a.rotation, b.rotation);
 	tmp.position = a.rotation * (a.scale * b.position);
@@ -71,9 +71,9 @@ inline Transform<T> Transform<T>::Combine(const Transform<T> &a, const Transform
 	return tmp;
 }
 template <typename T>
-inline Transform<T> Transform<T>::Inverse(const Transform<T> &t)
+inline Transform3<T> Transform3<T>::Inverse(const Transform3<T> &t)
 {
-	Transform<T> tmp;
+	Transform3<T> tmp;
 	tmp.rotation = Quaternion<T>::Inverse(t.rotation);
 	tmp.scale.x = Math::Abs(t.scale.x) < 0.000001f ? 0.0f : 1.0f / t.scale.x;
 	tmp.scale.y = Math::Abs(t.scale.y) < 0.000001f ? 0.0f : 1.0f / t.scale.y;
@@ -83,17 +83,17 @@ inline Transform<T> Transform<T>::Inverse(const Transform<T> &t)
 }
 
 template <typename T>
-inline Transform<T> Transform<T>::Interpolate(const Transform<T> &a, const Transform<T> &b, float t)
+inline Transform3<T> Transform3<T>::Interpolate(const Transform3<T> &a, const Transform3<T> &b, float t)
 {
 	Quaternion<T> bRot = b.rotation;
 	if (Quaternion<T>::Dot(a.rotation, bRot) < 0.0f)
 		bRot = -bRot;
 
-	return Transform<T>(Vector3<T>::Lerp(a.position, b.position, t), Quaternion<T>::NLerp(a.rotation, bRot, t), Vector3<T>::Lerp(a.scale, b.scale, t));
+	return Transform3<T>(Vector3<T>::Lerp(a.position, b.position, t), Quaternion<T>::NLerp(a.rotation, bRot, t), Vector3<T>::Lerp(a.scale, b.scale, t));
 }
 
 template <typename T>
-inline Matrix4<T> Transform<T>::ToMatrix4(const Transform<T> &trans)
+inline Matrix4<T> Transform3<T>::ToMatrix4(const Transform3<T> &trans)
 {
 	Matrix4<T> world = Matrix4<T>::Translate(trans.position);
 	world *= Quaternion<T>::ToMatrix4(trans.rotation);
@@ -102,7 +102,7 @@ inline Matrix4<T> Transform<T>::ToMatrix4(const Transform<T> &trans)
 }
 
 template <typename T>
-inline Vector3<T> Transform<T>::TransformPoint(const Transform<T> &a, const Vector3<T> &b)
+inline Vector3<T> Transform3<T>::TransformPoint(const Transform3<T> &a, const Vector3<T> &b)
 {
 	Vector3<T> out;
 	out = a.rotation * (a.scale * b);
@@ -111,7 +111,7 @@ inline Vector3<T> Transform<T>::TransformPoint(const Transform<T> &a, const Vect
 }
 
 template <typename T>
-inline Vector3<T> Transform<T>::TransformVector(const Transform<T> &a, const Vector3<T> &b)
+inline Vector3<T> Transform3<T>::TransformVector(const Transform3<T> &a, const Vector3<T> &b)
 {
 	Vector3<T> out;
 	out = a.rotation * (a.scale * b);
@@ -133,7 +133,7 @@ inline Vector3<T> TransformVector(const DualQuaternion<T> &dq, const Vector3<T> 
 }
 
 template <typename T>
-inline DualQuaternion<T> Transform<T>::TransformToDualQuaternion(const Transform<T> &t)
+inline DualQuaternion<T> Transform3<T>::ToDualQuaternion(const Transform3<T> &t)
 {
 	Quaternion<T> d;
 	d.vec = t.position;
