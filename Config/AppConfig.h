@@ -1,23 +1,8 @@
 #pragma once
 #include "Core/Singleton.h"
-#include "Gfx/IGfxDevice.h"
+#include "Config/GfxConfig.h"
 namespace CynicEngine
-{
-    enum class GfxBackend
-    {
-        VULKAN,
-        D3D12,
-        METAL,
-    };
-    struct GfxConfig
-    {
-        GfxBackend backend{GfxBackend::VULKAN};
-        bool vSync{false};
-#ifndef NDEBUG
-        bool enableGpuValidation{false};
-#endif
-    };
-    
+{    
     class AppConfig : public Singleton<AppConfig>
     {
     public:

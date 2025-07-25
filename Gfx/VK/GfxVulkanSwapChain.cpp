@@ -107,9 +107,8 @@ namespace CynicEngine
         mPresentMode = ChooseSwapChainPresentMode(swapChainDetail.presentModes);
         mExtent = ChooseSwapChainExtent(swapChainDetail.surfaceCapabilities);
 
-        uint32_t imageCount = swapChainDetail.surfaceCapabilities.minImageCount;
-        if (swapChainDetail.surfaceCapabilities.maxImageCount > 0 && imageCount > swapChainDetail.surfaceCapabilities.maxImageCount)
-            imageCount = swapChainDetail.surfaceCapabilities.maxImageCount;
+        uint32_t imageCount = static_cast<uint32_t>(AppConfig::GetInstance().GetGfxConfig().backBufferCount);
+        imageCount = Math::Clamp(imageCount, swapChainDetail.surfaceCapabilities.minImageCount, swapChainDetail.surfaceCapabilities.maxImageCount);
 
         VkSwapchainCreateInfoKHR createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -141,7 +140,7 @@ namespace CynicEngine
         createInfo.preTransform = swapChainDetail.surfaceCapabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = mPresentMode;
-        createInfo.oldSwapchain = mHandle == VK_NULL_HANDLE ? mHandle : VK_NULL_HANDLE;
+        createInfo.oldSwapchain = (mHandle == VK_NULL_HANDLE) ? mHandle : VK_NULL_HANDLE;
 
         VK_CHECK(vkCreateSwapchainKHR(mDevice->GetLogicDevice(), &createInfo, nullptr, &mHandle));
 
