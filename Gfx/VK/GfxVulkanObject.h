@@ -8,6 +8,7 @@ namespace CynicEngine
     public:
         GfxVulkanObject(IGfxDevice *device);
         virtual ~GfxVulkanObject() = default;
+
         GfxVulkanDevice *GetDevice() const;
 
     protected:
