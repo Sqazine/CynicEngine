@@ -1,5 +1,5 @@
 #pragma once
-
+#include "IGfxDevice.h"
 namespace CynicEngine
 {
     class IGfxBuffer
@@ -7,6 +7,8 @@ namespace CynicEngine
     public:
         IGfxBuffer() = default;
         virtual ~IGfxBuffer() = default;
+
+        IGfxBuffer *Create(IGfxDevice *device);
     };
 
     class IGfxTexture
@@ -14,5 +16,7 @@ namespace CynicEngine
     public:
         IGfxTexture() = default;
         virtual ~IGfxTexture() = default;
+
+        IGfxTexture *Create(IGfxDevice *device);
     };
 }

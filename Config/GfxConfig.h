@@ -25,7 +25,7 @@ namespace CynicEngine
         bool vSync{false};
         GfxBackBufferCount backBufferCount{GfxBackBufferCount::TWO};
 #ifndef NDEBUG
-        bool enableGpuValidation{false};
+        bool enableGpuValidation{true};
 #endif
     };
 }

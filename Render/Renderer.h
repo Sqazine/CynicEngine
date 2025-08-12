@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "Config/AppConfig.h"
 #include "Platform/Window.h"
 #include "Gfx/IGfxDevice.h"
-#include "Gfx/IGfxSwapChain.h"
 namespace CynicEngine
 {
     class Renderer
@@ -12,13 +12,12 @@ namespace CynicEngine
         Renderer(Window *window);
         virtual ~Renderer() = default;
 
-        void BeginRender();
+        void BeginFrame();
         virtual void Render();
-        void EndRender();
+        void EndFrame();
 
     private:
         Window *mWindow;
         std::unique_ptr<IGfxDevice> mGfxDevice;
-        std::unique_ptr<IGfxSwapChain> mGfxSwapChain;
     };
 }

@@ -164,8 +164,7 @@ namespace CynicEngine
 	}
 #endif
 
-	GfxVulkanDevice::GfxVulkanDevice(const Window *window)
-		: IGfxDevice(window)
+	GfxVulkanDevice::GfxVulkanDevice()
 	{
 		CreateInstance();
 #ifndef NDEBUG
@@ -180,6 +179,7 @@ namespace CynicEngine
 
 	GfxVulkanDevice::~GfxVulkanDevice()
 	{
+		mSwapChain.reset(nullptr);
 		vkDestroyDevice(mLogicDevice, nullptr);
 #ifndef NDEBUG
 		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
@@ -463,4 +463,25 @@ namespace CynicEngine
 								  spec.deviceProperties.apiVersion, spec.deviceProperties.driverVersion);
 		}
 	}
+
+	void GfxVulkanDevice::CreateSwapChain(Window *window)
+	{
+		mSwapChain = std::make_unique<GfxVulkanSwapChain>(this, window);
+	}
+
+	void GfxVulkanDevice::WaitIdle()
+	{
+		vkDeviceWaitIdle(GetLogicDevice());
+	}
+
+	void GfxVulkanDevice::BeginFrame()
+	{
+		mSwapChain->BeginFrame();
+	}
+
+	void GfxVulkanDevice::EndFrame()
+	{
+		mSwapChain->EndFrame();
+	}
+
 }

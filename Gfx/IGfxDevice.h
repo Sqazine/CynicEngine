@@ -7,12 +7,12 @@ namespace CynicEngine
 	class IGfxDevice
 	{
 	public:
-		IGfxDevice(const Window *window);
+		IGfxDevice();
 		virtual ~IGfxDevice() = default;
 
-		static IGfxDevice *Create(const Window *window);
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
 
-	protected:
-		const Window *mWindow;
+		static IGfxDevice *Create(Window *window);
 	};
 }

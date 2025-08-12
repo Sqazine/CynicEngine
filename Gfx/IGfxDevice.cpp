@@ -6,19 +6,22 @@
 
 namespace CynicEngine
 {
-	IGfxDevice::IGfxDevice(const Window *window)
-		: mWindow(window)
+	IGfxDevice::IGfxDevice()
 	{
 	}
 
-	IGfxDevice *IGfxDevice::Create(const Window *window)
+	IGfxDevice *IGfxDevice::Create(Window *window)
 	{
 		const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
 		switch (gfxConfig.backend)
 		{
 		case GfxBackend::VULKAN:
+		{
 			// Create Vulkan device
-			return new GfxVulkanDevice(window);
+			auto device = new GfxVulkanDevice();
+			device->CreateSwapChain(window);
+			return device;
+		}
 		case GfxBackend::D3D12:
 			// Create D3D12 device
 			CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));

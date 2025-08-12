@@ -15,9 +15,9 @@ namespace CynicEngine
         IGfxCommandBuffer() = default;
         virtual ~IGfxCommandBuffer() = default;
 
-        static IGfxCommandBuffer *Create(IGfxDevice *device,GfxCommandType type);
+        static IGfxCommandBuffer *Create(IGfxDevice *device, GfxCommandType type);
 
-        virtual IGfxCommandBuffer* Begin() = 0;
-        virtual IGfxCommandBuffer* End() = 0;
+        virtual IGfxCommandBuffer *Begin() = 0;
+        virtual IGfxCommandBuffer *End() = 0;
     };
 }

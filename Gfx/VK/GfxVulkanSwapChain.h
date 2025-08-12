@@ -1,9 +1,11 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <memory>
+#include "Math/Vector2.h"
 #include "GfxVulkanSyncObject.h"
 #include "GfxVulkanObject.h"
-#include "Gfx/IGfxSwapChain.h"
+#include "GfxVulkanCommandBuffer.h"
 namespace CynicEngine
 {
     struct SwapChainDetails
@@ -13,14 +15,16 @@ namespace CynicEngine
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
     };
 
-    class GfxVulkanSwapChain : public GfxVulkanObject, public IGfxSwapChain
+    class GfxVulkanSwapChain : public GfxVulkanObject
     {
     public:
         GfxVulkanSwapChain(IGfxDevice *device, Window *window);
         ~GfxVulkanSwapChain();
 
-        void BeginFrame() override;
-        void EndFrame() override;
+        void BeginFrame();
+        void EndFrame();
+        uint8_t GetBackBufferCount() const;
+        uint8_t GetCurrentBackBufferIndex() const;
 
         VkExtent2D GetExtent() const;
 
@@ -34,6 +38,7 @@ namespace CynicEngine
         void CreateSurface();
         void ObtainPresentQueue();
         void CreateSwapChain();
+        void CreateCommandBuffers();
         void CreateSyncObjects();
 
         SwapChainDetails QuerySwapChainDetails();
@@ -42,9 +47,14 @@ namespace CynicEngine
         VkPresentModeKHR ChooseSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
         VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
+        void Resize(Vector2u32 extent);
         void Resize(uint32_t width, uint32_t height);
         VkResult AcquireNextImage(const GfxVulkanSemaphore *semaphore = nullptr, const GfxVulkanFence *fence = nullptr);
         void Present(const GfxVulkanSemaphore *waitFor = nullptr);
+
+        void CleanUpResource();
+
+        Window* mWindow;
 
         uint32_t mPresentFamilyIdx{0};
         VkQueue mPresentQueue{VK_NULL_HANDLE};
@@ -56,12 +66,12 @@ namespace CynicEngine
         VkPresentModeKHR mPresentMode;
 
         uint32_t mSwapChainImageCount{0};
+        uint32_t mFrameOverlapCount{0};
 
-        std::vector<std::unique_ptr<GfxVulkanSemaphore>> mWaitSemaphores;
-        std::vector<std::unique_ptr<GfxVulkanSemaphore>> mSignalSemaphores;
-        std::vector<std::unique_ptr<GfxVulkanFence>> mWaitFences;
         uint32_t mCurrentFrameIndex{0};
-
         uint32_t mNextFrameIndex{0};
+
+        std::vector<std::unique_ptr<GfxVulkanCommandBuffer>> mGfxCommandBuffer;
+        std::vector<std::unique_ptr<GfxVulkanSemaphore>> mPresentSemaphore;
     };
 }

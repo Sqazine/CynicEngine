@@ -3,13 +3,13 @@
 #include "GfxVulkanDevice.h"
 namespace CynicEngine
 {
-    GfxVulkanFence::GfxVulkanFence(IGfxDevice *device, FenceStatus status)
-        : GfxVulkanObject(device), mStatus(status)
+    GfxVulkanFence::GfxVulkanFence(IGfxDevice *device, bool signalAtCreate)
+        : GfxVulkanObject(device)
     {
         VkFenceCreateInfo info;
         ZeroVulkanStruct(info, VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
         info.pNext = nullptr;
-        info.flags = mStatus == FenceStatus::SIGNALED ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
+        info.flags = signalAtCreate ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 
         VK_CHECK(vkCreateFence(mDevice->GetLogicDevice(), &info, nullptr, &mHandle));
     }
@@ -28,31 +28,27 @@ namespace CynicEngine
 
     void GfxVulkanFence::Wait(bool waitAll, uint64_t timeout)
     {
-        VkResult ret = vkWaitForFences(mDevice->GetLogicDevice(), 1, &mHandle, waitAll, timeout);
-        switch (ret)
-        {
-        case VK_SUCCESS:
-            mStatus = FenceStatus::SIGNALED;
-            break;
-        case VK_TIMEOUT:
-            mStatus = FenceStatus::UNSIGNALED;
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Fence wait timeout!"));
-            break;
-        default:
-            VK_CHECK(ret);
-            break;
-        }
+        VK_CHECK(vkWaitForFences(mDevice->GetLogicDevice(), 1, &mHandle, waitAll, timeout));
     }
 
     void GfxVulkanFence::Reset()
     {
         VK_CHECK(vkResetFences(mDevice->GetLogicDevice(), 1, &mHandle));
-        mStatus = FenceStatus::UNSIGNALED;
     }
 
-    FenceStatus GfxVulkanFence::GetStatus() const
+    bool GfxVulkanFence::IsSignaled()
     {
-        return mStatus;
+        auto result = vkGetFenceStatus(mDevice->GetLogicDevice(), mHandle);
+        switch (result)
+        {
+        case VK_SUCCESS:
+            return true;
+        case VK_NOT_READY:
+            return false;
+        case VK_ERROR_DEVICE_LOST:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Device Lost!"));
+            return false;
+        }
     }
 
     GfxVulkanSemaphore::GfxVulkanSemaphore(IGfxDevice *device)

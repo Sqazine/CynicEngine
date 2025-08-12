@@ -6,17 +6,18 @@
 namespace CynicEngine
 {
     GfxVulkanSwapChain::GfxVulkanSwapChain(IGfxDevice *device, Window *window)
-        : GfxVulkanObject(device), IGfxSwapChain(device, window), mHandle(VK_NULL_HANDLE), mNextFrameIndex(0)
+        : GfxVulkanObject(device), mWindow(window), mHandle(VK_NULL_HANDLE), mNextFrameIndex(0)
     {
         CreateSurface();
         ObtainPresentQueue();
         CreateSwapChain();
+        CreateCommandBuffers();
         CreateSyncObjects();
     }
 
     GfxVulkanSwapChain::~GfxVulkanSwapChain()
     {
-        vkDestroySwapchainKHR(mDevice->GetLogicDevice(), mHandle, nullptr);
+        CleanUpResource();
         vkDestroySurfaceKHR(mDevice->GetInstance(), mSurface, nullptr);
     }
 
@@ -27,14 +28,15 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::BeginFrame()
     {
-        mWaitFences[mCurrentFrameIndex]->Wait(true, UINT64_MAX);
+        auto CurFence = mGfxCommandBuffer[mCurrentFrameIndex]->GetFence();
+        CurFence->Wait(true, UINT64_MAX);
 
-        auto result = vkAcquireNextImageKHR(mDevice->GetLogicDevice(), mHandle, UINT64_MAX, mWaitSemaphores[mCurrentFrameIndex]->GetHandle(), mWaitFences[mCurrentFrameIndex]->GetHandle(), &mNextFrameIndex);
+        auto result = vkAcquireNextImageKHR(mDevice->GetLogicDevice(), mHandle, UINT64_MAX, mPresentSemaphore[mCurrentFrameIndex]->GetHandle(), VK_NULL_HANDLE, &mNextFrameIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             CYNIC_ENGINE_LOG_INFO(TEXT("Swap chain out of date, resizing..."));
-            Resize(mWindow->GetSize().x, mWindow->GetSize().y);
+            Resize(mWindow->GetSize());
             return;
         }
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -43,30 +45,27 @@ namespace CynicEngine
             return;
         }
 
-        mWaitFences[mCurrentFrameIndex]->Reset();
+        CurFence->Reset();
     }
 
     void GfxVulkanSwapChain::EndFrame()
     {
-        VkPresentInfoKHR presentInfo;
-        ZeroVulkanStruct(presentInfo, VK_STRUCTURE_TYPE_PRESENT_INFO_KHR);
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &mHandle;
-        presentInfo.pImageIndices = &mNextFrameIndex;
+        mGfxCommandBuffer[mCurrentFrameIndex]->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
+        GfxVulkanSemaphore *renderFinishedSemaphore = mGfxCommandBuffer[mCurrentFrameIndex]->GetSignalSemaphore();
 
-        auto result = vkQueuePresentKHR(mPresentQueue, &presentInfo);
+        Present(renderFinishedSemaphore);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-        {
-            CYNIC_ENGINE_LOG_INFO(TEXT("Swap chain out of date, resizing..."));
-            Resize(mWindow->GetSize().x, mWindow->GetSize().y);
-        }
-        else if (result != VK_SUCCESS)
-        {
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Failed to present swap chain!"));
-        }
+        mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrameOverlapCount;
+    }
 
-        mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mSwapChainImageCount;
+    uint8_t GfxVulkanSwapChain::GetBackBufferCount() const
+    {
+        return mSwapChainImageCount;
+    }
+
+    uint8_t GfxVulkanSwapChain::GetCurrentBackBufferIndex() const
+    {
+        return mCurrentFrameIndex;
     }
 
     VkExtent2D GfxVulkanSwapChain::GetExtent() const
@@ -97,7 +96,17 @@ namespace CynicEngine
             presentInfo.pWaitSemaphores = &waitFor->GetHandle();
         }
 
-        VK_CHECK(vkQueuePresentKHR(mPresentQueue, &presentInfo));
+        auto result = vkQueuePresentKHR(mPresentQueue, &presentInfo);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+        {
+            CYNIC_ENGINE_LOG_INFO(TEXT("Swap chain out of date, resizing..."));
+            Resize(mWindow->GetSize().x, mWindow->GetSize().y);
+        }
+        else if (result != VK_SUCCESS)
+        {
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Failed to present swap chain!"));
+        }
     }
 
     void GfxVulkanSwapChain::CreateSwapChain()
@@ -145,26 +154,28 @@ namespace CynicEngine
         VK_CHECK(vkCreateSwapchainKHR(mDevice->GetLogicDevice(), &createInfo, nullptr, &mHandle));
 
         vkGetSwapchainImagesKHR(mDevice->GetLogicDevice(), mHandle, &mSwapChainImageCount, nullptr);
-    }
 
-    void GfxVulkanSwapChain::CreateSyncObjects()
-    {
-        mWaitSemaphores.resize(mSwapChainImageCount);
-        mSignalSemaphores.resize(mSwapChainImageCount);
-        mWaitFences.resize(mSwapChainImageCount);
-        for (size_t i = 0; i < mSwapChainImageCount; i++)
-        {
-            mWaitSemaphores[i] = std::make_unique<GfxVulkanSemaphore>(mDevice);
-            mSignalSemaphores[i] = std::make_unique<GfxVulkanSemaphore>(mDevice);
-
-            mWaitFences[i] = std::make_unique<GfxVulkanFence>(mDevice, FenceStatus::SIGNALED);
-        }
+        mFrameOverlapCount = mSwapChainImageCount - 1;
     }
 
     void GfxVulkanSwapChain::CreateSurface()
     {
         VulkanPlatformInfo *platformInfo = PlatformInfo::GetInstance().GetVulkanPlatformInfo();
         mSurface = platformInfo->CreateSurface(mWindow, mDevice->GetInstance());
+    }
+
+    void GfxVulkanSwapChain::CreateCommandBuffers()
+    {
+        mGfxCommandBuffer.resize(mFrameOverlapCount);
+        for (auto &cmdBuffer : mGfxCommandBuffer)
+            cmdBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, GfxCommandType::GRAPHICS);
+    }
+
+    void GfxVulkanSwapChain::CreateSyncObjects()
+    {
+        mPresentSemaphore.resize(mFrameOverlapCount);
+        for (auto &semaphore : mPresentSemaphore)
+            semaphore = std::make_unique<GfxVulkanSemaphore>(mDevice);
     }
 
     const VkSwapchainKHR &GfxVulkanSwapChain::GetHandle() const
@@ -274,8 +285,21 @@ namespace CynicEngine
         vkGetDeviceQueue(mDevice->GetLogicDevice(), mPresentFamilyIdx, 0, &mPresentQueue);
     }
 
+    void GfxVulkanSwapChain::CleanUpResource()
+    {
+        vkDestroySwapchainKHR(mDevice->GetLogicDevice(), mHandle, nullptr);
+    }
+
+    void GfxVulkanSwapChain::Resize(Vector2u32 extent)
+    {
+        Resize(extent.x, extent.y);
+    }
+
     void GfxVulkanSwapChain::Resize(uint32_t width, uint32_t height)
     {
-        
+        mDevice->WaitIdle();
+
+        CleanUpResource();
+        CreateSwapChain();
     }
 }

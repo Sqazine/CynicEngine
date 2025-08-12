@@ -14,10 +14,10 @@ namespace CynicEngine
             if (mState == AppState::TICK)
             {
                 Tick();
-                mRenderer->BeginRender();
+                mRenderer->BeginFrame();
                 Render();
                 RenderGizmo();
-                mRenderer->EndRender();
+                mRenderer->EndFrame();
             }
             PostTick();
         }

@@ -1,22 +1,17 @@
-#include "IGfxSwapChain.h"
+#include "IGfxCommandBuffer.h"
+#include "GfxVulkanCommandBuffer.h"
 #include "Config/AppConfig.h"
 #include "Logger/Logger.h"
 #include "Core/Marco.h"
-#include "Gfx/VK/GfxVulkanSwapChain.h"
 namespace CynicEngine
 {
-    IGfxSwapChain::IGfxSwapChain(IGfxDevice *device, Window *window)
-        : mWindow(window)
-    {
-    }
-
-    IGfxSwapChain *IGfxSwapChain::Create(IGfxDevice *device, Window *window)
-    {
-        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+	IGfxCommandBuffer *IGfxCommandBuffer::Create(IGfxDevice *device, GfxCommandType type)
+	{
+		const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
 		switch (gfxConfig.backend)
 		{
 		case GfxBackend::VULKAN:
-			return new GfxVulkanSwapChain(device, window);
+			return new GfxVulkanCommandBuffer(device, type);
 		case GfxBackend::D3D12:
 			CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
 			break;
@@ -27,5 +22,5 @@ namespace CynicEngine
 
 		CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
 		return nullptr;
-    }
-} // namespace CynicEngine
+	}
+}

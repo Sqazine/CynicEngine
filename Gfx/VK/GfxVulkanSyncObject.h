@@ -6,16 +6,10 @@ namespace CynicEngine
 {
     constexpr uint64_t FENCE_WAIT_TIME_OUT = UINT64_MAX;
 
-    enum class FenceStatus
-    {
-        SIGNALED,
-        UNSIGNALED,
-    };
-
     class GfxVulkanFence : public GfxVulkanObject
     {
     public:
-        GfxVulkanFence(IGfxDevice *device, FenceStatus status = FenceStatus::UNSIGNALED);
+        GfxVulkanFence(IGfxDevice *device, bool signalAtCreate);
         ~GfxVulkanFence();
 
         const VkFence &GetHandle() const;
@@ -23,11 +17,10 @@ namespace CynicEngine
         void Wait(bool waitAll = true, uint64_t timeout = FENCE_WAIT_TIME_OUT);
         void Reset();
 
-        FenceStatus GetStatus() const;
+        bool IsSignaled();
 
     private:
         VkFence mHandle;
-        FenceStatus mStatus;
     };
 
     class GfxVulkanSemaphore : public GfxVulkanObject

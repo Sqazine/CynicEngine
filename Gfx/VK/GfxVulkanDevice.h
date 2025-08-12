@@ -4,6 +4,7 @@
 #include <memory>
 #include "Gfx/IGfxDevice.h"
 #include "GfxVulkanCommon.h"
+#include "GfxVulkanSwapChain.h"
 
 namespace CynicEngine
 {
@@ -45,8 +46,11 @@ namespace CynicEngine
 	class GfxVulkanDevice : public IGfxDevice
 	{
 	public:
-		GfxVulkanDevice(const Window *window);
+		GfxVulkanDevice();
 		~GfxVulkanDevice() override;
+
+		void BeginFrame();
+		void EndFrame();
 
 		VkDevice GetLogicDevice() const { return mLogicDevice; }
 		VkInstance GetInstance() const { return mInstance; }
@@ -54,9 +58,12 @@ namespace CynicEngine
 		const VkQueue &GetGraphicsQueue() const { return mGraphicsQueue; }
 		const VkQueue &GetComputeQueue() const { return mComputeQueue; }
 		const VkQueue &GetTransferQueue() const { return mTransferQueue; }
-		
+
 		const PhysicalDeviceSpecification &GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
 
+		void CreateSwapChain(Window* window);
+
+		void WaitIdle();
 	private:
 		void CreateInstance();
 #ifndef NDEBUG
@@ -94,6 +101,8 @@ namespace CynicEngine
 		VkQueue mGraphicsQueue;
 		VkQueue mComputeQueue;
 		VkQueue mTransferQueue;
+
+		std::unique_ptr<GfxVulkanSwapChain> mSwapChain;
 
 	private:
 #ifndef NDEBUG

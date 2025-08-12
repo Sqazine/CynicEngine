@@ -7,21 +7,20 @@ namespace CynicEngine
         : mWindow(window)
     {
         mGfxDevice.reset(IGfxDevice::Create(mWindow));
-        mGfxSwapChain.reset(IGfxSwapChain::Create(mGfxDevice.get(), mWindow));
     }
 
-    void Renderer::BeginRender()
+    void Renderer::BeginFrame()
     {
-        mGfxSwapChain->BeginFrame();
+        mGfxDevice->BeginFrame();
     }
 
     void Renderer::Render()
     {
     }
 
-    void Renderer::EndRender()
+    void Renderer::EndFrame()
     {
-        mGfxSwapChain->EndFrame();
+        mGfxDevice->EndFrame();
     }
 
 } // namespace CynicEngine

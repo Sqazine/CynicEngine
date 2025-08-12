@@ -36,6 +36,12 @@ namespace CynicEngine
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
         VK_CHECK(vkAllocateCommandBuffers(mDevice->GetLogicDevice(), &allocInfo, &mHandle))
+
+        {
+            mSignalSemaphore = std::make_unique<GfxVulkanSemaphore>(mDevice);
+
+            mFence = std::make_unique<GfxVulkanFence>(mDevice, true);
+        }
     }
 
     GfxVulkanCommandBuffer::~GfxVulkanCommandBuffer()
@@ -55,6 +61,28 @@ namespace CynicEngine
     IGfxCommandBuffer *GfxVulkanCommandBuffer::End()
     {
         VK_CHECK(vkEndCommandBuffer(mHandle))
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::Submit(GfxVulkanSemaphore* waitSemaphore)
+    {
+        VkSemaphore waitRawSemaphore = waitSemaphore->GetHandle();
+        VkSemaphore signalRawSemaphore = mSignalSemaphore->GetHandle();
+
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+        VkSubmitInfo submitInfo;
+        ZeroVulkanStruct(submitInfo, VK_STRUCTURE_TYPE_SUBMIT_INFO);
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &waitRawSemaphore;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &signalRawSemaphore;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &mHandle;
+
+        VK_CHECK(vkQueueSubmit(mRelatedQueue, 1, &submitInfo, mFence->GetHandle()))
+
         return this;
     }
 }
