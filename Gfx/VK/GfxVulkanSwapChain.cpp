@@ -11,6 +11,7 @@ namespace CynicEngine
         CreateSurface();
         ObtainPresentQueue();
         CreateSwapChain();
+        CreateBackTextures();
         CreateCommandBuffers();
         CreateSyncObjects();
     }
@@ -46,10 +47,18 @@ namespace CynicEngine
         }
 
         CurFence->Reset();
+
+        GetCurrentBackCommandBuffer()->Begin();
+
+        BeginRender();
     }
 
     void GfxVulkanSwapChain::EndFrame()
     {
+        EndRender();
+
+        GetCurrentBackCommandBuffer()->End();
+
         mGfxCommandBuffer[mCurrentFrameIndex]->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
         GfxVulkanSemaphore *renderFinishedSemaphore = mGfxCommandBuffer[mCurrentFrameIndex]->GetSignalSemaphore();
 
@@ -66,6 +75,11 @@ namespace CynicEngine
     uint8_t GfxVulkanSwapChain::GetCurrentBackBufferIndex() const
     {
         return mCurrentFrameIndex;
+    }
+
+    GfxVulkanCommandBuffer *GfxVulkanSwapChain::GetCurrentBackCommandBuffer() const
+    {
+        return mGfxCommandBuffer[mCurrentFrameIndex].get();
     }
 
     VkExtent2D GfxVulkanSwapChain::GetExtent() const
@@ -158,6 +172,30 @@ namespace CynicEngine
         mFrameOverlapCount = mSwapChainImageCount - 1;
     }
 
+    void GfxVulkanSwapChain::CreateBackTextures()
+    {
+        std::vector<VkImage> images(mSwapChainImageCount);
+        vkGetSwapchainImagesKHR(mDevice->GetLogicDevice(), mHandle, &mSwapChainImageCount, images.data());
+
+        GfxTextureDesc desc;
+        desc.width = mExtent.width;
+        desc.height = mExtent.height;
+        desc.mipLevels = 1;
+        desc.format = ToFormat(mSurfaceFormat.format);
+        desc.sampleCount = 1;
+
+        mSwapChainColorBackTextures.resize(mSwapChainImageCount);
+        for (auto i = 0; i < mSwapChainImageCount; i++)
+        {
+            mSwapChainColorBackTextures[i] = new GfxVulkanTexture(mDevice, desc, images[i]);
+        }
+
+        mColorBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+
+        desc.format = ToFormat(mDevice->FindDepthFormat());
+        mDepthBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+    }
+
     void GfxVulkanSwapChain::CreateSurface()
     {
         VulkanPlatformInfo *platformInfo = PlatformInfo::GetInstance().GetVulkanPlatformInfo();
@@ -176,6 +214,53 @@ namespace CynicEngine
         mPresentSemaphore.resize(mFrameOverlapCount);
         for (auto &semaphore : mPresentSemaphore)
             semaphore = std::make_unique<GfxVulkanSemaphore>(mDevice);
+    }
+
+    void GfxVulkanSwapChain::BeginRender()
+    {
+        VkRenderingAttachmentInfo colorAttachmentInfo{};
+        colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        colorAttachmentInfo.pNext = nullptr;
+        colorAttachmentInfo.imageView = mColorBackTexture->GetView();
+        colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+        colorAttachmentInfo.resolveImageView = GetCurrentSwapChainBackTexture()->GetView();
+        colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachmentInfo.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
+
+        std::vector<VkRenderingAttachmentInfo> colorAttachmentInfos{
+            colorAttachmentInfo,
+        };
+
+        VkRenderingAttachmentInfo depthAttachmentInfo{};
+        depthAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        depthAttachmentInfo.pNext = nullptr;
+        depthAttachmentInfo.imageView = mDepthBackTexture->GetView();
+        depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachmentInfo.clearValue.depthStencil = {1.0f, 0};
+
+        VkRenderingInfo renderingInfo{};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        renderingInfo.pNext = nullptr;
+        renderingInfo.flags = 0;
+        renderingInfo.renderArea.offset = {0, 0};
+        renderingInfo.renderArea.extent = mExtent;
+        renderingInfo.layerCount = 1;
+        renderingInfo.colorAttachmentCount = colorAttachmentInfos.size();
+        renderingInfo.pColorAttachments = colorAttachmentInfos.data();
+        renderingInfo.pDepthAttachment = &depthAttachmentInfo;
+
+        vkCmdBeginRendering(GetCurrentBackCommandBuffer()->GetHandle(), &renderingInfo);
+    }
+    void GfxVulkanSwapChain::EndRender()
+    {
+        vkCmdEndRendering(GetCurrentBackCommandBuffer()->GetHandle());
+
+        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
     }
 
     const VkSwapchainKHR &GfxVulkanSwapChain::GetHandle() const
@@ -287,6 +372,8 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::CleanUpResource()
     {
+        mColorBackTexture.reset();
+        mDepthBackTexture.reset();
         vkDestroySwapchainKHR(mDevice->GetLogicDevice(), mHandle, nullptr);
     }
 

@@ -24,13 +24,18 @@ namespace CynicEngine
         return nullptr;
     }
 
-    IGfxTexture *IGfxTexture::Create(IGfxDevice *device)
+    IGfxTexture::IGfxTexture(const GfxTextureDesc &desc)
+        : mDesc(desc)
+    {
+    }
+
+    IGfxTexture *IGfxTexture::Create(IGfxDevice *device, const GfxTextureDesc &desc)
     {
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
         {
         case GfxBackend::VULKAN:
-            return new GfxVulkanTexture(device);
+            return new GfxVulkanTexture(device, desc);
         case GfxBackend::D3D12:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
             break;

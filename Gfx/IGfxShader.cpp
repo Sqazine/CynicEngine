@@ -1,13 +1,15 @@
 #include "IGfxShader.h"
+#include "Config/AppConfig.h"
+#include "Logger/Logger.h"
+#include "Gfx/VK/GfxVulkanShader.h"
 namespace CynicEngine
 {
-
     IGfxRasterShader *IGfxRasterShader::CreateFromFiles(IGfxDevice *device,
                                                         std::string_view vertContent,
                                                         std::string_view fragContent,
-                                                        std::string_view tessCtrlContent = "",
-                                                        std::string_view tessEvalContent = "",
-                                                        std::string_view geomContent = "")
+                                                        std::string_view tessCtrlContent,
+                                                        std::string_view tessEvalContent,
+                                                        std::string_view geomContent)
     {
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)

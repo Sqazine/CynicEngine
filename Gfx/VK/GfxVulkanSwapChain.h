@@ -6,6 +6,8 @@
 #include "GfxVulkanSyncObject.h"
 #include "GfxVulkanObject.h"
 #include "GfxVulkanCommandBuffer.h"
+#include "GfxVulkanResource.h"
+#include "Gfx/IGfxResource.h"
 namespace CynicEngine
 {
     struct SwapChainDetails
@@ -25,6 +27,7 @@ namespace CynicEngine
         void EndFrame();
         uint8_t GetBackBufferCount() const;
         uint8_t GetCurrentBackBufferIndex() const;
+        GfxVulkanCommandBuffer *GetCurrentBackCommandBuffer() const;
 
         VkExtent2D GetExtent() const;
 
@@ -34,12 +37,18 @@ namespace CynicEngine
 
         uint32_t GetNextFrameIndex() const;
 
+        GfxVulkanTexture* GetCurrentSwapChainBackTexture(){return mSwapChainColorBackTextures[mCurrentFrameIndex];}
+
     private:
         void CreateSurface();
         void ObtainPresentQueue();
         void CreateSwapChain();
+        void CreateBackTextures();
         void CreateCommandBuffers();
         void CreateSyncObjects();
+
+        void BeginRender();
+        void EndRender();
 
         SwapChainDetails QuerySwapChainDetails();
 
@@ -54,7 +63,7 @@ namespace CynicEngine
 
         void CleanUpResource();
 
-        Window* mWindow;
+        Window *mWindow;
 
         uint32_t mPresentFamilyIdx{0};
         VkQueue mPresentQueue{VK_NULL_HANDLE};
@@ -73,5 +82,10 @@ namespace CynicEngine
 
         std::vector<std::unique_ptr<GfxVulkanCommandBuffer>> mGfxCommandBuffer;
         std::vector<std::unique_ptr<GfxVulkanSemaphore>> mPresentSemaphore;
+
+        std::vector<GfxVulkanTexture *> mSwapChainColorBackTextures;
+
+        std::unique_ptr<GfxVulkanTexture> mColorBackTexture;
+        std::unique_ptr<GfxVulkanTexture> mDepthBackTexture;
     };
 }

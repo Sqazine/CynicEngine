@@ -49,8 +49,10 @@ namespace CynicEngine
 		GfxVulkanDevice();
 		~GfxVulkanDevice() override;
 
-		void BeginFrame();
-		void EndFrame();
+		void BeginFrame() override;
+		void EndFrame() override;
+
+		GfxVulkanCommandBuffer *GetCurrentBackCommandBuffer() const override;
 
 		VkDevice GetLogicDevice() const { return mLogicDevice; }
 		VkInstance GetInstance() const { return mInstance; }
@@ -60,10 +62,16 @@ namespace CynicEngine
 		const VkQueue &GetTransferQueue() const { return mTransferQueue; }
 
 		const PhysicalDeviceSpecification &GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
+		VkPhysicalDevice GetPhysicalDevice() const {return GetPhysicalDeviceSpec().handle;}
 
-		void CreateSwapChain(Window* window);
+		void CreateSwapChain(Window *window);
 
 		void WaitIdle();
+
+		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+		VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+VkFormat FindDepthFormat();
 	private:
 		void CreateInstance();
 #ifndef NDEBUG

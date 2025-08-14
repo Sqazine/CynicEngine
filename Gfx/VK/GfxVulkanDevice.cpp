@@ -204,7 +204,7 @@ namespace CynicEngine
 		}
 
 		VkApplicationInfo appInfo{};
-		appInfo.pApplicationName = "Cynic Engine";			   //TODO: Get application name from config
+		appInfo.pApplicationName = "Cynic Engine";			   // TODO: Get application name from config
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0); // TODO: Get application version from config
 		appInfo.pEngineName = "Cynic Engine";
 		appInfo.engineVersion = CYNIC_ENGINE_VERSION_BINARY;
@@ -302,6 +302,15 @@ namespace CynicEngine
 
 	void GfxVulkanDevice::CreateLogicDevice()
 	{
+
+		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+		constexpr VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+			.dynamicRendering = VK_TRUE,
+		};
+
 		const auto &finalSelectedSpec = mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex];
 
 		const float queuePriority = 1.0f;
@@ -313,12 +322,12 @@ namespace CynicEngine
 
 		VkDeviceCreateInfo deviceInfo;
 		ZeroVulkanStruct(deviceInfo, VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO);
-		deviceInfo.pNext = nullptr;
+		deviceInfo.pNext = &dynamicRenderingFeature;
 		deviceInfo.queueCreateInfoCount = 1;
 		deviceInfo.pQueueCreateInfos = &deviceQueueInfo;
 		deviceInfo.enabledExtensionCount = (uint32_t)mDeviceExtensions.size();
 		deviceInfo.ppEnabledExtensionNames = mDeviceExtensions.data();
-		deviceInfo.pEnabledFeatures = nullptr;
+		deviceInfo.pEnabledFeatures = &deviceFeatures;
 
 		VK_CHECK(vkCreateDevice(finalSelectedSpec.handle, &deviceInfo, nullptr, &mLogicDevice));
 	}
@@ -474,6 +483,49 @@ namespace CynicEngine
 		vkDeviceWaitIdle(GetLogicDevice());
 	}
 
+	uint32_t GfxVulkanDevice::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), &memProperties);
+
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				return i;
+			}
+		}
+		CYNIC_ENGINE_LOG_ERROR(TEXT("failed to find suitable memory type!"));
+	}
+
+	VkFormat GfxVulkanDevice::FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	{
+		for (VkFormat format : candidates)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(GetPhysicalDevice(), format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+			{
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+			{
+				return format;
+			}
+		}
+
+		CYNIC_ENGINE_LOG_ERROR(TEXT("failed to find supported format!"));
+	}
+
+	VkFormat GfxVulkanDevice::FindDepthFormat()
+	{
+		return FindSupportedFormat(
+			{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+	}
+
 	void GfxVulkanDevice::BeginFrame()
 	{
 		mSwapChain->BeginFrame();
@@ -482,6 +534,11 @@ namespace CynicEngine
 	void GfxVulkanDevice::EndFrame()
 	{
 		mSwapChain->EndFrame();
+	}
+
+	GfxVulkanCommandBuffer *GfxVulkanDevice::GetCurrentBackCommandBuffer() const
+	{
+		return mSwapChain->GetCurrentBackCommandBuffer();
 	}
 
 }

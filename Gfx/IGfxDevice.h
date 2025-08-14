@@ -1,18 +1,19 @@
 
 #pragma once
 #include "Platform/Window.h"
-
 namespace CynicEngine
 {
+	class IGfxCommandBuffer;
 	class IGfxDevice
 	{
 	public:
 		IGfxDevice();
 		virtual ~IGfxDevice() = default;
 
+		static IGfxDevice *Create(Window *window);
+
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
-
-		static IGfxDevice *Create(Window *window);
+		virtual IGfxCommandBuffer *GetCurrentBackCommandBuffer() const = 0;
 	};
 }

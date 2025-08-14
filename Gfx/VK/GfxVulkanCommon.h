@@ -89,5 +89,22 @@ namespace CynicEngine
         memset(((uint8_t *)&Struct) + sizeof(VkStructureType), 0, sizeof(T) - sizeof(VkStructureType));
     }
 
-    uint32_t GetVulkanQueueFamilyIndex(const class GfxVulkanDevice *device,enum class GfxCommandType type);
+    enum class Format;
+    enum class GfxCommandType;
+    enum class Filter;
+    enum class AddressMode;
+    enum class IndexType;
+    class GfxVulkanDevice;
+
+    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type);
+
+    VkImageAspectFlagBits GetAspectFromFormat(Format format);
+
+    VkFormat ToVkFormat(Format format);
+    Format ToFormat(VkFormat vkFormat);
+    VkFilter ToVkFilter(Filter filter);
+    VkSamplerAddressMode ToVkSamplerAddressMode(AddressMode addressMode);
+
+    VkIndexType ToVkIndexType(IndexType type);
+
 } // namespace CynicEngine
