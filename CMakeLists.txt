@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.25)
 
 set(PROJECT_NAME CynicEngine  VERSION 0.1.0 LANGUAGES C CXX)
 
@@ -64,7 +64,7 @@ if(MSVC)
     set_property(TARGET SDL3-shared PROPERTY FOLDER 3rd/SDL3)
     set_property(TARGET SDL3_test PROPERTY FOLDER 3rd/SDL3)
 
-    set_property(TARGET spirv-reflect PROPERTY FOLDER 3rd/SPIRV-Reflect)
+    set_property(TARGET spirv-reflect-static PROPERTY FOLDER 3rd/SPIRV-Reflect)
 
     set_property(TARGET ${CYS_LIB_NAME} PROPERTY FOLDER 3rd/CynicScript)
     set_property(TARGET ${CYS_EXE_NAME} PROPERTY FOLDER 3rd/CynicScript)
