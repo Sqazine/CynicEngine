@@ -88,11 +88,6 @@ namespace CynicEngine
         return mExtent;
     }
 
-    VkResult GfxVulkanSwapChain::AcquireNextImage(const GfxVulkanSemaphore *semaphore, const GfxVulkanFence *fence)
-    {
-        return (vkAcquireNextImageKHR(mDevice->GetLogicDevice(), mHandle, UINT64_MAX, (semaphore ? semaphore->GetHandle() : nullptr), (fence ? fence->GetHandle() : nullptr), &mNextFrameIndex));
-    }
-
     uint32_t GfxVulkanSwapChain::GetNextFrameIndex() const
     {
         return mNextFrameIndex;
@@ -416,5 +411,6 @@ namespace CynicEngine
 
         CleanUpResource();
         CreateSwapChain();
+        CreateBackTextures();
     }
 }

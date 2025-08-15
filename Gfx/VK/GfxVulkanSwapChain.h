@@ -58,7 +58,6 @@ namespace CynicEngine
 
         void Resize(Vector2u32 extent);
         void Resize(uint32_t width, uint32_t height);
-        VkResult AcquireNextImage(const GfxVulkanSemaphore *semaphore = nullptr, const GfxVulkanFence *fence = nullptr);
         void Present(const GfxVulkanSemaphore *waitFor = nullptr);
 
         void CleanUpResource();

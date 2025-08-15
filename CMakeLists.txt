@@ -55,7 +55,7 @@ set(SPIRV_REFLECT_STATIC_LIB ON)
 find_package(Vulkan REQUIRED)
 add_subdirectory(${THIRD_PARTY_DIR}/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(${THIRD_PARTY_DIR}/SPIRV-Reflect EXCLUDE_FROM_ALL)
-add_subdirectory(${THIRD_PARTY_DIR}/CynicScript EXCLUDE_FROM_ALL)
+add_subdirectory(${THIRD_PARTY_DIR}/CynicScript)
 
 if(MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
