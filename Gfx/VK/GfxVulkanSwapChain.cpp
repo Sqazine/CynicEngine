@@ -190,7 +190,10 @@ namespace CynicEngine
             mSwapChainColorBackTextures[i] = new GfxVulkanTexture(mDevice, desc, images[i]);
         }
 
-        mColorBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+        if (AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1)
+        {
+            mColorBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+        }
 
         desc.format = ToFormat(mDevice->FindDepthFormat());
         mDepthBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
@@ -221,7 +224,7 @@ namespace CynicEngine
         VkRenderingAttachmentInfo colorAttachmentInfo{};
         colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         colorAttachmentInfo.pNext = nullptr;
-        colorAttachmentInfo.imageView = mColorBackTexture->GetView();
+        colorAttachmentInfo.imageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? mColorBackTexture->GetView() : GetCurrentSwapChainBackTexture()->GetView();
         colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
         colorAttachmentInfo.resolveImageView = GetCurrentSwapChainBackTexture()->GetView();
@@ -229,10 +232,6 @@ namespace CynicEngine
         colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachmentInfo.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
-
-        std::vector<VkRenderingAttachmentInfo> colorAttachmentInfos{
-            colorAttachmentInfo,
-        };
 
         VkRenderingAttachmentInfo depthAttachmentInfo{};
         depthAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -250,8 +249,8 @@ namespace CynicEngine
         renderingInfo.renderArea.offset = {0, 0};
         renderingInfo.renderArea.extent = mExtent;
         renderingInfo.layerCount = 1;
-        renderingInfo.colorAttachmentCount = colorAttachmentInfos.size();
-        renderingInfo.pColorAttachments = colorAttachmentInfos.data();
+        renderingInfo.colorAttachmentCount = 1;
+        renderingInfo.pColorAttachments = &colorAttachmentInfo;
         renderingInfo.pDepthAttachment = &depthAttachmentInfo;
 
         vkCmdBeginRendering(GetCurrentBackCommandBuffer()->GetHandle(), &renderingInfo);
@@ -372,7 +371,10 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::CleanUpResource()
     {
-        mColorBackTexture.reset();
+        if (AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1)
+        {
+            mColorBackTexture.reset();
+        }
         mDepthBackTexture.reset();
         vkDestroySwapchainKHR(mDevice->GetLogicDevice(), mHandle, nullptr);
     }
