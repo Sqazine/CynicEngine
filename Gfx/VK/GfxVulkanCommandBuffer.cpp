@@ -46,6 +46,7 @@ namespace CynicEngine
 
     GfxVulkanCommandBuffer::~GfxVulkanCommandBuffer()
     {
+        mDevice->WaitIdle();
         vkDestroyCommandPool(mDevice->GetLogicDevice(), mPoolHandle, nullptr);
     }
 

@@ -63,6 +63,7 @@ namespace CynicEngine
     }
     GfxVulkanSemaphore::~GfxVulkanSemaphore()
     {
+        mDevice->WaitIdle();
         vkDestroySemaphore(mDevice->GetLogicDevice(), mHandle, nullptr);
     }
 

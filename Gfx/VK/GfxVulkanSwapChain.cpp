@@ -3,6 +3,7 @@
 #include "Platform/PlatformInfo.h"
 #include "Config/AppConfig.h"
 #include "Math/Math.hpp"
+#include "Core/Marco.h"
 namespace CynicEngine
 {
     GfxVulkanSwapChain::GfxVulkanSwapChain(IGfxDevice *device, Window *window)
@@ -29,7 +30,7 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::BeginFrame()
     {
-        auto CurFence = mGfxCommandBuffer[mCurrentFrameIndex]->GetFence();
+        auto CurFence = GetCurrentBackCommandBuffer()->GetFence();
         CurFence->Wait(true, UINT64_MAX);
 
         auto result = vkAcquireNextImageKHR(mDevice->GetLogicDevice(), mHandle, UINT64_MAX, mPresentSemaphore[mCurrentFrameIndex]->GetHandle(), VK_NULL_HANDLE, &mNextFrameIndex);
@@ -95,6 +96,11 @@ namespace CynicEngine
     uint32_t GfxVulkanSwapChain::GetNextFrameIndex() const
     {
         return mNextFrameIndex;
+    }
+
+    GfxVulkanTexture *GfxVulkanSwapChain::GetCurrentSwapChainBackTexture() const
+    {
+        return mSwapChainColorBackTextures[GetNextFrameIndex()];
     }
 
     void GfxVulkanSwapChain::Present(const GfxVulkanSemaphore *waitFor)
@@ -185,18 +191,18 @@ namespace CynicEngine
         desc.sampleCount = 1;
 
         mSwapChainColorBackTextures.resize(mSwapChainImageCount);
-        for (auto i = 0; i < mSwapChainImageCount; i++)
+        for (uint32_t i = 0; i < mSwapChainImageCount; i++)
         {
             mSwapChainColorBackTextures[i] = new GfxVulkanTexture(mDevice, desc, images[i]);
         }
 
         if (AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1)
         {
-            mColorBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+            mColorBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
         }
 
         desc.format = ToFormat(mDevice->FindDepthFormat());
-        mDepthBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc);
+        mDepthBackTexture = std::make_unique<GfxVulkanTexture>(mDevice, desc, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     }
 
     void GfxVulkanSwapChain::CreateSurface()
@@ -221,20 +227,25 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::BeginRender()
     {
-        VkRenderingAttachmentInfo colorAttachmentInfo{};
+        auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
+
+        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+
+        VkRenderingAttachmentInfo colorAttachmentInfo;
+        ZeroVulkanStruct(colorAttachmentInfo, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
         colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         colorAttachmentInfo.pNext = nullptr;
         colorAttachmentInfo.imageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? mColorBackTexture->GetView() : GetCurrentSwapChainBackTexture()->GetView();
         colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-        colorAttachmentInfo.resolveImageView = GetCurrentSwapChainBackTexture()->GetView();
+        colorAttachmentInfo.resolveMode = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE;
+        colorAttachmentInfo.resolveImageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? GetCurrentSwapChainBackTexture()->GetView() : nullptr;
         colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachmentInfo.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
 
-        VkRenderingAttachmentInfo depthAttachmentInfo{};
-        depthAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        VkRenderingAttachmentInfo depthAttachmentInfo;
+        ZeroVulkanStruct(depthAttachmentInfo, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
         depthAttachmentInfo.pNext = nullptr;
         depthAttachmentInfo.imageView = mDepthBackTexture->GetView();
         depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -242,8 +253,8 @@ namespace CynicEngine
         depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentInfo.clearValue.depthStencil = {1.0f, 0};
 
-        VkRenderingInfo renderingInfo{};
-        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        VkRenderingInfo renderingInfo;
+        ZeroVulkanStruct(renderingInfo, VK_STRUCTURE_TYPE_RENDERING_INFO);
         renderingInfo.pNext = nullptr;
         renderingInfo.flags = 0;
         renderingInfo.renderArea.offset = {0, 0};
@@ -253,18 +264,29 @@ namespace CynicEngine
         renderingInfo.pColorAttachments = &colorAttachmentInfo;
         renderingInfo.pDepthAttachment = &depthAttachmentInfo;
 
-        vkCmdBeginRendering(GetCurrentBackCommandBuffer()->GetHandle(), &renderingInfo);
+        vkCmdBeginRendering(rawCmdBuffer, &renderingInfo);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)mExtent.width;
+        viewport.height = (float)mExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(rawCmdBuffer, 0, 1, &viewport);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = mExtent;
+        vkCmdSetScissor(rawCmdBuffer, 0, 1, &scissor);
     }
     void GfxVulkanSwapChain::EndRender()
     {
-        vkCmdEndRendering(GetCurrentBackCommandBuffer()->GetHandle());
+        auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
+
+        vkCmdEndRendering(rawCmdBuffer);
 
         GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
-    }
-
-    const VkSwapchainKHR &GfxVulkanSwapChain::GetHandle() const
-    {
-        return mHandle;
     }
 
     VkSurfaceFormatKHR GfxVulkanSwapChain::ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
@@ -371,6 +393,10 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::CleanUpResource()
     {
+        for(auto& texture:mSwapChainColorBackTextures)
+        {
+            SAFE_DELETE(texture);
+        }
         if (AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1)
         {
             mColorBackTexture.reset();

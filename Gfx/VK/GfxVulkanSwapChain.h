@@ -33,11 +33,11 @@ namespace CynicEngine
 
         const VkSurfaceFormatKHR GetSurfaceFormat() const;
 
-        const VkSwapchainKHR &GetHandle() const;
+        const VkSwapchainKHR &GetHandle() const{return mHandle;}
 
         uint32_t GetNextFrameIndex() const;
 
-        GfxVulkanTexture* GetCurrentSwapChainBackTexture(){return mSwapChainColorBackTextures[mCurrentFrameIndex];}
+        GfxVulkanTexture* GetCurrentSwapChainBackTexture() const;
 
     private:
         void CreateSurface();

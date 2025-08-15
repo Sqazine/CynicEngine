@@ -15,22 +15,31 @@ namespace CynicEngine
     GfxVulkanTexture::GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImage swapchainImageRawHandle)
         : IGfxTexture(desc), GfxVulkanObject(device)
     {
-        if (!swapchainImageRawHandle)
+        if (swapchainImageRawHandle == VK_NULL_HANDLE)
         {
-            mIsSwapChainImage = true;
-            CreateImage();
+            mIsSwapChainImage = false;
+            CreateImage(VkImageUsageFlagBits(VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT));
         }
         else
         {
-            mIsSwapChainImage = false;
+            mIsSwapChainImage = true;
             mHandle = swapchainImageRawHandle;
         }
         CreateImageView();
         CreateSampler();
     }
 
+    GfxVulkanTexture::GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImageUsageFlags usage)
+        : IGfxTexture(desc), GfxVulkanObject(device), mIsSwapChainImage(false)
+    {
+        CreateImage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        CreateImageView();
+        CreateSampler();
+    }
+
     GfxVulkanTexture::~GfxVulkanTexture()
     {
+        mDevice->WaitIdle();
         VkDevice device = mDevice->GetLogicDevice();
         vkDestroyImageView(device, mView, nullptr);
         vkDestroySampler(device, mSampler, nullptr);
@@ -46,7 +55,7 @@ namespace CynicEngine
         return GetAspectFromFormat(mDesc.format);
     }
 
-    void GfxVulkanTexture::CreateImage()
+    void GfxVulkanTexture::CreateImage(VkImageUsageFlagBits usage)
     {
         VkImageCreateInfo imageInfo{};
         ZeroVulkanStruct(imageInfo, VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO);
@@ -60,7 +69,7 @@ namespace CynicEngine
         imageInfo.format = ToVkFormat(mDesc.format);
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        imageInfo.usage = usage;
         imageInfo.samples = (VkSampleCountFlagBits)mDesc.sampleCount;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 

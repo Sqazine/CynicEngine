@@ -16,14 +16,15 @@ namespace CynicEngine
     {
     public:
         GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImage swapchainImageRawHandle = VK_NULL_HANDLE);
+        GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImageUsageFlags usage);
         ~GfxVulkanTexture() override;
 
         VkImageAspectFlagBits GetAspect();
         VkImage GetHandle() const { return mHandle; }
-        VkImageView GetView() const {return mView;}
+        VkImageView GetView() const { return mView; }
 
     private:
-        void CreateImage();
+        void CreateImage(VkImageUsageFlagBits usage);
         void CreateImageView();
         void CreateSampler();
 
