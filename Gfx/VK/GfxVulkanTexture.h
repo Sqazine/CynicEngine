@@ -1,17 +1,10 @@
 #pragma once
 #include <vulkan/vulkan.h>
-#include "Gfx/IGfxResource.h"
+#include "Gfx/IGfxTexture.h"
 #include "GfxVulkanObject.h"
 #include "Gfx/IGfxDevice.h"
 namespace CynicEngine
 {
-    class GfxVulkanBuffer : public GfxVulkanObject, public IGfxBuffer
-    {
-    public:
-        GfxVulkanBuffer(IGfxDevice *device);
-        ~GfxVulkanBuffer() override;
-    };
-
     class GfxVulkanTexture : public GfxVulkanObject, public IGfxTexture
     {
     public:
@@ -22,6 +15,7 @@ namespace CynicEngine
         VkImageAspectFlagBits GetAspect();
         VkImage GetHandle() const { return mHandle; }
         VkImageView GetView() const { return mView; }
+        VkSampler GetSampler() const { return mSampler; }
 
     private:
         void CreateImage(VkImageUsageFlagBits usage);

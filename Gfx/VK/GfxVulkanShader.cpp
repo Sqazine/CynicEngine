@@ -1,7 +1,8 @@
 #include "GfxVulkanShader.h"
 #include "GfxVulkanDevice.h"
 #include "GfxVulkanCommon.h"
-#include "GfxVulkanResource.h"
+#include "GfxVulkanBuffer.h"
+#include "GfxVulkanTexture.h"
 #include <cassert>
 
 namespace CynicEngine
@@ -167,9 +168,9 @@ namespace CynicEngine
 
         auto rawBuffer = dynamic_cast<const GfxVulkanBuffer *>(buffer);
 
-        // mBufferInfos[name].buffer = rawBuffer->GetHandle();
-        // mBufferInfos[name].offset = 0;
-        // mBufferInfos[name].range = rawBuffer->GetSize();
+        mBufferInfos[name].buffer = rawBuffer->GetHandle();
+        mBufferInfos[name].offset = 0;
+        mBufferInfos[name].range = rawBuffer->GetSize();
 
         mWrites[name].pBufferInfo = &mBufferInfos[name];
 
@@ -185,9 +186,9 @@ namespace CynicEngine
         if (mImageInfos.find(name) == mImageInfos.end())
             mImageInfos[name] = VkDescriptorImageInfo{};
 
-        // mImageInfos[name].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        // mImageInfos[name].imageView = rawTexture->mImage->mView;
-        // mImageInfos[name].sampler = rawTexture->mSampler;
+        mImageInfos[name].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        mImageInfos[name].imageView = rawTexture->GetView();
+        mImageInfos[name].sampler = rawTexture->GetSampler();
 
         mWrites[name].pImageInfo = &mImageInfos[name];
         return this;

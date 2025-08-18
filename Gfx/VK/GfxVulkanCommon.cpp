@@ -1,7 +1,8 @@
 #include "GfxVulkanCommon.h"
 #include "GfxVulkanDevice.h"
 #include "Gfx/IGfxCommandBuffer.h"
-#include "Gfx/IGfxResource.h"
+#include "Gfx/IGfxTexture.h"
+#include "Gfx/IGfxBuffer.h"
 namespace CynicEngine
 {
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type)
@@ -77,30 +78,35 @@ namespace CynicEngine
 
     VkFilter ToVkFilter(Filter filter)
     {
+#define DEF(filter)        \
+    case Filter::##filter: \
+        return VK_FILTER_##filter
+
         switch (filter)
         {
-        case Filter::NEAREST:
-            return VK_FILTER_NEAREST;
-        case Filter::LINEAR:
-            return VK_FILTER_LINEAR;
+            DEF(NEAREST);
+            DEF(LINEAR);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan Filter"));
         }
+#undef DEF
     }
 
     VkSamplerAddressMode ToVkSamplerAddressMode(AddressMode addressMode)
     {
+#define DEF(addressMode)             \
+    case AddressMode::##addressMode: \
+        return VK_SAMPLER_ADDRESS_MODE_##addressMode
+
         switch (addressMode)
         {
-        case AddressMode::REPEAT:
-            return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        case AddressMode::MIRRORED_REPEAT:
-            return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-        case AddressMode::CLAMP_TO_EDGE:
-            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            DEF(REPEAT);
+            DEF(MIRRORED_REPEAT);
+            DEF(CLAMP_TO_EDGE);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan Address Mode"));
         }
+#undef DEF
     }
 
     VkIndexType ToVkIndexType(IndexType type)

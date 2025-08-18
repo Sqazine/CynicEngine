@@ -1,6 +1,7 @@
 #pragma once
 #include "IGfxDevice.h"
-#include "IGfxResource.h"
+#include "IGfxTexture.h"
+#include "IGfxBuffer.h"
 namespace CynicEngine
 {
     class IGfxRasterShader

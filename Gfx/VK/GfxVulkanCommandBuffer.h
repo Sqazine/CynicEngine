@@ -4,7 +4,8 @@
 #include "Gfx/IGfxCommandBuffer.h"
 #include "GfxVulkanObject.h"
 #include "GfxVulkanSyncObject.h"
-#include "GfxVulkanResource.h"
+#include "GfxVulkanTexture.h"
+#include "GfxVulkanBuffer.h"
 namespace CynicEngine
 {
     class GfxVulkanCommandBuffer : public GfxVulkanObject, public IGfxCommandBuffer
@@ -13,14 +14,15 @@ namespace CynicEngine
         GfxVulkanCommandBuffer(IGfxDevice *device, GfxCommandType type);
         ~GfxVulkanCommandBuffer() override;
 
-        VkCommandBuffer GetHandle() const {return mHandle;}
+        VkCommandBuffer GetHandle() const { return mHandle; }
 
         IGfxCommandBuffer *Begin() override;
         IGfxCommandBuffer *End() override;
 
-        IGfxCommandBuffer *Submit(GfxVulkanSemaphore *waitSemaphore);
+        IGfxCommandBuffer *Submit(GfxVulkanSemaphore *waitSemaphore = nullptr);
 
-        IGfxCommandBuffer* TransitionImageLayout(GfxVulkanTexture* texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+        IGfxCommandBuffer *TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+        IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
 
         GfxVulkanFence *GetFence() const { return mFence.get(); }
         GfxVulkanSemaphore *GetSignalSemaphore() const { return mSignalSemaphore.get(); }

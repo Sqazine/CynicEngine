@@ -6,8 +6,7 @@
 #include "GfxVulkanSyncObject.h"
 #include "GfxVulkanObject.h"
 #include "GfxVulkanCommandBuffer.h"
-#include "GfxVulkanResource.h"
-#include "Gfx/IGfxResource.h"
+#include "GfxVulkanTexture.h"
 namespace CynicEngine
 {
     struct SwapChainDetails

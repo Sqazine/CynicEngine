@@ -1,17 +1,7 @@
-#include "GfxVulkanResource.h"
-#include "GfxVulkanCommon.h"
+#include "GfxVulkanTexture.h"
 #include "GfxVulkanDevice.h"
 namespace CynicEngine
 {
-    GfxVulkanBuffer::GfxVulkanBuffer(IGfxDevice *device)
-        : GfxVulkanObject(device)
-    {
-    }
-
-    GfxVulkanBuffer::~GfxVulkanBuffer()
-    {
-    }
-
     GfxVulkanTexture::GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImage swapchainImageRawHandle)
         : IGfxTexture(desc), GfxVulkanObject(device)
     {

@@ -74,8 +74,11 @@ namespace CynicEngine
 
         VkSubmitInfo submitInfo;
         ZeroVulkanStruct(submitInfo, VK_STRUCTURE_TYPE_SUBMIT_INFO);
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &waitRawSemaphore;
+        if (waitSemaphore)
+        {
+            submitInfo.waitSemaphoreCount = 1;
+            submitInfo.pWaitSemaphores = &waitRawSemaphore;
+        }
         submitInfo.pWaitDstStageMask = waitStages;
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &signalRawSemaphore;
@@ -87,7 +90,7 @@ namespace CynicEngine
         return this;
     }
 
-    IGfxCommandBuffer *GfxVulkanCommandBuffer::TransitionImageLayout(GfxVulkanTexture* texture,VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
     {
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -150,6 +153,16 @@ namespace CynicEngine
             0, nullptr,
             1, &barrier);
 
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize)
+    {
+        auto srcVulkanBuffer = static_cast<GfxVulkanBuffer*>(src);
+        auto dstVulkanBuffer = static_cast<GfxVulkanBuffer*>(dst);
+        VkBufferCopy copyRegion{};
+        copyRegion.size = static_cast<VkDeviceSize>(bufferSize);
+        vkCmdCopyBuffer(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanBuffer->GetHandle(), 1, &copyRegion);
         return this;
     }
 }

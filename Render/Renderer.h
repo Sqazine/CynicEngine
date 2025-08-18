@@ -12,12 +12,14 @@ namespace CynicEngine
         Renderer(Window *window);
         virtual ~Renderer() = default;
 
+        static IGfxDevice* GetGfxDevice();
+
         void BeginFrame();
         virtual void Render();
         void EndFrame();
 
     private:
         Window *mWindow;
-        std::unique_ptr<IGfxDevice> mGfxDevice;
+        static std::unique_ptr<IGfxDevice> mGfxDevice;
     };
 }

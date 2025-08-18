@@ -1,5 +1,6 @@
 #pragma once
 #include "IGfxDevice.h"
+#include "IGfxBuffer.h"
 namespace CynicEngine
 {
     enum class GfxCommandType
@@ -19,5 +20,6 @@ namespace CynicEngine
 
         virtual IGfxCommandBuffer *Begin() = 0;
         virtual IGfxCommandBuffer *End() = 0;
+        virtual IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) = 0;
     };
 }

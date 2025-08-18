@@ -3,10 +3,17 @@
 
 namespace CynicEngine
 {
+    std::unique_ptr<IGfxDevice> Renderer::mGfxDevice{nullptr};
+
     Renderer::Renderer(Window *window)
         : mWindow(window)
     {
         mGfxDevice.reset(IGfxDevice::Create(mWindow));
+    }
+
+    IGfxDevice *Renderer::GetGfxDevice()
+    {
+        return mGfxDevice.get();
     }
 
     void Renderer::BeginFrame()
