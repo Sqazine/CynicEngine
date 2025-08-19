@@ -7,14 +7,13 @@
 #include "Core/App.h"
 namespace CynicEngine
 {
-    class EditorApp : public App, public Singleton<EditorApp>
+    class TestApp : public App, public Singleton<TestApp>
     {
     public:
-        EditorApp() = default;
-        ~EditorApp() override = default;
+        TestApp() = default;
+        ~TestApp() override = default;
 
     protected:
-    
         void Init() override;
         void PreTick() override;
         void Tick() override;

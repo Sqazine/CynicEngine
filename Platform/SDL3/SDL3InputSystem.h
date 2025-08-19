@@ -34,7 +34,7 @@ namespace CynicEngine
         Vector2f GetMouseScrollWheel() const override;
 
         void SetReleativeMode(Window* pWindow,bool isActive) override;
-        bool IsReleativeMode() const override;
+        bool IsReleativeMode(Window* pWindow) const override;
 
     private:
         friend class SDL3InputSystem;

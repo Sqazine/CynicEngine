@@ -11,6 +11,12 @@ namespace CynicEngine
         mGfxDevice.reset(IGfxDevice::Create(mWindow));
     }
 
+    Renderer::~Renderer()
+    {
+        mFrameGraph.ExportGraphviz("frameGraph.gv");
+        mFrameGraph.Clear();
+    }
+
     IGfxDevice *Renderer::GetGfxDevice()
     {
         return mGfxDevice.get();

@@ -353,7 +353,7 @@ namespace CynicEngine
         virtual Vector2f GetMouseScrollWheel() const = 0;
 
         virtual void SetReleativeMode(Window* pWindow,bool isActive) = 0;
-        virtual bool IsReleativeMode() const = 0;
+        virtual bool IsReleativeMode(Window* pWindow) const = 0;
     };
 
     class Controller
@@ -395,11 +395,10 @@ namespace CynicEngine
             return mMouse.get();
         }
 
-    protected:
-        friend class EditorApp;
         virtual void Init() = 0;
         virtual void PreTick(Window *pWindow) = 0;
         virtual void PostTick() = 0;
+    protected:
         std::unique_ptr<Keyboard> mKeyboard;
         std::unique_ptr<Mouse> mMouse;
         std::vector<std::unique_ptr<Controller>> mControllers;

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vulkan/vulkan.h>
+#include <vector>
 #include "Core/Common.h"
 #include "Logger/Logger.h"
 namespace CynicEngine
@@ -95,6 +96,7 @@ namespace CynicEngine
     enum class AddressMode;
     enum class IndexType;
     class GfxVulkanDevice;
+    struct IGfxVertexDesc;
 
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type);
 
@@ -106,5 +108,8 @@ namespace CynicEngine
     VkSamplerAddressMode ToVkSamplerAddressMode(AddressMode addressMode);
 
     VkIndexType ToVkIndexType(IndexType type);
+
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc);
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc);
 
 } // namespace CynicEngine

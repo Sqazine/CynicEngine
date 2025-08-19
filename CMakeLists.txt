@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.25)
 
 set(PROJECT_NAME CynicEngine  VERSION 0.1.0 LANGUAGES C CXX)
 
+if(MSVC OR ${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
+    set(CYNIC_ENGINE_LIB_NAME libCynicEngine CACHE INTERNAL "CynicEngine library name")
+else()
+    set(CYNIC_ENGINE_LIB_NAME CynicEngine CACHE INTERNAL "CynicEngine library name")
+endif()
+
 project(${PROJECT_NAME})
 
 configure_file(Config/Version.h.in generated/Version.h @ONLY)
@@ -44,6 +50,7 @@ endif ()
 message(STATUS "CURRENT_PLATFORM=${CURRENT_PLATFORM}")
 
 option(CYNIC_ENGINE_UTF8_ENCODE "use utf8 encode" ON)
+option(CYNIC_ENGINE_BUILD_TEST "build test example" ON)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rd")
 set(SDL_INC_DIR "${THIRD_PARTY_DIR}/SDL/include")
@@ -81,7 +88,7 @@ file(GLOB MATH_SRC "${CMAKE_SOURCE_DIR}/Math/*.cpp" "${CMAKE_SOURCE_DIR}/Math/*.
 file(GLOB PLATFORM_SRC "${CMAKE_SOURCE_DIR}/Platform/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/*.h" "${CMAKE_SOURCE_DIR}/Platform/*.inl")
 file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.h" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.inl")
 file(GLOB RENDER_SRC "${CMAKE_SOURCE_DIR}/Render/*.cpp" "${CMAKE_SOURCE_DIR}/Render/*.h" "${CMAKE_SOURCE_DIR}/Render/*.inl")
-file(GLOB FRAME_GRAPH_SRC "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.cpp" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.h" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.inl")
+file(GLOB FRAMEGRAPH_SRC "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.cpp" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.h" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.inl")
 
 source_group("generated" FILES ${GENERATED_SRC})
 source_group("Config" FILES ${CONFIG_SRC})
@@ -94,13 +101,12 @@ source_group("Math" FILES ${MATH_SRC})
 source_group("Platform" FILES ${PLATFORM_SRC})
 source_group("Platform/SDL3" FILES ${PLATFORM_SDL3_SRC})
 source_group("Render" FILES ${RENDER_SRC})
-source_group("Render/FrameGraph" FILES ${FRAME_GRAPH_SRC})
+source_group("Render/FrameGraph" FILES ${FRAMEGRAPH_SRC})
 
 set(CYNIC_SRC
     ${GENERATED_SRC}
     ${CONFIG_SRC}
     ${CORE_SRC}
-    ${EDITOR_SRC}
     ${GFX_SRC}
     ${GFX_VULKAN_SRC}
     ${LOGGER_SRC}
@@ -108,39 +114,53 @@ set(CYNIC_SRC
     ${PLATFORM_SRC}
     ${PLATFORM_SDL3_SRC}
     ${RENDER_SRC}
-    ${FRAME_GRAPH_SRC}
+    ${FRAMEGRAPH_SRC}
 )
 
-add_executable(${PROJECT_NAME} ${CYNIC_SRC})
-
-set(CYNIC_INC_DIRS ${CMAKE_SOURCE_DIR}
+set(CYNIC_INC_DIRS 
+    ${CMAKE_SOURCE_DIR}
     ${GENERATED_DIR}
-    Core
-    Editor
-    Gfx
-    Gfx/VK
-    Logger
-    Math
-    Platform
-    Platform/SDL3
-    Render
-    Render/FrameGraph
+    ${CMAKE_SOURCE_DIR}/Core
+    ${CMAKE_SOURCE_DIR}/Gfx
+    ${CMAKE_SOURCE_DIR}/Gfx/VK
+    ${CMAKE_SOURCE_DIR}/Logger
+    ${CMAKE_SOURCE_DIR}/Math
+    ${CMAKE_SOURCE_DIR}/Platform
+    ${CMAKE_SOURCE_DIR}/Platform/SDL3
+    ${CMAKE_SOURCE_DIR}/Render
+    ${CMAKE_SOURCE_DIR}/Render/FrameGraph
 
     ${SDL_INC_DIR}
     ${CYS_INC_DIR}
     ${SPIRV_REFLECT_INC_DIR}
 )
-                    
-target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+set(THIRDPARTY_LIB 
     SDL3::SDL3
     Vulkan::Vulkan
     spirv-reflect-static
     ${CYS_LIB_NAME}
 )
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC ${CURRENT_PLATFORM} ${VULKAN_HPP_DISPATCH_LOADER_DYNAMIC} ${VULKAN_HPP_ENABLE_DYNAMIC_LOADER_TOOL})
+set(COMPILE_DEFINITIONS
+    ${CURRENT_PLATFORM} 
+    ${VULKAN_HPP_DISPATCH_LOADER_DYNAMIC} 
+    ${VULKAN_HPP_ENABLE_DYNAMIC_LOADER_TOOL}
+)
+
+add_library(${CYNIC_ENGINE_LIB_NAME} ${CYNIC_SRC})
+target_include_directories(${CYNIC_ENGINE_LIB_NAME}  PUBLIC ${CYNIC_INC_DIRS})
+target_link_libraries(${CYNIC_ENGINE_LIB_NAME} PUBLIC ${THIRDPARTY_LIB})
+target_compile_definitions(${CYNIC_ENGINE_LIB_NAME} PUBLIC ${COMPILE_DEFINITIONS})
+
+if(CYNIC_ENGINE_BUILD_TEST)
+    add_subdirectory(Test)
+endif()
+
+add_executable(${PROJECT_NAME} ${EDITOR_SRC})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS} ${CMAKE_SOURCE_DIR}/Editor)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CYNIC_ENGINE_LIB_NAME} ${THIRDPARTY_LIB})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${COMPILE_DEFINITIONS})
 
 if(CYNIC_ENGINE_UTF8_ENCODE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC CYNIC_ENGINE_UTF8_ENCODE)
@@ -150,9 +170,7 @@ endif()
 if(${CURRENT_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
     target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
     if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE "/wd4251;" "/bigobj;" "/MD;")
+        target_compile_options(${PROJECT_NAME} PRIVATE "/wd4251;" "/bigobj;")
     endif()
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 endif()
-
-add_subdirectory(Test)

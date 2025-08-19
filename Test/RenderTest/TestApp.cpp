@@ -1,47 +1,51 @@
-#include "EditorApp.h"
+#include "TestApp.h"
 #include "Logger/Logger.h"
 #include "Config/AppConfig.h"
 #include "Platform/PlatformInfo.h"
+#include "MeshDrawPass.h"
 
 namespace CynicEngine
 {
-    void EditorApp::Init()
+    void TestApp::Init()
     {
         App::Init();
+
+        mWindow->SetTitle("TestApp");
+
+        AddMeshDrawPass(mRenderer.get());
     }
 
-    void EditorApp::Tick()
+    void TestApp::Tick()
     {
         App::Tick();
     }
 
-    void EditorApp::Render()
+    void TestApp::Render()
     {
         App::Render();
     }
 
-    void EditorApp::RenderGizmo()
+    void TestApp::RenderGizmo()
     {
-        App::RenderGizmo();
     }
 
-    void EditorApp::Destroy()
+    void TestApp::Destroy()
     {
         App::Destroy();
     }
 
-    void EditorApp::PreTick()
+    void TestApp::PreTick()
     {
         App::PreTick();
     }
 
-    void EditorApp::PostTick()
+    void TestApp::PostTick()
     {
         App::PostTick();
     }
 
     void MainEntry(int argc, char *argv[])
     {
-        EditorApp::GetInstance().Run();
+        TestApp::GetInstance().Run();
     }
 }

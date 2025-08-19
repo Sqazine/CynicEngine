@@ -211,7 +211,7 @@ namespace CynicEngine
             SDL_SetWindowRelativeMouseMode(sdlWindow, false);
     }
 
-    bool SDL3Mouse::IsReleativeMode() const
+    bool SDL3Mouse::IsReleativeMode(Window* pWindow) const
     {
         return mIsRelative;
     }

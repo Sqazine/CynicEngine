@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include <cassert>
+
 namespace GL
 {
     using Buffer = std::size_t;
@@ -33,6 +34,7 @@ namespace GLResource
 
 namespace CynicEngine
 {
+
     template <>
     std::unique_ptr<GL::Buffer> Realize(const GLResource::BufferDesc &description)
     {
@@ -45,8 +47,7 @@ namespace CynicEngine
         return std::make_unique<GL::Buffer>(description.levels);
     }
 }
-
-int main()
+int main(int argc, char *argv[])
 {
     CynicEngine::FrameGraph frameGraph;
 

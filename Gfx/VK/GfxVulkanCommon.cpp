@@ -3,6 +3,7 @@
 #include "Gfx/IGfxCommandBuffer.h"
 #include "Gfx/IGfxTexture.h"
 #include "Gfx/IGfxBuffer.h"
+#include "Gfx/IGfxVertexDesc.h"
 namespace CynicEngine
 {
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type)
@@ -51,6 +52,7 @@ namespace CynicEngine
             DEF(R8G8B8A8_SRGB);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Format"));
+            return VK_FORMAT_R8_UNORM; // for avoiding compiler warning
         }
 #undef DEF
     }
@@ -72,6 +74,7 @@ namespace CynicEngine
             DEF(R8G8B8A8_SRGB);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Format"));
+            return Format::B8G8R8A8_UNORM; // for avoiding compiler warning
         }
 #undef DEF
     }
@@ -88,6 +91,7 @@ namespace CynicEngine
             DEF(LINEAR);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan Filter"));
+            return VK_FILTER_NEAREST; // for avoiding compiler warning
         }
 #undef DEF
     }
@@ -105,6 +109,7 @@ namespace CynicEngine
             DEF(CLAMP_TO_EDGE);
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan Address Mode"));
+            return VK_SAMPLER_ADDRESS_MODE_REPEAT; // for avoiding compiler warning
         }
 #undef DEF
     }
@@ -119,7 +124,34 @@ namespace CynicEngine
             return VK_INDEX_TYPE_UINT32;
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan index type"));
-            return VK_INDEX_TYPE_UINT32;
+            return VK_INDEX_TYPE_UINT32; // for avoiding compiler warning
         }
+    }
+
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc)
+    {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = desc.bindingPoint;
+        bindingDescription.stride = desc.size;
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc)
+    {
+        std::vector<VkVertexInputAttributeDescription> result;
+        for (size_t i = 0; i < desc.attribs.size(); ++i)
+        {
+            VkVertexInputAttributeDescription attributeDescriptions;
+            attributeDescriptions.binding = desc.bindingPoint;
+            attributeDescriptions.location = i;
+            attributeDescriptions.format = ToVkFormat(desc.attribs[i].format);
+            attributeDescriptions.offset = desc.attribs[i].offset;
+
+            result.emplace_back(attributeDescriptions);
+        }
+
+        return result;
     }
 }
