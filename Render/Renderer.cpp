@@ -29,6 +29,7 @@ namespace CynicEngine
 
     void Renderer::Render()
     {
+        mFrameGraph.Execute();
     }
 
     void Renderer::EndFrame()

@@ -21,11 +21,11 @@ namespace CynicEngine
             CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
             break;
         default:
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
             break;
         }
 
-        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
         return nullptr;
     }
 }

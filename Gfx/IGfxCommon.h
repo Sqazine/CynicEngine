@@ -8,8 +8,9 @@ namespace CynicEngine
         B8G8R8A8_SRGB,
         B8G8R8A8_UNORM,
 
-        R32G32B32_SFLOAT,
         R32G32_SFLOAT,
+        R32G32B32_SFLOAT,
+        R32G32B32A32_SFLOAT,
 
         D32_SFLOAT,
         D32_SFLOAT_S8_UINT,

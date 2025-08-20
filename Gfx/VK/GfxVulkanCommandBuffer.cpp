@@ -67,7 +67,6 @@ namespace CynicEngine
 
     IGfxCommandBuffer *GfxVulkanCommandBuffer::Submit(GfxVulkanSemaphore *waitSemaphore)
     {
-        VkSemaphore waitRawSemaphore = waitSemaphore->GetHandle();
         VkSemaphore signalRawSemaphore = mSignalSemaphore->GetHandle();
 
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
@@ -76,6 +75,7 @@ namespace CynicEngine
         ZeroVulkanStruct(submitInfo, VK_STRUCTURE_TYPE_SUBMIT_INFO);
         if (waitSemaphore)
         {
+            VkSemaphore waitRawSemaphore = waitSemaphore->GetHandle();
             submitInfo.waitSemaphoreCount = 1;
             submitInfo.pWaitSemaphores = &waitRawSemaphore;
         }
@@ -158,8 +158,8 @@ namespace CynicEngine
 
     IGfxCommandBuffer *GfxVulkanCommandBuffer::CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize)
     {
-        auto srcVulkanBuffer = static_cast<GfxVulkanBuffer*>(src);
-        auto dstVulkanBuffer = static_cast<GfxVulkanBuffer*>(dst);
+        auto srcVulkanBuffer = static_cast<GfxVulkanBuffer *>(src);
+        auto dstVulkanBuffer = static_cast<GfxVulkanBuffer *>(dst);
         VkBufferCopy copyRegion{};
         copyRegion.size = static_cast<VkDeviceSize>(bufferSize);
         vkCmdCopyBuffer(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanBuffer->GetHandle(), 1, &copyRegion);

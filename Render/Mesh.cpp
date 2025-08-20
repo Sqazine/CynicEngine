@@ -9,7 +9,13 @@ namespace CynicEngine
             return;
 
         mVertices = vertices;
-        mVertexBuffer.reset(IGfxVertexBuffer<Vertex>::Create(Renderer::GetGfxDevice(), mVertices));
+
+        IGfxBufferDesc gfxDesc{};
+        gfxDesc.elementSize = sizeof(Vertex);
+        gfxDesc.bufferSize = mVertices.size() * gfxDesc.elementSize;
+        gfxDesc.data = mVertices.data();
+
+        mVertexBuffer.reset(IGfxVertexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
     }
     void Mesh::SetIndices(const std::vector<uint32_t> &indices)
     {
@@ -17,6 +23,12 @@ namespace CynicEngine
             return;
 
         mIndices = indices;
-        mIndexBuffer.reset(IGfxIndexBuffer::Create(Renderer::GetGfxDevice(), mIndices));
+
+        IGfxBufferDesc gfxDesc{};
+        gfxDesc.elementSize = sizeof(uint32_t);
+        gfxDesc.bufferSize = mIndices.size() * gfxDesc.elementSize;
+        gfxDesc.data = mIndices.data();
+
+        mIndexBuffer.reset(IGfxIndexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
     }
 }

@@ -1,5 +1,9 @@
 #pragma once
+#include <memory>
 #include "Render/Renderer.h"
+#include "Render/Mesh.h"
+#include "Gfx/IGfxShader.h"
+#include "Gfx/IGfxPipeline.h"
 namespace CynicEngine
 {
     class MeshDrawPass
@@ -9,8 +13,8 @@ namespace CynicEngine
         void Execute();
 
         Mesh mMesh;
-        std::unique_ptr<RasterShader> mShader;
-        std::unique_ptr<GraphicsPipeline> mGraphicsPipeline;
+        std::unique_ptr<IGfxRasterShader> mShader;
+        std::unique_ptr<IGfxRasterPipeline> mRasterPipeline;
     };
 
     void AddMeshDrawPass(Renderer *renderer);

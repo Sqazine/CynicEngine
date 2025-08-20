@@ -39,5 +39,7 @@ namespace CynicEngine
         std::unique_ptr<InputSystem> mInputSystem;
 
         std::unique_ptr<Renderer> mRenderer;
+    private:
+        void Draw();
     };
 }

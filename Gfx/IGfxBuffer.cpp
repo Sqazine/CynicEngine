@@ -6,27 +6,92 @@
 #include "Gfx/VK/GfxVulkanBufferCommon.h"
 namespace CynicEngine
 {
-    IGfxIndexBuffer *IGfxIndexBuffer::Create(IGfxDevice *device, const std::vector<uint32_t> &indices)
+    IGfxVertexBuffer *IGfxVertexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
     {
-        IGfxIndexBuffer* indexBuffer = new IGfxIndexBuffer();
-        indexBuffer->mElementCount = indices.size();
+        IGfxVertexBuffer* vertexBuffer = new IGfxVertexBuffer();
+        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+        switch (gfxConfig.backend)
+        {
+        case GfxBackend::VULKAN:
+        {
+            vertexBuffer->mGfxBuffer.reset(GfxVulkanBufferCommon::CreateVertexBuffer(device, desc));
+            return vertexBuffer;
+        }
+        case GfxBackend::D3D12:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+            break;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+            break;
+        }
+
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+    }
+
+    inline IGfxUniformBuffer *IGfxUniformBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
+    {
+        IGfxUniformBuffer *uniformBuffer = new IGfxUniformBuffer();
+        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+        switch (gfxConfig.backend)
+        {
+        case GfxBackend::VULKAN:
+        {
+            uniformBuffer->mGfxBuffer.reset(GfxVulkanBufferCommon::CreateUniformBuffer(device, desc));
+            return uniformBuffer;
+        }
+        case GfxBackend::D3D12:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+            break;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+            break;
+        }
+
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+    }
+
+    void IGfxUniformBuffer::SetData(const IGfxBufferDesc &desc)
+    {
+        const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+        switch (gfxConfig.backend)
+        {
+        case GfxBackend::VULKAN:
+        {
+            auto vulkanGfxBuffer = dynamic_cast<GfxVulkanBuffer *>(mGfxBuffer.get());
+            GfxVulkanBufferCommon::SetCpuBufferData(vulkanGfxBuffer, desc.bufferSize, desc.data);
+            break;
+        }
+        case GfxBackend::D3D12:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+            break;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+            break;
+        }
+
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+    }
+    IGfxIndexBuffer *IGfxIndexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
+    {
+        IGfxIndexBuffer *indexBuffer = new IGfxIndexBuffer();
+        indexBuffer->mElementCount = desc.bufferSize / desc.elementSize;
 
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
         {
         case GfxBackend::VULKAN:
         {
-            indexBuffer->mGfxBuffer.reset(GfxVulkanBufferCommon::CreateIndexBuffer(device, indices));
+            indexBuffer->mGfxBuffer.reset(GfxVulkanBufferCommon::CreateIndexBuffer(device, desc));
             return indexBuffer;
         }
         case GfxBackend::D3D12:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
             break;
         default:
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
             break;
         }
 
-        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
     }
 }

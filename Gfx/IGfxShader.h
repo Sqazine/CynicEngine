@@ -10,7 +10,7 @@ namespace CynicEngine
         IGfxRasterShader() = default;
         virtual ~IGfxRasterShader() = default;
 
-        static IGfxRasterShader *CreateFromFiles(IGfxDevice *device,
+        static IGfxRasterShader *Create(IGfxDevice *device,
                                                  std::string_view vertContent,
                                                  std::string_view fragContent,
                                                  std::string_view tessCtrlContent = "",

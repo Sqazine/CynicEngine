@@ -4,7 +4,7 @@
 #include "Gfx/VK/GfxVulkanShader.h"
 namespace CynicEngine
 {
-    IGfxRasterShader *IGfxRasterShader::CreateFromFiles(IGfxDevice *device,
+    IGfxRasterShader *IGfxRasterShader::Create(IGfxDevice *device,
                                                         std::string_view vertContent,
                                                         std::string_view fragContent,
                                                         std::string_view tessCtrlContent,
@@ -20,11 +20,11 @@ namespace CynicEngine
             CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
             break;
         default:
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
             break;
         }
 
-        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: %d"), static_cast<int>(gfxConfig.backend));
+        CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
         return nullptr;
     }
 }

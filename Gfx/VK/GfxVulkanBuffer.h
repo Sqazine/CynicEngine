@@ -22,7 +22,7 @@ namespace CynicEngine
         size_t GetSize() const { return mDesc.size; }
         VkDeviceMemory GetMemory() const { return mMemory; }
 
-        void *GetMappedAddress() { return mMappedAddress; }
+        void *& GetMappedAddress() { return mMappedAddress; }
 
     private:
         GfxVulkanBufferDesc mDesc;

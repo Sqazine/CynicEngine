@@ -5,39 +5,36 @@
 
 namespace CynicEngine
 {
-    void App::Run()
-    {
-        Init();
-        while (mState != AppState::QUIT)
-        {
-            PreTick();
-            if (mState == AppState::TICK)
-            {
-                Tick();
-                mRenderer->BeginFrame();
-                Render();
-                RenderGizmo();
-                mRenderer->EndFrame();
-            }
-            PostTick();
-        }
-        Destroy();
-    }
+	void App::Run()
+	{
+		Init();
+		while (mState != AppState::QUIT)
+		{
+			PreTick();
+			if (mState == AppState::TICK)
+			{
+				Tick();
+				Draw();
+			}
+			PostTick();
+		}
+		Destroy();
+	}
 
-    void App::Quit()
-    {
-        mState = AppState::QUIT;
-    }
+	void App::Quit()
+	{
+		mState = AppState::QUIT;
+	}
 
-    Window *App::GetWindow() const
-    {
-        return mWindow.get();
-    }
+	Window *App::GetWindow() const
+	{
+		return mWindow.get();
+	}
 
-    InputSystem *App::GetInputSystem() const
-    {
-        return mInputSystem.get();
-    }
+	InputSystem *App::GetInputSystem() const
+	{
+		return mInputSystem.get();
+	}
 
 	void App::Init()
 	{
@@ -88,4 +85,11 @@ namespace CynicEngine
 		mInputSystem->PostTick();
 	}
 
+	void App::Draw()
+	{
+		mRenderer->BeginFrame();
+		Render();
+		RenderGizmo();
+		mRenderer->EndFrame();
+	}
 }

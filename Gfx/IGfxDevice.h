@@ -7,7 +7,7 @@ namespace CynicEngine
 	class IGfxDevice
 	{
 	public:
-		IGfxDevice();
+		IGfxDevice() = default;
 		virtual ~IGfxDevice() = default;
 
 		static IGfxDevice *Create(Window *window);
