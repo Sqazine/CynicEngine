@@ -114,13 +114,13 @@ namespace CynicEngine
 #undef DEF
     }
 
-    VkIndexType ToVkIndexType(IndexType type)
+    VkIndexType ToVkIndexType(IGfxIndexType type)
     {
         switch (type)
         {
-        case IndexType::UINT16:
+        case IGfxIndexType::UINT16:
             return VK_INDEX_TYPE_UINT16;
-        case IndexType::UINT32:
+        case IGfxIndexType::UINT32:
             return VK_INDEX_TYPE_UINT32;
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan index type"));

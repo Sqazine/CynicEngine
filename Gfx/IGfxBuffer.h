@@ -12,41 +12,47 @@ namespace CynicEngine
     };
 
     template <typename VertexType>
-    class VertexBuffer
+    class IGfxVertexBuffer
     {
     public:
-        VertexBuffer(IGfxDevice *device, const std::vector<VertexType> &vertices);
-        ~VertexBuffer();
+        IGfxVertexBuffer() = default;
+        ~IGfxVertexBuffer() { mGfxBuffer.reset(nullptr); }
+
+        static IGfxVertexBuffer *Create(IGfxDevice *device, const std::vector<VertexType> &vertices);
 
     protected:
         std::unique_ptr<IGfxBuffer> mGfxBuffer;
     };
 
-    enum class IndexType
+    enum class IGfxIndexType
     {
         UINT16,
         UINT32
     };
 
-    class IndexBuffer
+    class IGfxIndexBuffer
     {
     public:
-        IndexBuffer(IGfxDevice *device,const std::vector<uint32_t> &indices);
-        ~IndexBuffer();
+        IGfxIndexBuffer() = default;
+        ~IGfxIndexBuffer() { mGfxBuffer.reset(nullptr); }
+
+        static IGfxIndexBuffer *Create(IGfxDevice *device, const std::vector<uint32_t> &indices);
 
     protected:
         size_t mElementCount;
-        IndexType mIndexType{IndexType::UINT32};
+        IGfxIndexType mIndexType{IGfxIndexType::UINT32};
 
         std::unique_ptr<IGfxBuffer> mGfxBuffer;
     };
 
     template <typename DataType>
-    class UniformBuffer
+    class IGfxUniformBuffer
     {
     public:
-        UniformBuffer(IGfxDevice *device,const DataType &data);
-        ~UniformBuffer();
+        IGfxUniformBuffer() = default;
+        ~IGfxUniformBuffer() { mGfxBuffer.reset(nullptr); }
+
+        static IGfxUniformBuffer *Create(IGfxDevice *device, const DataType &data);
 
         void SetData(const DataType &data);
 

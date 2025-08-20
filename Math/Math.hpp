@@ -1,9 +1,8 @@
 #pragma once
 #include <cmath>
-#include <cmath>
 #include <limits>
 #include <cstdint>
-namespace Math
+namespace CynicEngine::Math
 {
 	constexpr float PI = 3.1415926535f;
 
