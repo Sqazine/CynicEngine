@@ -50,18 +50,16 @@ namespace CynicEngine
         CurFence->Reset();
 
         GetCurrentBackCommandBuffer()->Begin();
+        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 
         BeginRender();
-
-        // GetCurrentBackCommandBuffer()->End();
     }
 
     void GfxVulkanSwapChain::EndFrame()
     {
-        // GetCurrentBackCommandBuffer()->Begin();
-
         EndRender();
 
+        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
         GetCurrentBackCommandBuffer()->End();
 
         mGfxCommandBuffer[mCurrentFrameIndex]->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
@@ -228,8 +226,6 @@ namespace CynicEngine
     {
         auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
 
-        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
-
         VkRenderingAttachmentInfo colorAttachmentInfo;
         ZeroVulkanStruct(colorAttachmentInfo, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
         colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -284,8 +280,6 @@ namespace CynicEngine
         auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
 
         vkCmdEndRendering(rawCmdBuffer);
-
-        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
     }
 
     VkSurfaceFormatKHR GfxVulkanSwapChain::ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
