@@ -1,5 +1,6 @@
 #include "MeshDrawPass.h"
 #include "Core/IO.h"
+#include "Gfx/IGfxCommandBuffer.h"
 namespace CynicEngine
 {
     void MeshDrawPass::Init()
@@ -25,18 +26,32 @@ namespace CynicEngine
         mMesh.SetIndices(indices);
 
         std::string shaderCompile;
-        shaderCompile = "slangc.exe " SHADER_DIR "meshDrawPass.vert.slang" " -profile sm_6_6+spirv_1_6 -target spirv -o " SHADER_DIR "meshDrawPass.vert.slang.spv" " -emit-spirv-directly -fvk-use-entrypoint-name";
+        shaderCompile = "slangc.exe " SHADER_DIR "meshDrawPass.vert.slang"
+                        " -profile sm_6_6+spirv_1_6 -target spirv -o " SHADER_DIR "meshDrawPass.vert.slang.spv"
+                        " -emit-spirv-directly -fvk-use-entrypoint-name";
         system(shaderCompile.c_str());
-        shaderCompile = "slangc.exe " SHADER_DIR "meshDrawPass.frag.slang" " -profile sm_6_6+spirv_1_6 -target spirv -o " SHADER_DIR "meshDrawPass.frag.slang.spv" " -emit-spirv-directly -fvk-use-entrypoint-name";
+        shaderCompile = "slangc.exe " SHADER_DIR "meshDrawPass.frag.slang"
+                        " -profile sm_6_6+spirv_1_6 -target spirv -o " SHADER_DIR "meshDrawPass.frag.slang.spv"
+                        " -emit-spirv-directly -fvk-use-entrypoint-name";
         system(shaderCompile.c_str());
 
         auto vertShaderContent = ReadFile(SHADER_DIR "meshDrawPass.vert.slang.spv");
         auto fragShaderContent = ReadFile(SHADER_DIR "meshDrawPass.frag.slang.spv");
         mShader.reset(IGfxRasterShader::Create(Renderer::GetGfxDevice(), vertShaderContent, fragShaderContent));
+        mRasterPipeline.reset(IGfxRasterPipeline::Create(Renderer::GetGfxDevice(), Vertex::GetVertexDesc(), mShader.get()));
     }
 
     void MeshDrawPass::Execute()
     {
+        auto cmdBuffer = Renderer::GetGfxDevice()->GetCurrentBackCommandBuffer();
+        cmdBuffer
+            // ->Begin()
+            ->BindRasterPipeline(mRasterPipeline.get())
+            ->BindVertexBuffer(mMesh.GetVertexBuffer())
+            ->BindIndexBuffer(mMesh.GetIndexBuffer())
+            ->DrawIndexed(mMesh.GetIndexBuffer()->GetElementCount(), 1, 0, 0, 0)
+            // ->End()
+            ;
     }
 
     void AddMeshDrawPass(Renderer *renderer)

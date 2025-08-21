@@ -11,20 +11,13 @@ namespace CynicEngine
         GfxVulkanRasterPipeline(IGfxDevice *device, const IGfxVertexDesc &vertexDesc, IGfxRasterShader *shader);
         ~GfxVulkanRasterPipeline() override;
 
+        VkPipeline GetHandle() const { return mHandle; }
+
     private:
-        void InitStates(const IGfxVertexDesc &vertexDesc);
-        void Create();
+        void Create(const IGfxVertexDesc &vertexDesc);
 
-        VkPipelineVertexInputStateCreateInfo mVertexState{};
-        VkPipelineInputAssemblyStateCreateInfo mInputAssemblyState{};
-        VkPipelineViewportStateCreateInfo mViewportState{};
-        VkPipelineRasterizationStateCreateInfo mRasterizerState{};
-        VkPipelineMultisampleStateCreateInfo mMultisamplingState{};
-        VkPipelineDepthStencilStateCreateInfo mDepthStencilState{};
-        VkPipelineColorBlendStateCreateInfo mColorBlendState{};
-        VkPipelineDynamicStateCreateInfo mDynamicState{};
-
-        VkPipelineRenderingCreateInfoKHR mPipelineRenderingCreateInfo{};
+        VkVertexInputBindingDescription mVertexInputBindingState{};
+        std::vector<VkVertexInputAttributeDescription> mVertexAttributes{};
 
         VkPipeline mHandle;
     };

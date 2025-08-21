@@ -8,7 +8,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
     inline void SetCpuBufferData(GfxVulkanBuffer *buffer, size_t size, const void *data)
     {
         auto device = buffer->GetDevice()->GetLogicDevice();
-        auto& bufferAddress = buffer->GetMappedAddress();
+        auto &bufferAddress = buffer->GetMappedAddress();
         vkMapMemory(device, buffer->GetMemory(), 0, size, 0, &bufferAddress);
         std::memcpy(buffer->GetMappedAddress(), data, size);
         vkUnmapMemory(device, buffer->GetMemory());
@@ -30,7 +30,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);
 
-        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, GfxCommandType::TRANSFER);
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, IGfxCommandType::TRANSFER, true);
         commandBuffer->Begin()
             ->CopyBuffer(stagingBuffer.get(), result, desc.size)
             ->End();
@@ -57,7 +57,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);
 
-        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, GfxCommandType::TRANSFER);
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, IGfxCommandType::TRANSFER, true);
         commandBuffer->Begin()
             ->CopyBuffer(stagingBuffer.get(), result, desc.size)
             ->End();

@@ -34,17 +34,17 @@ namespace CynicEngine
 
                 IGfxVertexAttrib attrib;
                 attrib.name = "POSITION";
-                attrib.format = Format::R32G32B32_SFLOAT;
+                attrib.format = IGfxFormat::R32G32B32_SFLOAT;
                 attrib.offset = offsetof(Vertex, position);
                 vertexDesc.attribs.emplace_back(attrib);
 
                 attrib.name = "COLOR";
-                attrib.format = Format::R32G32B32A32_SFLOAT;
+                attrib.format = IGfxFormat::R32G32B32A32_SFLOAT;
                 attrib.offset = offsetof(Vertex, color);
                 vertexDesc.attribs.emplace_back(attrib);
 
                 attrib.name = "TEXCOORD";
-                attrib.format = Format::R32G32_SFLOAT;
+                attrib.format = IGfxFormat::R32G32_SFLOAT;
                 attrib.offset = offsetof(Vertex, texCoord0);
                 vertexDesc.attribs.emplace_back(attrib);
             }

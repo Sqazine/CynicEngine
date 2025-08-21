@@ -8,7 +8,7 @@ namespace CynicEngine
     struct IGfxVertexAttrib
     {
         std::string_view name;
-        Format format;
+        IGfxFormat format;
         size_t offset;
     };
 

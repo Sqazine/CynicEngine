@@ -6,15 +6,15 @@
 #include "Gfx/IGfxVertexDesc.h"
 namespace CynicEngine
 {
-    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type)
+    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type)
     {
         switch (type)
         {
-        case GfxCommandType::GRAPHICS:
+        case IGfxCommandType::GRAPHICS:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.graphicsFamilyIdx.value();
-        case GfxCommandType::COMPUTE:
+        case IGfxCommandType::COMPUTE:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.computeFamilyIdx.value();
-        case GfxCommandType::TRANSFER:
+        case IGfxCommandType::TRANSFER:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.transferFamilyIdx.value();
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown GfxCommandType: {}"), static_cast<int>(type));
@@ -22,34 +22,39 @@ namespace CynicEngine
         }
     }
 
-    VkImageAspectFlagBits GetAspectFromFormat(Format format)
+    VkImageAspectFlagBits GetAspectFromFormat(IGfxFormat format)
     {
         switch (format)
         {
-        case Format::D32_SFLOAT:
-        case Format::D32_SFLOAT_S8_UINT:
-        case Format::D24_UNORM_S8_UINT:
+        case IGfxFormat::D32_SFLOAT:
+        case IGfxFormat::D32_SFLOAT_S8_UINT:
+        case IGfxFormat::D24_UNORM_S8_UINT:
             return VK_IMAGE_ASPECT_DEPTH_BIT;
         default:
             return VK_IMAGE_ASPECT_COLOR_BIT;
         }
     }
 
-    VkFormat ToVkFormat(Format format)
+#define FormatDefines()       \
+    DEF(R8G8B8A8_SRGB);       \
+    DEF(B8G8R8A8_SRGB);       \
+    DEF(B8G8R8A8_UNORM);      \
+    DEF(R32G32_SFLOAT);       \
+    DEF(R32G32B32_SFLOAT);    \
+    DEF(R32G32B32A32_SFLOAT); \
+    DEF(D24_UNORM_S8_UINT);   \
+    DEF(D32_SFLOAT);          \
+    DEF(D32_SFLOAT_S8_UINT);
+
+    VkFormat ToVkFormat(IGfxFormat format)
     {
-#define DEF(format)        \
-    case Format::##format: \
+#define DEF(format)            \
+    case IGfxFormat::##format: \
         return VK_FORMAT_##format
 
         switch (format)
         {
-            DEF(D24_UNORM_S8_UINT);
-            DEF(D32_SFLOAT);
-            DEF(D32_SFLOAT_S8_UINT);
-            DEF(B8G8R8A8_SRGB);
-            DEF(B8G8R8A8_UNORM);
-            DEF(R32G32B32_SFLOAT);
-            DEF(R8G8B8A8_SRGB);
+            FormatDefines();
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Format"));
             return VK_FORMAT_R8_UNORM; // for avoiding compiler warning
@@ -57,32 +62,26 @@ namespace CynicEngine
 #undef DEF
     }
 
-    Format ToFormat(VkFormat vkFormat)
+    IGfxFormat ToFormat(VkFormat vkFormat)
     {
 #define DEF(format)          \
     case VK_FORMAT_##format: \
-        return Format::##format
+        return IGfxFormat::##format
 
         switch (vkFormat)
         {
-            DEF(D24_UNORM_S8_UINT);
-            DEF(D32_SFLOAT);
-            DEF(D32_SFLOAT_S8_UINT);
-            DEF(B8G8R8A8_SRGB);
-            DEF(B8G8R8A8_UNORM);
-            DEF(R32G32B32_SFLOAT);
-            DEF(R8G8B8A8_SRGB);
+            FormatDefines();
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Format"));
-            return Format::B8G8R8A8_UNORM; // for avoiding compiler warning
+            return IGfxFormat::B8G8R8A8_UNORM; // for avoiding compiler warning
         }
 #undef DEF
     }
 
-    VkFilter ToVkFilter(Filter filter)
+    VkFilter ToVkFilter(IGfxFilter filter)
     {
-#define DEF(filter)        \
-    case Filter::##filter: \
+#define DEF(filter)            \
+    case IGfxFilter::##filter: \
         return VK_FILTER_##filter
 
         switch (filter)
@@ -96,10 +95,10 @@ namespace CynicEngine
 #undef DEF
     }
 
-    VkSamplerAddressMode ToVkSamplerAddressMode(AddressMode addressMode)
+    VkSamplerAddressMode ToVkSamplerAddressMode(IGfxAddressMode addressMode)
     {
-#define DEF(addressMode)             \
-    case AddressMode::##addressMode: \
+#define DEF(addressMode)                 \
+    case IGfxAddressMode::##addressMode: \
         return VK_SAMPLER_ADDRESS_MODE_##addressMode
 
         switch (addressMode)

@@ -19,7 +19,5 @@ namespace CynicEngine
 
         virtual IGfxRasterShader *BindBuffer(std::string_view name, const IGfxBuffer *buffer) = 0;
         virtual IGfxRasterShader *BindTexture(std::string_view name, const IGfxTexture *texture) = 0;
-
-        virtual void Flush() = 0;
     };
 }

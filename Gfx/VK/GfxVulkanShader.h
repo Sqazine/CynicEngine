@@ -42,7 +42,7 @@ namespace CynicEngine
         IGfxRasterShader *BindBuffer(std::string_view name, const IGfxBuffer *buffer) override;
         IGfxRasterShader *BindTexture(std::string_view name, const IGfxTexture *texture) override;
 
-        void Flush() override;
+        void Flush();
 
     private:
         void CreateFromFiles(std::string_view vertContent,
@@ -83,9 +83,9 @@ namespace CynicEngine
 
         std::vector<VkDescriptorSetLayout> mDescriptorSetLayouts;
         std::vector<VkDescriptorSet> mDescriptorSets;
-        VkDescriptorPool mDescriptorPool;
+        VkDescriptorPool mDescriptorPool{VK_NULL_HANDLE};
 
-        VkPipelineLayout mPipelineLayout;
+        VkPipelineLayout mPipelineLayout{VK_NULL_HANDLE};
 
         std::unordered_map<std::string_view, VkDescriptorBufferInfo> mBufferInfos;
         std::unordered_map<std::string_view, VkDescriptorImageInfo> mImageInfos;

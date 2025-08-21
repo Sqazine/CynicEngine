@@ -25,6 +25,8 @@ namespace CynicEngine
 
         static IGfxVertexBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
 
+        IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
+
     protected:
         std::unique_ptr<IGfxBuffer> mGfxBuffer;
     };
@@ -43,6 +45,9 @@ namespace CynicEngine
 
         static IGfxIndexBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
 
+        IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
+        IGfxIndexType GetIndexType() const { return mIndexType; }
+        size_t GetElementCount() const { return mElementCount; }
     protected:
         size_t mElementCount;
         IGfxIndexType mIndexType{IGfxIndexType::UINT32};
@@ -59,6 +64,8 @@ namespace CynicEngine
         static IGfxUniformBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
 
         void SetData(const IGfxBufferDesc &desc);
+
+        IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
 
     protected:
         std::unique_ptr<IGfxBuffer> mGfxBuffer;

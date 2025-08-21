@@ -1,27 +1,29 @@
 #include "GfxVulkanCommandBuffer.h"
+#include "Gfx/IGfxDevice.h"
 #include "GfxVulkanCommon.h"
 #include "GfxVulkanDevice.h"
-#include "Gfx/IGfxDevice.h"
+#include "GfxVulkanShader.h"
+#include "GfxVulkanPipeline.h"
 namespace CynicEngine
 {
-    VkQueue QueryQueueByCommandType(IGfxDevice *device, GfxCommandType type)
+    VkQueue QueryQueueByCommandType(IGfxDevice *device, IGfxCommandType type)
     {
-        auto vulkanDevice = dynamic_cast<GfxVulkanDevice *>(device);
+        auto vulkanDevice = static_cast<GfxVulkanDevice *>(device);
         switch (type)
         {
-        case GfxCommandType::GRAPHICS:
+        case IGfxCommandType::GRAPHICS:
             return vulkanDevice->GetGraphicsQueue();
-        case GfxCommandType::COMPUTE:
+        case IGfxCommandType::COMPUTE:
             return vulkanDevice->GetComputeQueue();
-        case GfxCommandType::TRANSFER:
+        case IGfxCommandType::TRANSFER:
             return vulkanDevice->GetTransferQueue();
         default:
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown GfxCommandType: {}"), static_cast<int>(type));
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown IGfxCommandType: {}"), static_cast<int>(type));
             return vulkanDevice->GetGraphicsQueue();
         }
     }
 
-    GfxVulkanCommandBuffer::GfxVulkanCommandBuffer(IGfxDevice *device, GfxCommandType type)
+    GfxVulkanCommandBuffer::GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type, bool isSingleUse)
         : GfxVulkanObject(device), mRelatedQueue(QueryQueueByCommandType(device, type)), mPoolHandle(VK_NULL_HANDLE), mHandle(VK_NULL_HANDLE)
     {
         VkCommandPoolCreateInfo poolInfo;
@@ -39,8 +41,14 @@ namespace CynicEngine
 
         {
             mSignalSemaphore = std::make_unique<GfxVulkanSemaphore>(mDevice);
-
-            mFence = std::make_unique<GfxVulkanFence>(mDevice, true);
+            if (!isSingleUse)
+            {
+                mFence = std::make_unique<GfxVulkanFence>(mDevice, true);
+            }
+            else
+            {
+                mFence.reset(nullptr);
+            }
         }
     }
 
@@ -85,7 +93,10 @@ namespace CynicEngine
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &mHandle;
 
-        VK_CHECK(vkQueueSubmit(mRelatedQueue, 1, &submitInfo, mFence->GetHandle()))
+        if (mFence)
+            VK_CHECK(vkQueueSubmit(mRelatedQueue, 1, &submitInfo, mFence->GetHandle()))
+        else
+            VK_CHECK(vkQueueSubmit(mRelatedQueue, 1, &submitInfo, VK_NULL_HANDLE))
 
         return this;
     }
@@ -163,6 +174,40 @@ namespace CynicEngine
         VkBufferCopy copyRegion{};
         copyRegion.size = static_cast<VkDeviceSize>(bufferSize);
         vkCmdCopyBuffer(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanBuffer->GetHandle(), 1, &copyRegion);
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindRasterPipeline(IGfxRasterPipeline *pipeline)
+    {
+        auto vulkanRasterShader = static_cast<GfxVulkanRasterShader *>(pipeline->GetShader());
+        vulkanRasterShader->Flush();
+
+        auto sets = vulkanRasterShader->GetDescriptorSets();
+        if (!sets.empty())
+            vkCmdBindDescriptorSets(mHandle, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanRasterShader->GetPiplineLayout(), 0, sets.size(), sets.data(), 0, nullptr);
+
+        auto vulkanRasterPipeline = static_cast<GfxVulkanRasterPipeline *>(pipeline);
+        vkCmdBindPipeline(mHandle, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanRasterPipeline->GetHandle());
+        return this;
+    }
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer)
+    {
+        auto vulkanVertexBuffer = static_cast<const GfxVulkanBuffer *>(vertexBuffer->GetGfxBuffer());
+        VkBuffer vertexBuffers[] = {vulkanVertexBuffer->GetHandle()};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(mHandle, 0, 1, vertexBuffers, offsets);
+        return this;
+    }
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindIndexBuffer(const IGfxIndexBuffer *indexBuffer)
+    {
+        auto vulkanIndexBuffer = static_cast<const GfxVulkanBuffer *>(indexBuffer->GetGfxBuffer());
+        vkCmdBindIndexBuffer(mHandle, vulkanIndexBuffer->GetHandle(), 0, ToVkIndexType(indexBuffer->GetIndexType()));
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+    {
+        vkCmdDrawIndexed(mHandle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
         return this;
     }
 }

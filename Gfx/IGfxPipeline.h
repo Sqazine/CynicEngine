@@ -7,10 +7,11 @@ namespace CynicEngine
     {
     public:
         IGfxRasterPipeline(IGfxRasterShader *shader);
-        ~IGfxRasterPipeline() = default;
+        virtual ~IGfxRasterPipeline() = default;
 
         static IGfxRasterPipeline *Create(IGfxDevice *device,const IGfxVertexDesc& vertexDesc,IGfxRasterShader *shader);
 
+        IGfxRasterShader *GetShader() const { return mShader; }
     protected:
         IGfxRasterShader *mShader;
     };

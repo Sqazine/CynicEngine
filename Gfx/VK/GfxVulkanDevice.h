@@ -62,7 +62,7 @@ namespace CynicEngine
 		const VkQueue &GetTransferQueue() const { return mTransferQueue; }
 
 		const PhysicalDeviceSpecification &GetPhysicalDeviceSpec() const { return mPhysicalDeviceSpecificationList[mSelectedPhysicalDeviceIndex]; }
-		VkPhysicalDevice GetPhysicalDevice() const {return GetPhysicalDeviceSpec().handle;}
+		VkPhysicalDevice GetPhysicalDevice() const { return GetPhysicalDeviceSpec().handle; }
 
 		void CreateSwapChain(Window *window);
 
@@ -71,7 +71,9 @@ namespace CynicEngine
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 		VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-VkFormat FindDepthFormat();
+		VkFormat FindDepthFormat();
+
+		const GfxVulkanSwapChain *GetSwapChain() const { return mSwapChain.get(); }
 	private:
 		void CreateInstance();
 #ifndef NDEBUG

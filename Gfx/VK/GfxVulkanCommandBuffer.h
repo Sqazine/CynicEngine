@@ -11,18 +11,22 @@ namespace CynicEngine
     class GfxVulkanCommandBuffer : public GfxVulkanObject, public IGfxCommandBuffer
     {
     public:
-        GfxVulkanCommandBuffer(IGfxDevice *device, GfxCommandType type);
+        GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type,bool isSingleUse);
         ~GfxVulkanCommandBuffer() override;
 
         VkCommandBuffer GetHandle() const { return mHandle; }
 
         IGfxCommandBuffer *Begin() override;
         IGfxCommandBuffer *End() override;
+        IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
+        IGfxCommandBuffer *BindRasterPipeline(IGfxRasterPipeline *pipeline) override;
+        IGfxCommandBuffer *BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer) override;
+        IGfxCommandBuffer *BindIndexBuffer(const IGfxIndexBuffer *indexBuffer) override;
+        IGfxCommandBuffer *DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
 
         IGfxCommandBuffer *Submit(GfxVulkanSemaphore *waitSemaphore = nullptr);
 
         IGfxCommandBuffer *TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
-        IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
 
         GfxVulkanFence *GetFence() const { return mFence.get(); }
         GfxVulkanSemaphore *GetSignalSemaphore() const { return mSignalSemaphore.get(); }

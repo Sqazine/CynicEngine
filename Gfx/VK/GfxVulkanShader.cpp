@@ -166,7 +166,7 @@ namespace CynicEngine
         if (mBufferInfos.find(name) == mBufferInfos.end())
             mBufferInfos[name] = VkDescriptorBufferInfo{};
 
-        auto rawBuffer = dynamic_cast<const GfxVulkanBuffer *>(buffer);
+        auto rawBuffer = static_cast<const GfxVulkanBuffer *>(buffer);
 
         mBufferInfos[name].buffer = rawBuffer->GetHandle();
         mBufferInfos[name].offset = 0;
@@ -181,7 +181,7 @@ namespace CynicEngine
     {
         MarkDirty();
 
-        auto rawTexture = dynamic_cast<const GfxVulkanTexture *>(texture);
+        auto rawTexture = static_cast<const GfxVulkanTexture *>(texture);
 
         if (mImageInfos.find(name) == mImageInfos.end())
             mImageInfos[name] = VkDescriptorImageInfo{};
@@ -296,7 +296,7 @@ namespace CynicEngine
             }
         }
 
-        mDescriptorSetLayouts.resize(maxCount + 1);
+        mDescriptorSetLayouts.resize(maxCount);
 
         auto GetDescriptorBinding = [&](std::string_view name)
         {
@@ -334,6 +334,9 @@ namespace CynicEngine
 
     void GfxVulkanRasterShader::CreateDescriptorPool()
     {
+        if (mDescriptorSetLayouts.empty())
+            return;
+
         std::vector<VkDescriptorPoolSize> poolSizes;
 
         for (auto &[k, v] : mBindings)
@@ -422,9 +425,9 @@ namespace CynicEngine
         auto layouts = GetDescriptorSetLayoutList();
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        ZeroVulkanStruct(pipelineLayoutInfo, VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
         pipelineLayoutInfo.setLayoutCount = layouts.size();
-        pipelineLayoutInfo.pSetLayouts = layouts.data();
+        pipelineLayoutInfo.pSetLayouts = layouts.empty() ? nullptr : layouts.data();
 
         VkDevice device = mDevice->GetLogicDevice();
 

@@ -57,7 +57,7 @@ namespace CynicEngine
         {
         case GfxBackend::VULKAN:
         {
-            auto vulkanGfxBuffer = dynamic_cast<GfxVulkanBuffer *>(mGfxBuffer.get());
+            auto vulkanGfxBuffer = static_cast<GfxVulkanBuffer *>(mGfxBuffer.get());
             GfxVulkanBufferCommon::SetCpuBufferData(vulkanGfxBuffer, desc.bufferSize, desc.data);
             break;
         }

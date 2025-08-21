@@ -7,6 +7,7 @@
 #include "GfxVulkanObject.h"
 #include "GfxVulkanCommandBuffer.h"
 #include "GfxVulkanTexture.h"
+#include "GfxVulkanCommon.h"
 namespace CynicEngine
 {
     struct SwapChainDetails
@@ -24,19 +25,19 @@ namespace CynicEngine
 
         void BeginFrame();
         void EndFrame();
+
+        const VkSwapchainKHR &GetHandle() const { return mHandle; }
         uint8_t GetBackBufferCount() const;
         uint8_t GetCurrentBackBufferIndex() const;
         GfxVulkanCommandBuffer *GetCurrentBackCommandBuffer() const;
-
         VkExtent2D GetExtent() const;
-
         const VkSurfaceFormatKHR GetSurfaceFormat() const;
-
-        const VkSwapchainKHR &GetHandle() const{return mHandle;}
-
         uint32_t GetNextFrameIndex() const;
+        GfxVulkanTexture *GetCurrentSwapChainBackTexture() const;
+        VkFormat GetColorTextureFormat() const { return mSurfaceFormat.format; }
+        VkFormat GetDepthTextureFormat() const { return ToVkFormat(mDepthBackTexture->GetDesc().format); }
 
-        GfxVulkanTexture* GetCurrentSwapChainBackTexture() const;
+        Window *GetWindow() const { return mWindow; }
 
     private:
         void CreateSurface();

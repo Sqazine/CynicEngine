@@ -90,24 +90,24 @@ namespace CynicEngine
         memset(((uint8_t *)&Struct) + sizeof(VkStructureType), 0, sizeof(T) - sizeof(VkStructureType));
     }
 
-    enum class Format;
-    enum class GfxCommandType;
-    enum class Filter;
-    enum class AddressMode;
-    enum class IndexType;
+    enum class IGfxFormat;
+    enum class IGfxCommandType;
+    enum class IGfxFilter;
+    enum class IGfxAddressMode;
+    enum class IGfxIndexType;
     class GfxVulkanDevice;
     struct IGfxVertexDesc;
 
-    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type);
+    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type);
 
-    VkImageAspectFlagBits GetAspectFromFormat(Format format);
+    VkImageAspectFlagBits GetAspectFromFormat(IGfxFormat format);
 
-    VkFormat ToVkFormat(Format format);
-    Format ToFormat(VkFormat vkFormat);
-    VkFilter ToVkFilter(Filter filter);
-    VkSamplerAddressMode ToVkSamplerAddressMode(AddressMode addressMode);
+    VkFormat ToVkFormat(IGfxFormat format);
+    IGfxFormat ToFormat(VkFormat vkFormat);
+    VkFilter ToVkFilter(IGfxFilter filter);
+    VkSamplerAddressMode ToVkSamplerAddressMode(IGfxAddressMode addressMode);
 
-    VkIndexType ToVkIndexType(IndexType type);
+    VkIndexType ToVkIndexType(IGfxIndexType type);
 
     VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc);
     std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc);

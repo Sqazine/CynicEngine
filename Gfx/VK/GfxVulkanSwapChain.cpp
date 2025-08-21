@@ -52,10 +52,14 @@ namespace CynicEngine
         GetCurrentBackCommandBuffer()->Begin();
 
         BeginRender();
+
+        // GetCurrentBackCommandBuffer()->End();
     }
 
     void GfxVulkanSwapChain::EndFrame()
     {
+        // GetCurrentBackCommandBuffer()->Begin();
+
         EndRender();
 
         GetCurrentBackCommandBuffer()->End();
@@ -210,7 +214,7 @@ namespace CynicEngine
     {
         mGfxCommandBuffer.resize(mFrameOverlapCount);
         for (auto &cmdBuffer : mGfxCommandBuffer)
-            cmdBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, GfxCommandType::GRAPHICS);
+            cmdBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, IGfxCommandType::GRAPHICS, false);
     }
 
     void GfxVulkanSwapChain::CreateSyncObjects()
@@ -388,7 +392,7 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::CleanUpResource()
     {
-        for(auto& texture:mSwapChainColorBackTextures)
+        for (auto &texture : mSwapChainColorBackTextures)
         {
             SAFE_DELETE(texture);
         }
