@@ -43,15 +43,17 @@ namespace CynicEngine
 
     void MeshDrawPass::Execute()
     {
+        auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
+
         auto cmdBuffer = Renderer::GetGfxDevice()->GetCurrentBackCommandBuffer();
         cmdBuffer
-            // ->Begin()
+            ->BeginRenderPass(swapChain)
             ->BindRasterPipeline(mRasterPipeline.get())
             ->BindVertexBuffer(mMesh.GetVertexBuffer())
             ->BindIndexBuffer(mMesh.GetIndexBuffer())
             ->DrawIndexed(mMesh.GetIndexBuffer()->GetElementCount(), 1, 0, 0, 0)
-            // ->End()
-            ;
+            ->EndRenderPass();
+        ;
     }
 
     void AddMeshDrawPass(Renderer *renderer)

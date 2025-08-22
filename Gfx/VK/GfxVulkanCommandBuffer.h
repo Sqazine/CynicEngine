@@ -11,13 +11,15 @@ namespace CynicEngine
     class GfxVulkanCommandBuffer : public GfxVulkanObject, public IGfxCommandBuffer
     {
     public:
-        GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type,bool isSingleUse);
+        GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type, bool isSingleUse);
         ~GfxVulkanCommandBuffer() override;
 
         VkCommandBuffer GetHandle() const { return mHandle; }
 
         IGfxCommandBuffer *Begin() override;
         IGfxCommandBuffer *End() override;
+        IGfxCommandBuffer *BeginRenderPass(IGfxSwapChain *swapChain) override;
+        IGfxCommandBuffer *EndRenderPass() override;
         IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
         IGfxCommandBuffer *BindRasterPipeline(IGfxRasterPipeline *pipeline) override;
         IGfxCommandBuffer *BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer) override;

@@ -460,6 +460,8 @@ namespace CynicEngine
         case 4:
             return VK_SHADER_STAGE_GEOMETRY_BIT;
         }
+
+        return VK_SHADER_STAGE_ALL;// for avoiding compiler warning
     }
 
     void GfxVulkanRasterShader::MarkDirty()

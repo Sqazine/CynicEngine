@@ -213,7 +213,7 @@ namespace CynicEngine
 		VkInstanceCreateInfo instanceCreateInfo{};
 		ZeroVulkanStruct(instanceCreateInfo, VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
 		instanceCreateInfo.pNext = nullptr;
-		instanceCreateInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+		instanceCreateInfo.flags = 0;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
 
 #ifndef NDEBUG
@@ -394,7 +394,7 @@ namespace CynicEngine
 
 			if (!isFound)
 			{
-				CYNIC_ENGINE_LOG_ERROR(TEXT("Missing Vulkan Instance Extension:%s"), extensionName);
+				CYNIC_ENGINE_LOG_ERROR(TEXT("Missing Vulkan Instance Extension:{}"), extensionName);
 			}
 		}
 	}
@@ -413,7 +413,7 @@ namespace CynicEngine
 	std::vector<const char *> GfxVulkanDevice::GetRequiredInstanceExtensions()
 	{
 		std::vector<const char *> result = PlatformInfo::GetInstance().GetVulkanPlatformInfo()->GetWindowInstanceExtension();
-		result.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+		// result.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #ifndef NDEBUG
 		if (AppConfig::GetInstance().GetGfxConfig().enableGpuValidation)
 			result.insert(result.end(), mDebugRequiredInstanceExtensions.begin(), mDebugRequiredInstanceExtensions.end());
@@ -496,6 +496,7 @@ namespace CynicEngine
 			}
 		}
 		CYNIC_ENGINE_LOG_ERROR(TEXT("failed to find suitable memory type!"));
+		return 0; // for avoiding compiler warning, should never reach here
 	}
 
 	VkFormat GfxVulkanDevice::FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
@@ -516,6 +517,7 @@ namespace CynicEngine
 		}
 
 		CYNIC_ENGINE_LOG_ERROR(TEXT("failed to find supported format!"));
+		return VK_FORMAT_UNDEFINED; // for avoiding compiler warning, should never reach here
 	}
 
 	VkFormat GfxVulkanDevice::FindDepthFormat()
@@ -536,7 +538,7 @@ namespace CynicEngine
 		mSwapChain->EndFrame();
 	}
 
-	GfxVulkanCommandBuffer *GfxVulkanDevice::GetCurrentBackCommandBuffer() const
+	IGfxCommandBuffer *GfxVulkanDevice::GetCurrentBackCommandBuffer() const
 	{
 		return mSwapChain->GetCurrentBackCommandBuffer();
 	}

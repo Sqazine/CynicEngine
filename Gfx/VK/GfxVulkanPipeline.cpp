@@ -35,17 +35,17 @@ namespace CynicEngine
         inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         inputAssemblyState.primitiveRestartEnable = VK_FALSE;
 
-        auto extent = mDevice->GetSwapChain()->GetExtent();
+        auto extent = static_cast<GfxVulkanSwapChain *>(mDevice->GetSwapChain())->GetExtent();
         VkViewport viewport;
-        viewport.x=0;
-        viewport.y=0;
+        viewport.x = 0;
+        viewport.y = 0;
         viewport.width = extent.width;
         viewport.height = extent.height;
-        viewport.minDepth =0.0;
-        viewport.maxDepth =1.0;
+        viewport.minDepth = 0.0;
+        viewport.maxDepth = 1.0;
 
         VkRect2D scissor;
-        scissor.offset = {0,0};
+        scissor.offset = {0, 0};
         scissor.extent = extent;
 
         VkPipelineViewportStateCreateInfo viewportState;
@@ -98,12 +98,14 @@ namespace CynicEngine
             VK_DYNAMIC_STATE_SCISSOR,
         };
 
+        auto vulkanSwapChain = static_cast<GfxVulkanSwapChain *>(mDevice->GetSwapChain());
+
         VkPipelineDynamicStateCreateInfo dynamicState;
         ZeroVulkanStruct(dynamicState, VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
         dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
         dynamicState.pDynamicStates = dynamicStates.data();
         VkFormat colorAttachmentFormats[] = {
-            mDevice->GetSwapChain()->GetColorTextureFormat(),
+            vulkanSwapChain->GetColorTextureFormat(),
         };
 
         VkPipelineRenderingCreateInfoKHR pipelineRendering;
@@ -111,7 +113,7 @@ namespace CynicEngine
         pipelineRendering.pNext = nullptr;
         pipelineRendering.colorAttachmentCount = colorBlendState.attachmentCount;
         pipelineRendering.pColorAttachmentFormats = colorAttachmentFormats;
-        pipelineRendering.depthAttachmentFormat = mDevice->GetSwapChain()->GetDepthTextureFormat();
+        pipelineRendering.depthAttachmentFormat = vulkanSwapChain->GetDepthTextureFormat();
         pipelineRendering.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
         auto rawShader = static_cast<GfxVulkanRasterShader *>(mShader);

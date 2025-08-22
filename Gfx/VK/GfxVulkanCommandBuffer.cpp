@@ -73,6 +73,45 @@ namespace CynicEngine
         return this;
     }
 
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BeginRenderPass(IGfxSwapChain *swapChain)
+    {
+        auto vulkanSwapChain = static_cast<GfxVulkanSwapChain *>(swapChain);
+        auto extent = vulkanSwapChain->GetExtent();
+
+        VkRenderingInfo renderingInfo;
+        ZeroVulkanStruct(renderingInfo, VK_STRUCTURE_TYPE_RENDERING_INFO);
+        renderingInfo.pNext = nullptr;
+        renderingInfo.flags = 0;
+        renderingInfo.renderArea.offset = {0, 0};
+        renderingInfo.renderArea.extent = extent;
+        renderingInfo.layerCount = 1;
+        renderingInfo.colorAttachmentCount = 1;
+        renderingInfo.pColorAttachments = vulkanSwapChain->GetColorAttachment();
+        renderingInfo.pDepthAttachment = vulkanSwapChain->GetDepthAttachment();
+
+        vkCmdBeginRendering(mHandle, &renderingInfo);
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)extent.width;
+        viewport.height = (float)extent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(mHandle, 0, 1, &viewport);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = extent;
+        vkCmdSetScissor(mHandle, 0, 1, &scissor);
+
+        return this;
+    }
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::EndRenderPass()
+    {
+        vkCmdEndRendering(mHandle);
+        return this;
+    }
+
     IGfxCommandBuffer *GfxVulkanCommandBuffer::Submit(GfxVulkanSemaphore *waitSemaphore)
     {
         VkSemaphore signalRawSemaphore = mSignalSemaphore->GetHandle();

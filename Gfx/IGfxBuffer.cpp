@@ -8,7 +8,7 @@ namespace CynicEngine
 {
     IGfxVertexBuffer *IGfxVertexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
     {
-        IGfxVertexBuffer* vertexBuffer = new IGfxVertexBuffer();
+        IGfxVertexBuffer *vertexBuffer = new IGfxVertexBuffer();
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
         {
@@ -26,6 +26,7 @@ namespace CynicEngine
         }
 
         CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+        return nullptr; // for avoiding compiler warning
     }
 
     inline IGfxUniformBuffer *IGfxUniformBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
@@ -48,6 +49,7 @@ namespace CynicEngine
         }
 
         CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+        return nullptr; // for avoiding compiler warning
     }
 
     void IGfxUniformBuffer::SetData(const IGfxBufferDesc &desc)
@@ -71,6 +73,7 @@ namespace CynicEngine
 
         CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
     }
+    
     IGfxIndexBuffer *IGfxIndexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
     {
         IGfxIndexBuffer *indexBuffer = new IGfxIndexBuffer();
@@ -93,5 +96,6 @@ namespace CynicEngine
         }
 
         CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+        return nullptr; // for avoiding compiler warning
     }
 }

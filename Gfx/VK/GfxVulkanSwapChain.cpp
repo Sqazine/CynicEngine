@@ -15,6 +15,7 @@ namespace CynicEngine
         CreateBackTextures();
         CreateCommandBuffers();
         CreateSyncObjects();
+        InitAttachments();
     }
 
     GfxVulkanSwapChain::~GfxVulkanSwapChain()
@@ -30,7 +31,7 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::BeginFrame()
     {
-        auto CurFence = GetCurrentBackCommandBuffer()->GetFence();
+        auto CurFence = GetCurrentVulkanBackCommandBuffer()->GetFence();
         CurFence->Wait(true, UINT64_MAX);
 
         auto result = vkAcquireNextImageKHR(mDevice->GetLogicDevice(), mHandle, UINT64_MAX, mPresentSemaphore[mCurrentFrameIndex]->GetHandle(), VK_NULL_HANDLE, &mNextFrameIndex);
@@ -49,21 +50,32 @@ namespace CynicEngine
 
         CurFence->Reset();
 
-        GetCurrentBackCommandBuffer()->Begin();
-        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+        GetCurrentVulkanBackCommandBuffer()->Begin();
+        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 
-        BeginRender();
+        mColorAttachment.imageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? mColorBackTexture->GetView() : GetCurrentSwapChainBackTexture()->GetView();
+        mColorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        mColorAttachment.resolveMode = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE;
+        mColorAttachment.resolveImageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? GetCurrentSwapChainBackTexture()->GetView() : nullptr;
+        mColorAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        mColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        mColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        mColorAttachment.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
+
+        mDepthAttachment.imageView = mDepthBackTexture->GetView();
+        mDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        mDepthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        mDepthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        mDepthAttachment.clearValue.depthStencil = {1.0f, 0};
     }
 
     void GfxVulkanSwapChain::EndFrame()
     {
-        EndRender();
+        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
+        GetCurrentVulkanBackCommandBuffer()->End();
 
-        GetCurrentBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
-        GetCurrentBackCommandBuffer()->End();
-
-        mGfxCommandBuffer[mCurrentFrameIndex]->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
-        GfxVulkanSemaphore *renderFinishedSemaphore = mGfxCommandBuffer[mCurrentFrameIndex]->GetSignalSemaphore();
+        GetCurrentVulkanBackCommandBuffer()->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
+        GfxVulkanSemaphore *renderFinishedSemaphore = GetCurrentVulkanBackCommandBuffer()->GetSignalSemaphore();
 
         Present(renderFinishedSemaphore);
 
@@ -80,7 +92,7 @@ namespace CynicEngine
         return mCurrentFrameIndex;
     }
 
-    GfxVulkanCommandBuffer *GfxVulkanSwapChain::GetCurrentBackCommandBuffer() const
+    IGfxCommandBuffer *GfxVulkanSwapChain::GetCurrentBackCommandBuffer() const
     {
         return mGfxCommandBuffer[mCurrentFrameIndex].get();
     }
@@ -222,64 +234,15 @@ namespace CynicEngine
             semaphore = std::make_unique<GfxVulkanSemaphore>(mDevice);
     }
 
-    void GfxVulkanSwapChain::BeginRender()
+    void GfxVulkanSwapChain::InitAttachments()
     {
-        auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
-
-        VkRenderingAttachmentInfo colorAttachmentInfo;
-        ZeroVulkanStruct(colorAttachmentInfo, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
-        colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        colorAttachmentInfo.pNext = nullptr;
-        colorAttachmentInfo.imageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? mColorBackTexture->GetView() : GetCurrentSwapChainBackTexture()->GetView();
-        colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachmentInfo.resolveMode = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE;
-        colorAttachmentInfo.resolveImageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? GetCurrentSwapChainBackTexture()->GetView() : nullptr;
-        colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachmentInfo.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
-
-        VkRenderingAttachmentInfo depthAttachmentInfo;
-        ZeroVulkanStruct(depthAttachmentInfo, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
-        depthAttachmentInfo.pNext = nullptr;
-        depthAttachmentInfo.imageView = mDepthBackTexture->GetView();
-        depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachmentInfo.clearValue.depthStencil = {1.0f, 0};
-
-        VkRenderingInfo renderingInfo;
-        ZeroVulkanStruct(renderingInfo, VK_STRUCTURE_TYPE_RENDERING_INFO);
-        renderingInfo.pNext = nullptr;
-        renderingInfo.flags = 0;
-        renderingInfo.renderArea.offset = {0, 0};
-        renderingInfo.renderArea.extent = mExtent;
-        renderingInfo.layerCount = 1;
-        renderingInfo.colorAttachmentCount = 1;
-        renderingInfo.pColorAttachments = &colorAttachmentInfo;
-        renderingInfo.pDepthAttachment = &depthAttachmentInfo;
-
-        vkCmdBeginRendering(rawCmdBuffer, &renderingInfo);
-
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = (float)mExtent.width;
-        viewport.height = (float)mExtent.height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(rawCmdBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor{};
-        scissor.offset = {0, 0};
-        scissor.extent = mExtent;
-        vkCmdSetScissor(rawCmdBuffer, 0, 1, &scissor);
+        ZeroVulkanStruct(mColorAttachment, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
+        ZeroVulkanStruct(mDepthAttachment, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
     }
-    void GfxVulkanSwapChain::EndRender()
-    {
-        auto rawCmdBuffer = GetCurrentBackCommandBuffer()->GetHandle();
 
-        vkCmdEndRendering(rawCmdBuffer);
+    GfxVulkanCommandBuffer *GfxVulkanSwapChain::GetCurrentVulkanBackCommandBuffer() const
+    {
+        return mGfxCommandBuffer[mCurrentFrameIndex].get();
     }
 
     VkSurfaceFormatKHR GfxVulkanSwapChain::ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)

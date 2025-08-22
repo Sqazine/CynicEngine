@@ -49,6 +49,8 @@ namespace CynicEngine
             CYNIC_ENGINE_LOG_ERROR(TEXT("Device Lost!"));
             return false;
         }
+
+        return false;// for avoiding compiler warning
     }
 
     GfxVulkanSemaphore::GfxVulkanSemaphore(IGfxDevice *device)

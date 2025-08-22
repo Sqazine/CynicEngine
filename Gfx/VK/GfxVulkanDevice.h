@@ -52,7 +52,7 @@ namespace CynicEngine
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		GfxVulkanCommandBuffer *GetCurrentBackCommandBuffer() const override;
+		IGfxCommandBuffer *GetCurrentBackCommandBuffer() const override;
 
 		VkDevice GetLogicDevice() const { return mLogicDevice; }
 		VkInstance GetInstance() const { return mInstance; }
@@ -73,7 +73,6 @@ namespace CynicEngine
 		VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		VkFormat FindDepthFormat();
 
-		const GfxVulkanSwapChain *GetSwapChain() const { return mSwapChain.get(); }
 	private:
 		void CreateInstance();
 #ifndef NDEBUG
@@ -111,8 +110,6 @@ namespace CynicEngine
 		VkQueue mGraphicsQueue;
 		VkQueue mComputeQueue;
 		VkQueue mTransferQueue;
-
-		std::unique_ptr<GfxVulkanSwapChain> mSwapChain;
 
 	private:
 #ifndef NDEBUG

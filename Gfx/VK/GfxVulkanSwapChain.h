@@ -17,19 +17,19 @@ namespace CynicEngine
         VkSurfaceCapabilitiesKHR surfaceCapabilities;
     };
 
-    class GfxVulkanSwapChain : public GfxVulkanObject
+    class GfxVulkanSwapChain : public GfxVulkanObject, public IGfxSwapChain
     {
     public:
         GfxVulkanSwapChain(IGfxDevice *device, Window *window);
-        ~GfxVulkanSwapChain();
+        ~GfxVulkanSwapChain() override;
 
-        void BeginFrame();
-        void EndFrame();
+        void BeginFrame() override;
+        void EndFrame() override;
+        IGfxCommandBuffer *GetCurrentBackCommandBuffer() const override;
 
         const VkSwapchainKHR &GetHandle() const { return mHandle; }
         uint8_t GetBackBufferCount() const;
         uint8_t GetCurrentBackBufferIndex() const;
-        GfxVulkanCommandBuffer *GetCurrentBackCommandBuffer() const;
         VkExtent2D GetExtent() const;
         const VkSurfaceFormatKHR GetSurfaceFormat() const;
         uint32_t GetNextFrameIndex() const;
@@ -39,6 +39,9 @@ namespace CynicEngine
 
         Window *GetWindow() const { return mWindow; }
 
+        VkRenderingAttachmentInfo *GetColorAttachment() { return &mColorAttachment; }
+        VkRenderingAttachmentInfo *GetDepthAttachment() { return &mDepthAttachment; }
+
     private:
         void CreateSurface();
         void ObtainPresentQueue();
@@ -46,9 +49,9 @@ namespace CynicEngine
         void CreateBackTextures();
         void CreateCommandBuffers();
         void CreateSyncObjects();
+        void InitAttachments();
 
-        void BeginRender();
-        void EndRender();
+        GfxVulkanCommandBuffer * GetCurrentVulkanBackCommandBuffer()const;
 
         SwapChainDetails QuerySwapChainDetails();
 
@@ -61,6 +64,7 @@ namespace CynicEngine
         void Present(const GfxVulkanSemaphore *waitFor = nullptr);
 
         void CleanUpResource();
+
 
         Window *mWindow;
 
@@ -86,5 +90,8 @@ namespace CynicEngine
 
         std::unique_ptr<GfxVulkanTexture> mColorBackTexture;
         std::unique_ptr<GfxVulkanTexture> mDepthBackTexture;
+
+        VkRenderingAttachmentInfo mColorAttachment;
+        VkRenderingAttachmentInfo mDepthAttachment;
     };
 }
