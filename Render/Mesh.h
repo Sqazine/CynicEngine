@@ -12,6 +12,7 @@ namespace CynicEngine
     struct Vertex
     {
         alignas(16) Vector3f position;
+        alignas(16) Vector3f normal;
         alignas(16) Vector4f color;
         alignas(8) Vector2f texCoord0;
 
@@ -52,11 +53,22 @@ namespace CynicEngine
         }
     };
 
+    enum class MeshType
+    {
+        QUAD,
+        CUBE,
+        SPHERE,
+        CAPSULE,
+        CYLINDER,
+    };
+
     class Mesh
     {
     public:
         Mesh() = default;
         ~Mesh() = default;
+
+        static Mesh* CreateBuiltinMesh(MeshType type);
 
         void SetVertices(const std::vector<Vertex> &vertices);
         void SetIndices(const std::vector<uint32_t> &indices);
@@ -70,6 +82,12 @@ namespace CynicEngine
         const IGfxIndexBuffer *GetIndexBuffer() const { return mIndexBuffer.get(); }
 
     private:
+        static Mesh* CreateBuiltinQuad();
+        static Mesh* CreateBuiltInCube();
+        static Mesh* CreateBuiltInSphere();
+        static Mesh* CreateBuiltInCapsule();
+        static Mesh* CreateBuiltInCylinder();
+
         std::vector<Vertex> mVertices{};
         std::vector<uint32_t> mIndices{};
 

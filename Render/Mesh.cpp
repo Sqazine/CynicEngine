@@ -3,6 +3,25 @@
 #include "Render/Renderer.h"
 namespace CynicEngine
 {
+    Mesh *Mesh::CreateBuiltinMesh(MeshType type)
+    {
+        switch (type)
+        {
+        case MeshType::QUAD:
+            return CreateBuiltinQuad();
+        case MeshType::CUBE:
+            return CreateBuiltinCube();
+        case MeshType::SPHERE:
+            return CreateBuiltinSphere();
+        case MeshType::CAPSULE:
+            return CreateBuiltinCapsule();
+        case MeshType::CYLINDER:
+            return CreateBuiltinCylinder();
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported mesh type!"));
+            return nullptr;
+        }
+    }
     void Mesh::SetVertices(const std::vector<Vertex> &vertices)
     {
         if (vertices == mVertices)
@@ -31,4 +50,30 @@ namespace CynicEngine
 
         mIndexBuffer.reset(IGfxIndexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
     }
+
+    Mesh *Mesh::CreateBuiltinQuad()
+    {
+        return nullptr; // TODO: Implementation not ready
+    }
+
+    Mesh *Mesh::CreateBuiltInCube()
+    {
+        return nullptr; // TODO: Implementation not ready
+    }
+
+    Mesh *Mesh::CreateBuiltInSphere()
+    {
+        return nullptr; // TODO: Implementation not ready
+    }
+
+    Mesh *Mesh::CreateBuiltInCapsule()
+    {
+        return nullptr; // TODO: Implementation not ready
+    }
+
+    Mesh *Mesh::CreateBuiltInCylinder()
+    {
+        return nullptr; // TODO: Implementation not ready
+    }
+
 }
