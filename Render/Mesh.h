@@ -13,12 +13,14 @@ namespace CynicEngine
     {
         alignas(16) Vector3f position;
         alignas(16) Vector3f normal;
+        alignas(16) Vector3f tangent;
+        alignas(16) Vector3f binormal;
         alignas(16) Vector4f color;
-        alignas(8) Vector2f texCoord0;
+        alignas(8) Vector2f texcoord0;
 
         bool operator==(const Vertex &other) const
         {
-            return position == other.position && color == other.color && texCoord0 == other.texCoord0;
+            return position == other.position && normal == other.normal && tangent == other.tangent && binormal == other.binormal && color == other.color && texcoord0 == other.texcoord0;
         }
 
         static IGfxVertexDesc GetVertexDesc()
@@ -39,6 +41,21 @@ namespace CynicEngine
                 attrib.offset = offsetof(Vertex, position);
                 vertexDesc.attribs.emplace_back(attrib);
 
+                attrib.name = "NORMAL";
+                attrib.format = IGfxFormat::R32G32B32_SFLOAT;
+                attrib.offset = offsetof(Vertex, normal);
+                vertexDesc.attribs.emplace_back(attrib);
+
+                attrib.name = "TANGENT";
+                attrib.format = IGfxFormat::R32G32B32_SFLOAT;
+                attrib.offset = offsetof(Vertex, tangent);
+                vertexDesc.attribs.emplace_back(attrib);
+
+                attrib.name = "BINORMAL";
+                attrib.format = IGfxFormat::R32G32B32_SFLOAT;
+                attrib.offset = offsetof(Vertex, binormal);
+                vertexDesc.attribs.emplace_back(attrib);
+
                 attrib.name = "COLOR";
                 attrib.format = IGfxFormat::R32G32B32A32_SFLOAT;
                 attrib.offset = offsetof(Vertex, color);
@@ -46,7 +63,7 @@ namespace CynicEngine
 
                 attrib.name = "TEXCOORD";
                 attrib.format = IGfxFormat::R32G32_SFLOAT;
-                attrib.offset = offsetof(Vertex, texCoord0);
+                attrib.offset = offsetof(Vertex, texcoord0);
                 vertexDesc.attribs.emplace_back(attrib);
             }
             return vertexDesc;
@@ -55,6 +72,7 @@ namespace CynicEngine
 
     enum class MeshType
     {
+        TRIANGLE,
         QUAD,
         CUBE,
         SPHERE,
@@ -68,7 +86,7 @@ namespace CynicEngine
         Mesh() = default;
         ~Mesh() = default;
 
-        static Mesh* CreateBuiltinMesh(MeshType type);
+        static Mesh *CreateBuiltinMesh(MeshType type);
 
         void SetVertices(const std::vector<Vertex> &vertices);
         void SetIndices(const std::vector<uint32_t> &indices);
@@ -82,11 +100,12 @@ namespace CynicEngine
         const IGfxIndexBuffer *GetIndexBuffer() const { return mIndexBuffer.get(); }
 
     private:
-        static Mesh* CreateBuiltinQuad();
-        static Mesh* CreateBuiltInCube();
-        static Mesh* CreateBuiltInSphere();
-        static Mesh* CreateBuiltInCapsule();
-        static Mesh* CreateBuiltInCylinder();
+        static Mesh *CreateBuiltinTriangle();
+        static Mesh *CreateBuiltinQuad();
+        static Mesh *CreateBuiltinCube();
+        static Mesh *CreateBuiltinSphere();
+        static Mesh *CreateBuiltinCapsule();
+        static Mesh *CreateBuiltinCylinder();
 
         std::vector<Vertex> mVertices{};
         std::vector<uint32_t> mIndices{};

@@ -9,6 +9,11 @@ namespace CynicEngine
         size_t elementSize;
         size_t bufferSize;
         void *data{nullptr};
+
+        bool IsArrayBuffer()
+        {
+            return bufferSize > elementSize;
+        }
     };
     class IGfxBuffer
     {
@@ -65,7 +70,7 @@ namespace CynicEngine
 
         void SetData(const IGfxBufferDesc &desc);
 
-        IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
+        const IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
 
     protected:
         std::unique_ptr<IGfxBuffer> mGfxBuffer;

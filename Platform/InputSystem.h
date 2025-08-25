@@ -352,8 +352,8 @@ namespace CynicEngine
         virtual Vector2f GetReleativeMove() const = 0;
         virtual Vector2f GetMouseScrollWheel() const = 0;
 
-        virtual void SetReleativeMode(Window* pWindow,bool isActive) = 0;
-        virtual bool IsReleativeMode(Window* pWindow) const = 0;
+        virtual void SetReleativeMode(Window *pWindow, bool isActive) = 0;
+        virtual bool IsReleativeMode(Window *pWindow) const = 0;
     };
 
     class Controller
@@ -373,8 +373,6 @@ namespace CynicEngine
         virtual const Vector2f &GetRightStickValue() const = 0;
 
         virtual bool IsConnected() const = 0;
-
-    private:
     };
 
     class InputSystem
@@ -395,9 +393,22 @@ namespace CynicEngine
             return mMouse.get();
         }
 
+        size_t GetControllerCount() const
+        {
+            return mControllers.size();
+        }
+
+        const Controller *GetController(size_t index) const
+        {
+            if (index >= mControllers.size())
+                return nullptr;
+            return mControllers[index].get();
+        }
+
         virtual void Init() = 0;
         virtual void PreTick(Window *pWindow) = 0;
         virtual void PostTick() = 0;
+
     protected:
         std::unique_ptr<Keyboard> mKeyboard;
         std::unique_ptr<Mouse> mMouse;

@@ -3,6 +3,7 @@
 #include "GfxVulkanCommon.h"
 #include "GfxVulkanBuffer.h"
 #include "GfxVulkanTexture.h"
+#include "Core/IO.h"
 #include <cassert>
 
 namespace CynicEngine
@@ -163,14 +164,22 @@ namespace CynicEngine
     {
         MarkDirty();
 
-        if (mBufferInfos.find(name) == mBufferInfos.end())
-            mBufferInfos[name] = VkDescriptorBufferInfo{};
+        if (mWrites.find(name) == mWrites.end())
+        {
+#ifdef CYNIC_ENGINE_UTF8_ENCODE
+            STRING utf8Name = Utf8::Decode(name.data());
+            CYNIC_ENGINE_LOG_WARN(TEXT("Cannot find buffer binding named: {}"), utf8Name);
+#else
+            CYNIC_ENGINE_LOG_WARN(TEXT("Cannot find buffer binding named: {}"), name);
+#endif
+            return this;
+        }
 
-        auto rawBuffer = static_cast<const GfxVulkanBuffer *>(buffer);
+        auto rawVulkanBuffer = static_cast<const GfxVulkanBuffer *>(buffer);
 
-        mBufferInfos[name].buffer = rawBuffer->GetHandle();
+        mBufferInfos[name].buffer = rawVulkanBuffer->GetHandle();
         mBufferInfos[name].offset = 0;
-        mBufferInfos[name].range = rawBuffer->GetSize();
+        mBufferInfos[name].range = rawVulkanBuffer->GetSize();
 
         mWrites[name].pBufferInfo = &mBufferInfos[name];
 
@@ -181,14 +190,22 @@ namespace CynicEngine
     {
         MarkDirty();
 
-        auto rawTexture = static_cast<const GfxVulkanTexture *>(texture);
+        auto rawVulkanTexture = static_cast<const GfxVulkanTexture *>(texture);
 
-        if (mImageInfos.find(name) == mImageInfos.end())
-            mImageInfos[name] = VkDescriptorImageInfo{};
+        if (mWrites.find(name) == mWrites.end())
+        {
+#ifdef CYNIC_ENGINE_UTF8_ENCODE
+            STRING utf8Name = Utf8::Decode(name.data());
+            CYNIC_ENGINE_LOG_WARN(TEXT("Cannot find texture binding named: {}"), utf8Name);
+#else
+            CYNIC_ENGINE_LOG_WARN(TEXT("Cannot find texture binding named: {}"), name);
+#endif
+            return this;
+        }
 
         mImageInfos[name].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        mImageInfos[name].imageView = rawTexture->GetView();
-        mImageInfos[name].sampler = rawTexture->GetSampler();
+        mImageInfos[name].imageView = rawVulkanTexture->GetView();
+        mImageInfos[name].sampler = rawVulkanTexture->GetSampler();
 
         mWrites[name].pImageInfo = &mImageInfos[name];
         return this;
@@ -200,8 +217,11 @@ namespace CynicEngine
         {
             mIsDirty = false;
 
-            auto writeList = GetWrites();
-            vkUpdateDescriptorSets(mDevice->GetLogicDevice(), static_cast<uint32_t>(writeList.size()), writeList.data(), 0, nullptr);
+            if (CheckDescriptorWriteValid())
+            {
+                auto writeList = GetWrites();
+                vkUpdateDescriptorSets(mDevice->GetLogicDevice(), static_cast<uint32_t>(writeList.size()), writeList.data(), 0, nullptr);
+            }
         }
     }
 
@@ -285,8 +305,10 @@ namespace CynicEngine
     void GfxVulkanRasterShader::DumpDescriptorSetLayouts()
     {
         size_t maxCount = 0;
+        size_t descriptorSetSize = 0;
         for (size_t i = 0; i < 5; ++i)
         {
+            descriptorSetSize += mReflectedData[i].descriptorSets.size();
             for (auto &spvSet : mReflectedData[i].descriptorSets)
             {
                 if (maxCount < spvSet->set)
@@ -296,7 +318,10 @@ namespace CynicEngine
             }
         }
 
-        mDescriptorSetLayouts.resize(maxCount);
+        if (descriptorSetSize == 0)
+            return;
+
+        mDescriptorSetLayouts.resize(maxCount + 1);
 
         auto GetDescriptorBinding = [&](std::string_view name)
         {
@@ -408,8 +433,7 @@ namespace CynicEngine
         for (const auto &[k, v] : mBindings)
         {
             VkWriteDescriptorSet write = {};
-
-            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            ZeroVulkanStruct(write, VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET);
             write.dstSet = mDescriptorSets[GetSetIndex(k)];
             write.dstBinding = v.binding;
             write.dstArrayElement = 0;
@@ -445,6 +469,24 @@ namespace CynicEngine
         return result;
     }
 
+    bool GfxVulkanRasterShader::CheckDescriptorWriteValid()
+    {
+        for (const auto &write : mWrites)
+        {
+            if (write.second.pBufferInfo == nullptr && write.second.pImageInfo == nullptr)
+            {
+#ifdef CYNIC_ENGINE_UTF8_ENCODE
+                STRING utf8Name = Utf8::Decode(write.first.data());
+                CYNIC_ENGINE_LOG_WARN(TEXT("Descriptor write for binding {} is not bound!"), utf8Name);
+#else
+                CYNIC_ENGINE_LOG_WARN(TEXT("Descriptor write for binding {} is not bound!"), write.first);
+#endif
+                return false;
+            }
+        }
+        return true;
+    }
+
     VkShaderStageFlagBits GfxVulkanRasterShader::GetShaderStageFlag(size_t idx)
     {
         switch (idx)
@@ -461,7 +503,7 @@ namespace CynicEngine
             return VK_SHADER_STAGE_GEOMETRY_BIT;
         }
 
-        return VK_SHADER_STAGE_ALL;// for avoiding compiler warning
+        return VK_SHADER_STAGE_ALL; // for avoiding compiler warning
     }
 
     void GfxVulkanRasterShader::MarkDirty()

@@ -65,6 +65,7 @@ namespace CynicEngine
         const VkDescriptorPool &GetDescriptorPool() const;
 
         std::vector<VkWriteDescriptorSet> GetWrites();
+        bool CheckDescriptorWriteValid();
 
         VkShaderStageFlagBits GetShaderStageFlag(size_t idx);
 

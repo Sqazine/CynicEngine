@@ -2,6 +2,7 @@
 #include <memory>
 #include "Render/Renderer.h"
 #include "Render/Mesh.h"
+#include "Render/Camera.h"
 #include "Gfx/IGfxShader.h"
 #include "Gfx/IGfxPipeline.h"
 namespace CynicEngine
@@ -12,7 +13,16 @@ namespace CynicEngine
         void Init();
         void Execute();
 
-        Mesh mMesh;
+        struct MeshUniformData
+        {
+            alignas(16) Matrix4f model;
+        };
+
+        MeshUniformData mMeshUniformData;
+
+        std::unique_ptr<Camera> mCamera;
+        std::unique_ptr<Mesh> mMesh;
+        std::unique_ptr<IGfxUniformBuffer> mMeshUniformDataBuffer;
         std::unique_ptr<IGfxRasterShader> mShader;
         std::unique_ptr<IGfxRasterPipeline> mRasterPipeline;
     };

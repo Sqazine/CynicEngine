@@ -72,7 +72,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
     {
         GfxVulkanBufferDesc desc;
         desc.size = gfxDesc.bufferSize;
-        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT| VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
         desc.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);

@@ -7,6 +7,11 @@
 #include "Math.hpp"
 #include "Vector4.h"
 #include "Quaternion.h"
+
+#include "Config/AppConfig.h"
+#include "Config/GfxConfig.h"
+#include "Core/Marco.h"
+#include "Logger/Logger.h"
 namespace CynicEngine
 {
 	template <typename T>
@@ -81,16 +86,20 @@ namespace CynicEngine
 		static Matrix4<T> Inverse(const Matrix4<T> &right);
 		static T Determinant(const Matrix4<T> &right);
 		static Matrix4<T> Adjoint(const Matrix4<T> &right);
-		static Matrix4<T> GLOrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar);
-		static Matrix4<T> VKOrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar);
-		static Matrix4<T> GLPerspective(const T &fov, const T &aspect, const T &znear, const T &zfar);
-		static Matrix4<T> VKPerspective(const T &fov, const T &aspect, const T &znear, const T &zfar);
+		static Matrix4<T> OrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar);
+		static Matrix4<T> Perspective(const T &fov, const T &aspect, const T &znear, const T &zfar);
 		static Matrix4<T> LookAt(const Vector3<T> &position, const Vector3<T> &target, const Vector3<T> &up);
 		static Matrix3<T> ToMatrix3(const Matrix4<T> &matrix);
 		static Quaternion<T> ToQuaternion(const Matrix4<T> &matrix);
 		static Transform<T> ToTransform(const Matrix4<T> &matrix);
 
 		static const Matrix4<T> IDENTITY;
+
+	private:
+		static Matrix4<T> GLOrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar);
+		static Matrix4<T> VKOrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar);
+		static Matrix4<T> GLPerspective(const T &fov, const T &aspect, const T &znear, const T &zfar);
+		static Matrix4<T> VKPerspective(const T &fov, const T &aspect, const T &znear, const T &zfar);
 	};
 
 	typedef Matrix4<float> Matrix4f;
@@ -321,6 +330,28 @@ namespace CynicEngine
 	}
 
 	template <typename T>
+	inline Matrix4<T> Matrix4<T>::OrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar)
+	{
+		const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+		switch (gfxConfig.backend)
+		{
+		case GfxBackend::VULKAN:
+		{
+			return VKOrthoGraphic(left, right, top, bottom, znear, zfar);
+		}
+		case GfxBackend::D3D12:
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+			break;
+		default:
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+			break;
+		}
+
+		CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+		return Matrix4<T>(); // for avoiding compiler warning
+	}
+
+	template <typename T>
 	inline Matrix4<T> Matrix4<T>::GLOrthoGraphic(const T &left, const T &right, const T &top, const T &bottom, const T &znear, const T &zfar)
 	{
 		Matrix4<T> tmp;
@@ -347,6 +378,28 @@ namespace CynicEngine
 	}
 
 	template <typename T>
+	inline Matrix4<T> Matrix4<T>::Perspective(const T &fov, const T &aspect, const T &znear, const T &zfar)
+	{
+		const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
+		switch (gfxConfig.backend)
+		{
+		case GfxBackend::VULKAN:
+		{
+			return VKPerspective(fov, aspect, znear, zfar);
+		}
+		case GfxBackend::D3D12:
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Not implemented D3D12 device creation yet"));
+			break;
+		default:
+			CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+			break;
+		}
+
+		CYNIC_ENGINE_LOG_ERROR(TEXT("Unreachable GfxBackend: {}"), static_cast<int>(gfxConfig.backend));
+		return Matrix4<T>(); // for avoiding compiler warning
+	}
+
+	template <typename T>
 	inline Matrix4<T> Matrix4<T>::GLPerspective(const T &fov, const T &aspect, const T &znear, const T &zfar)
 	{
 		Matrix4<T> tmp(static_cast<T>(0.0f));
@@ -369,7 +422,7 @@ namespace CynicEngine
 		tmp.elements[0] = f / aspect;
 		tmp.elements[5] = -f;
 		tmp.elements[10] = zfar / (znear - zfar);
-		tmp.elements[11] = -1.0f;
+		tmp.elements[11] = static_cast<T>(-1.0f);
 		tmp.elements[14] = (znear * zfar) / (znear - zfar);
 		return tmp;
 	}

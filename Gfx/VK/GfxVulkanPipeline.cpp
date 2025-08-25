@@ -61,7 +61,7 @@ namespace CynicEngine
         rasterizerState.rasterizerDiscardEnable = VK_FALSE;
         rasterizerState.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizerState.lineWidth = 1.0f;
-        rasterizerState.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizerState.cullMode = VK_CULL_MODE_NONE;
         rasterizerState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizerState.depthBiasEnable = VK_FALSE;
 
