@@ -7,7 +7,7 @@
 namespace CynicEngine
 {
     GfxVulkanSwapChain::GfxVulkanSwapChain(IGfxDevice *device, Window *window)
-        : GfxVulkanObject(device), mWindow(window), mHandle(VK_NULL_HANDLE), mNextFrameIndex(0)
+        : GfxVulkanObject(device),IGfxSwapChain(window), mHandle(VK_NULL_HANDLE), mNextFrameIndex(0)
     {
         CreateSurface();
         ObtainPresentQueue();
@@ -51,7 +51,7 @@ namespace CynicEngine
         CurFence->Reset();
 
         GetCurrentVulkanBackCommandBuffer()->Begin();
-        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
         mColorAttachment.imageView = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1 ? mColorBackTexture->GetView() : GetCurrentSwapChainBackTexture()->GetView();
         mColorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -71,7 +71,7 @@ namespace CynicEngine
 
     void GfxVulkanSwapChain::EndFrame()
     {
-        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
+        GetCurrentVulkanBackCommandBuffer()->TransitionImageLayout(GetCurrentSwapChainBackTexture(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         GetCurrentVulkanBackCommandBuffer()->End();
 
         GetCurrentVulkanBackCommandBuffer()->Submit(mPresentSemaphore[mCurrentFrameIndex].get());
@@ -130,7 +130,7 @@ namespace CynicEngine
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             CYNIC_ENGINE_LOG_INFO(TEXT("Swap chain out of date, resizing..."));
-            Resize(mWindow->GetSize().x, mWindow->GetSize().y);
+            Resize(mWindow->GetSize());
         }
         else if (result != VK_SUCCESS)
         {
@@ -195,9 +195,7 @@ namespace CynicEngine
         GfxTextureDesc desc;
         desc.width = mExtent.width;
         desc.height = mExtent.height;
-        desc.mipLevels = 1;
         desc.format = ToFormat(mSurfaceFormat.format);
-        desc.sampleCount = 1;
 
         mSwapChainColorBackTextures.resize(mSwapChainImageCount);
         for (uint32_t i = 0; i < mSwapChainImageCount; i++)

@@ -5,6 +5,17 @@
 #include "GfxVulkanBuffer.h"
 namespace CynicEngine::GfxVulkanBufferCommon
 {
+    inline GfxVulkanBuffer *CreateStagingBuffer(IGfxDevice *device, float bufferSize)
+    {
+        GfxVulkanBufferDesc desc;
+        desc.size = bufferSize;
+        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        desc.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+        GfxVulkanBuffer *stagingBuffer = new GfxVulkanBuffer(device, desc);
+        return stagingBuffer;
+    }
+
     inline void SetCpuBufferData(GfxVulkanBuffer *buffer, size_t size, const void *data)
     {
         auto device = buffer->GetDevice()->GetLogicDevice();
@@ -16,15 +27,13 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
     inline GfxVulkanBuffer *CreateVertexBuffer(IGfxDevice *device, const IGfxBufferDesc &gfxDesc)
     {
+        std::unique_ptr<GfxVulkanBuffer> stagingBuffer;
+        stagingBuffer.reset(CreateStagingBuffer(device, gfxDesc.bufferSize));
+
+        SetCpuBufferData(stagingBuffer.get(), (size_t)gfxDesc.bufferSize, gfxDesc.data);
+
         GfxVulkanBufferDesc desc;
         desc.size = gfxDesc.bufferSize;
-        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        desc.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-        std::unique_ptr<GfxVulkanBuffer> stagingBuffer = std::make_unique<GfxVulkanBuffer>(device, desc);
-
-        SetCpuBufferData(stagingBuffer.get(), (size_t)desc.size, gfxDesc.data);
-
         desc.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         desc.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
@@ -43,15 +52,13 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
     inline GfxVulkanBuffer *CreateIndexBuffer(IGfxDevice *device, const IGfxBufferDesc &gfxDesc)
     {
+        std::unique_ptr<GfxVulkanBuffer> stagingBuffer;
+        stagingBuffer.reset(CreateStagingBuffer(device, gfxDesc.bufferSize));
+
+        SetCpuBufferData(stagingBuffer.get(), (size_t)gfxDesc.bufferSize, gfxDesc.data);
+
         GfxVulkanBufferDesc desc;
         desc.size = gfxDesc.bufferSize;
-        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        desc.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-        std::unique_ptr<GfxVulkanBuffer> stagingBuffer = std::make_unique<GfxVulkanBuffer>(device, desc);
-
-        SetCpuBufferData(stagingBuffer.get(), (size_t)desc.size, gfxDesc.data);
-
         desc.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
         desc.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
@@ -72,7 +79,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
     {
         GfxVulkanBufferDesc desc;
         desc.size = gfxDesc.bufferSize;
-        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT| VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        desc.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
         desc.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);

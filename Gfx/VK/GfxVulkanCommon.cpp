@@ -2,7 +2,6 @@
 #include "GfxVulkanDevice.h"
 #include "Gfx/IGfxCommandBuffer.h"
 #include "Gfx/IGfxTexture.h"
-#include "Gfx/IGfxBuffer.h"
 #include "Gfx/IGfxVertexDesc.h"
 namespace CynicEngine
 {
@@ -36,6 +35,10 @@ namespace CynicEngine
     }
 
 #define FormatDefines()       \
+    DEF(R8_UNORM);            \
+    DEF(R8G8_UNORM);          \
+    DEF(R8G8B8_UNORM);        \
+    DEF(R8G8B8A8_UNORM);      \
     DEF(R8G8B8A8_SRGB);       \
     DEF(B8G8R8A8_SRGB);       \
     DEF(B8G8R8A8_UNORM);      \

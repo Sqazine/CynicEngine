@@ -9,7 +9,7 @@ namespace CynicEngine
 
         uint32_t width{0};
         uint32_t height{0};
-        uint32_t mipLevels{0};
+        uint32_t mipLevelCount{1};
 
         IGfxFormat format{IGfxFormat::R8G8B8A8_SRGB};
         uint8_t sampleCount{1};
@@ -27,8 +27,11 @@ namespace CynicEngine
         IGfxTexture(const GfxTextureDesc &desc);
         virtual ~IGfxTexture() = default;
 
-        IGfxTexture *Create(IGfxDevice *device, const GfxTextureDesc &desc);
+        static IGfxTexture *Create(IGfxDevice *device, const GfxTextureDesc &desc);
         const GfxTextureDesc &GetDesc() const { return mDesc; }
+
+        uint32_t GetMipLevelCount() const { return mDesc.mipLevelCount; }
+
     protected:
         GfxTextureDesc mDesc;
     };

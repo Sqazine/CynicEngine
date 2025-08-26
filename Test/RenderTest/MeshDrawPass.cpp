@@ -16,9 +16,12 @@ namespace CynicEngine
         system(shaderCompile.c_str());
 
         mCamera = std::make_unique<Camera>();
-        mCamera->SetPosition(Vector3f(0.0f, 0.0f, 100.0f));
+        mCamera->SetPosition(Vector3f(0.0f, 0.0f, 10.0f));
         mCamera->SetFovByDegree(60.0f);
         mMesh.reset(Mesh::CreateBuiltinMesh(MeshType::TRIANGLE));
+
+        GfxTextureDesc textureDesc=ReadTexture(ASSETS_DIR "uv.png");
+        mColorTexture.reset(IGfxTexture::Create(Renderer::GetGfxDevice(),textureDesc));
 
         IGfxBufferDesc desc{};
         desc.bufferSize = sizeof(MeshUniformData);
@@ -33,6 +36,7 @@ namespace CynicEngine
 
         mShader->BindBuffer("cameraData", mCamera->GetRenderDataBuffer()->GetGfxBuffer());
         mShader->BindBuffer("meshUBO", mMeshUniformDataBuffer->GetGfxBuffer());
+        mShader->BindTexture("texSampler", mColorTexture.get());
     }
 
     void MeshDrawPass::Execute()
@@ -54,13 +58,13 @@ namespace CynicEngine
         renderer->AddRenderTask<MeshDrawPass>(
             "MeshDrawPass",
             true,
-            [&](MeshDrawPass &task, RenderTaskBuilder &builder)
+            [&](MeshDrawPass *task, RenderTaskBuilder &builder)
             {
-                task.Init();
+                task->Init();
             },
-            [=](MeshDrawPass &task)
+            [=](MeshDrawPass *task)
             {
-                task.Execute();
+                task->Execute();
             });
     }
 }

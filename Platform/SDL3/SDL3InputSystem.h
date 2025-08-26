@@ -2,6 +2,7 @@
 #include <vector>
 #include <SDL3/SDL.h>
 #include <memory>
+#include <functional>
 #include "Math/Vector2.h"
 #include "Platform/InputSystem.h"
 
@@ -87,7 +88,11 @@ namespace CynicEngine
         void Init() override;
         void PreTick(Window *pWindow) override;
         void PostTick() override;
+
+        void RegisterEventCallback(std::function<void(SDL_Event)> callback);
     private:
         void ProcessEvent(Window* pWindow);
+
+        std::vector<std::function<void(SDL_Event)>> mCallbacks;
     };
 }

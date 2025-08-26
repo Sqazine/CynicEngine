@@ -1,5 +1,6 @@
 #include "GfxVulkanTexture.h"
 #include "GfxVulkanDevice.h"
+#include "GfxVulkanBufferCommon.h"
 namespace CynicEngine
 {
     GfxVulkanTexture::GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImage swapchainImageRawHandle)
@@ -8,7 +9,8 @@ namespace CynicEngine
         if (swapchainImageRawHandle == VK_NULL_HANDLE)
         {
             mIsSwapChainImage = false;
-            CreateImage(VkImageUsageFlagBits(VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT));
+            CreateImage(VkImageUsageFlagBits(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT));
+            FillData();
         }
         else
         {
@@ -22,7 +24,7 @@ namespace CynicEngine
     GfxVulkanTexture::GfxVulkanTexture(IGfxDevice *device, const GfxTextureDesc &desc, VkImageUsageFlags usage)
         : IGfxTexture(desc), GfxVulkanObject(device), mIsSwapChainImage(false)
     {
-        CreateImage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        CreateImage(usage);
         CreateImageView();
         CreateSampler();
     }
@@ -45,16 +47,15 @@ namespace CynicEngine
         return GetAspectFromFormat(mDesc.format);
     }
 
-    void GfxVulkanTexture::CreateImage(VkImageUsageFlagBits usage)
+    void GfxVulkanTexture::CreateImage(VkImageUsageFlags usage)
     {
         VkImageCreateInfo imageInfo{};
         ZeroVulkanStruct(imageInfo, VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO);
-
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
         imageInfo.extent.width = mDesc.width;
         imageInfo.extent.height = mDesc.height;
         imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = mDesc.mipLevels;
+        imageInfo.mipLevels = mDesc.mipLevelCount;
         imageInfo.arrayLayers = 1;
         imageInfo.format = ToVkFormat(mDesc.format);
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -78,6 +79,26 @@ namespace CynicEngine
         vkBindImageMemory(mDevice->GetLogicDevice(), mHandle, mMemory, 0);
     }
 
+    void GfxVulkanTexture::FillData()
+    {
+        float imageSize = mDesc.width * mDesc.height * GetFormatByteCount(mDesc.format);
+        std::unique_ptr<GfxVulkanBuffer> stagingBuffer;
+        stagingBuffer.reset(GfxVulkanBufferCommon::CreateStagingBuffer(mDevice, imageSize));
+
+        GfxVulkanBufferCommon::SetCpuBufferData(stagingBuffer.get(), (size_t)imageSize, mDesc.data);
+
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, IGfxCommandType::TRANSFER, true);
+        commandBuffer->Begin();
+        commandBuffer->TransitionImageLayout(this, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        commandBuffer->CopyBufferToImage(stagingBuffer.get(), this, mDesc.width, mDesc.height);
+        commandBuffer->TransitionImageLayout(this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        commandBuffer->End();
+
+        commandBuffer->Submit();
+
+        stagingBuffer.reset();
+    }
+
     void GfxVulkanTexture::CreateImageView()
     {
         VkImageViewCreateInfo viewInfo{};
@@ -87,7 +108,7 @@ namespace CynicEngine
         viewInfo.format = ToVkFormat(mDesc.format);
         viewInfo.subresourceRange.aspectMask = GetAspectFromFormat(mDesc.format);
         viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = mDesc.mipLevels;
+        viewInfo.subresourceRange.levelCount = mDesc.mipLevelCount;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
 

@@ -2,6 +2,7 @@
 #include <string>
 #include <locale>
 #include <codecvt>
+#include "Gfx/IGfxTexture.h"
 namespace CynicEngine
 {
     namespace Utf8
@@ -20,4 +21,5 @@ namespace CynicEngine
     }
 
     std::string ReadFile(std::string_view path);
+    GfxTextureDesc ReadTexture(std::string_view path);
 }

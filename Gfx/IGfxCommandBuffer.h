@@ -24,6 +24,7 @@ namespace CynicEngine
         virtual IGfxCommandBuffer *BeginRenderPass(IGfxSwapChain *swapChain) = 0;
         virtual IGfxCommandBuffer *EndRenderPass() = 0;
         virtual IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) = 0;
+        virtual IGfxCommandBuffer *CopyBufferToImage(IGfxBuffer *src, IGfxTexture *dst, uint32_t width, uint32_t height) = 0;
         virtual IGfxCommandBuffer *BindRasterPipeline(IGfxRasterPipeline *pipeline) = 0;
         virtual IGfxCommandBuffer *BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer) = 0;
         virtual IGfxCommandBuffer *BindIndexBuffer(const IGfxIndexBuffer *indexBuffer) = 0;

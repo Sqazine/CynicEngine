@@ -16,6 +16,7 @@ namespace CynicEngine
 
         Window *GetWindow() const;
         InputSystem *GetInputSystem() const;
+        Renderer *GetRenderer() const;
 
     protected:
         enum class AppState

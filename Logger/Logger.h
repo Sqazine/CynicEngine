@@ -73,7 +73,7 @@ namespace CynicEngine
     do                                                                                  \
     {                                                                                   \
         CynicEngine::Logger::Log(CynicEngine::Logger::Kind::ERROR, fmt, ##__VA_ARGS__); \
-        assert(0);                                                                      \
+        abort();                                                                      \
     } while (false);
     
 #define CYNIC_ENGINE_LOG_WARN(fmt, ...)                                                \

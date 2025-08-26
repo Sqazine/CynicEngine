@@ -33,6 +33,7 @@ namespace CynicEngine
         virtual void Resize(const Vector2u32 &extent) = 0;
         virtual void Resize(uint32_t w, uint32_t h) = 0;
         virtual Vector2u32 GetSize() = 0;
+        virtual float GetAspect() = 0;
 
         virtual void Show() = 0;
         virtual void Hide() = 0;

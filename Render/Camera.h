@@ -31,6 +31,8 @@ namespace CynicEngine
 
         const IGfxUniformBuffer *GetRenderDataBuffer() const { return mRenderDataBuffer.get(); }
     protected:
+        void InitializeDefault(const Vector3f &position, const Vector3f &target);
+
         struct CameraRenderData
         {
             alignas(16) Matrix4f viewMatrix;

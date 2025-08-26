@@ -10,7 +10,7 @@ namespace CynicEngine
     class RenderTaskBase
     {
     public:
-        explicit RenderTaskBase(std::string_view name,bool cullImmune)
+        explicit RenderTaskBase(std::string_view name, bool cullImmune)
             : mName(name), mCullImmune(cullImmune), mRefCount(0)
         {
         }
@@ -50,10 +50,21 @@ namespace CynicEngine
     public:
         explicit RenderTask(std::string_view name,
                             bool cullImmune,
-                            const std::function<void(DataType &, RenderTaskBuilder &)> &setupFunction,
-                            const std::function<void(DataType &)> &executeFunction)
-            : RenderTaskBase(name,cullImmune), mSetupFunction(setupFunction), mExecuteFunction(executeFunction)
+                            const std::function<void(DataType *, RenderTaskBuilder &)> &setupFunction,
+                            const std::function<void(DataType *)> &executeFunction)
+            : RenderTaskBase(name, cullImmune), mSetupFunction(setupFunction), mExecuteFunction(executeFunction)
         {
+            mData = std::make_unique<DataType>();
+        }
+
+        explicit RenderTask(std::string_view name,
+                            bool cullImmune,
+                            const std::function<DataType *()> &createFunction,
+                            const std::function<void(DataType *, RenderTaskBuilder &)> &setupFunction,
+                            const std::function<void(DataType *)> &executeFunction)
+            : RenderTaskBase(name, cullImmune), mSetupFunction(setupFunction), mExecuteFunction(executeFunction)
+        {
+            mData.reset(createFunction());
         }
 
         RenderTask(const RenderTask &) = delete;
@@ -62,22 +73,22 @@ namespace CynicEngine
         RenderTask(RenderTask &&) = default;
         RenderTask &operator=(RenderTask &&) = default;
 
-        const DataType &GetData() const { return mData; }
+        const DataType *GetData() const { return mData.get(); }
 
     protected:
         void Setup(RenderTaskBuilder &builder) override
         {
-            mSetupFunction(mData, builder);
+            mSetupFunction(mData.get(), builder);
         }
 
         void Execute() override
         {
-            mExecuteFunction(mData);
+            mExecuteFunction(mData.get());
         }
 
-        DataType mData;
-        const std::function<void(DataType &, RenderTaskBuilder &)> mSetupFunction;
-        const std::function<void(DataType &)> mExecuteFunction;
+        std::unique_ptr<DataType> mData;
+        const std::function<void(DataType *, RenderTaskBuilder &)> mSetupFunction;
+        const std::function<void(DataType *)> mExecuteFunction;
     };
 
 }

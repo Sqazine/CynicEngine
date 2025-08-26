@@ -36,6 +36,11 @@ namespace CynicEngine
 		return mInputSystem.get();
 	}
 
+	Renderer *App::GetRenderer() const
+	{
+		return mRenderer.get();
+	}
+
 	void App::Init()
 	{
 		PlatformInfo::GetInstance().Init();

@@ -420,13 +420,13 @@ namespace CynicEngine
 
         for (float latNumber = 0; latNumber <= latitudeBands; latNumber++)
         {
-            float theta = latNumber * 3.14 / latitudeBands;
+            float theta = latNumber * Math::PI / latitudeBands;
             float sinTheta = sin(theta);
             float cosTheta = cos(theta);
 
             for (float longNumber = 0; longNumber <= longitudeBands; longNumber++)
             {
-                float phi = longNumber * 2 * 3.147 / longitudeBands;
+                float phi = longNumber * Math::TWO_PI / longitudeBands;
                 float sinPhi = sin(phi);
                 float cosPhi = cos(phi);
 

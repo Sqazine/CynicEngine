@@ -27,8 +27,9 @@ namespace CynicEngine
         void EndFrame() override;
         IGfxCommandBuffer *GetCurrentBackCommandBuffer() const override;
 
+        uint8_t GetBackBufferCount() const override;
+
         const VkSwapchainKHR &GetHandle() const { return mHandle; }
-        uint8_t GetBackBufferCount() const;
         uint8_t GetCurrentBackBufferIndex() const;
         VkExtent2D GetExtent() const;
         const VkSurfaceFormatKHR GetSurfaceFormat() const;
@@ -36,8 +37,6 @@ namespace CynicEngine
         GfxVulkanTexture *GetCurrentSwapChainBackTexture() const;
         VkFormat GetColorTextureFormat() const { return mSurfaceFormat.format; }
         VkFormat GetDepthTextureFormat() const { return ToVkFormat(mDepthBackTexture->GetDesc().format); }
-
-        Window *GetWindow() const { return mWindow; }
 
         VkRenderingAttachmentInfo *GetColorAttachment() { return &mColorAttachment; }
         VkRenderingAttachmentInfo *GetDepthAttachment() { return &mDepthAttachment; }
@@ -64,9 +63,6 @@ namespace CynicEngine
         void Present(const GfxVulkanSemaphore *waitFor = nullptr);
 
         void CleanUpResource();
-
-
-        Window *mWindow;
 
         uint32_t mPresentFamilyIdx{0};
         VkQueue mPresentQueue{VK_NULL_HANDLE};

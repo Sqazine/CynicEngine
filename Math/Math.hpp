@@ -5,6 +5,7 @@
 namespace CynicEngine::Math
 {
 	constexpr float PI = 3.1415926535f;
+	constexpr float TWO_PI = PI * 2.0f;
 
 	template <typename T>
 	inline T ToRadian(const T &degree)

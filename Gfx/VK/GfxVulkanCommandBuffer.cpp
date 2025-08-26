@@ -140,7 +140,7 @@ namespace CynicEngine
         return this;
     }
 
-    IGfxCommandBuffer *GfxVulkanCommandBuffer::TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout)
     {
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -151,7 +151,7 @@ namespace CynicEngine
         barrier.image = texture->GetHandle();
         barrier.subresourceRange.aspectMask = texture->GetAspect();
         barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = mipLevels;
+        barrier.subresourceRange.levelCount = texture->GetMipLevelCount();
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = 1;
 
@@ -213,6 +213,27 @@ namespace CynicEngine
         VkBufferCopy copyRegion{};
         copyRegion.size = static_cast<VkDeviceSize>(bufferSize);
         vkCmdCopyBuffer(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanBuffer->GetHandle(), 1, &copyRegion);
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::CopyBufferToImage(IGfxBuffer *src, IGfxTexture *dst, uint32_t width, uint32_t height)
+    {
+        auto srcVulkanBuffer = dynamic_cast<GfxVulkanBuffer *>(src);
+        auto dstVulkanTexture = dynamic_cast<GfxVulkanTexture *>(dst);
+
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = dstVulkanTexture->GetAspect();
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = {0, 0, 0};
+        region.imageExtent = {width,height,1};
+
+        vkCmdCopyBufferToImage(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
         return this;
     }
 

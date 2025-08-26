@@ -64,26 +64,26 @@ int main(int argc, char *argv[])
     auto RenderTask1 = frameGraph.AddRenderTask<RenderTask1Data>(
         "Render Task 1",
         false,
-        [&](RenderTask1Data &data, CynicEngine::RenderTaskBuilder &builder)
+        [&](RenderTask1Data *data, CynicEngine::RenderTaskBuilder &builder)
         {
-            data.output1 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer Albedo", GLResource::TextureDescription());
-            data.output2 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer Normal", GLResource::TextureDescription());
-            data.output3 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer MetalRoughness", GLResource::TextureDescription());
-            data.output4 = builder.Write<GLResource::Texture2DResource>(retainedResource);
+            data->output1 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer Albedo", GLResource::TextureDescription());
+            data->output2 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer Normal", GLResource::TextureDescription());
+            data->output3 = builder.CreateResource<GLResource::Texture2DResource>("GBuffer MetalRoughness", GLResource::TextureDescription());
+            data->output4 = builder.Write<GLResource::Texture2DResource>(retainedResource);
         },
-        [=](const RenderTask1Data &data)
+        [=](const RenderTask1Data *data)
         {
             // Perform actual rendering. You may load resources from CPU by capturing them.
-            auto actual1 = data.output1->GetActualData();
-            auto actual2 = data.output2->GetActualData();
-            auto actual3 = data.output3->GetActualData();
-            auto actual4 = data.output4->GetActualData();
+            auto actual1 = data->output1->GetActualData();
+            auto actual2 = data->output2->GetActualData();
+            auto actual3 = data->output3->GetActualData();
+            auto actual4 = data->output4->GetActualData();
         });
 
     auto data1 = RenderTask1->GetData();
-    assert(data1.output1->GetId() == 1);
-    assert(data1.output2->GetId() == 2);
-    assert(data1.output3->GetId() == 3);
+    assert(data1->output1->GetId() == 1);
+    assert(data1->output2->GetId() == 2);
+    assert(data1->output3->GetId() == 3);
 
     struct RenderTask2Data
     {
@@ -96,27 +96,27 @@ int main(int argc, char *argv[])
     auto RenderTask2 = frameGraph.AddRenderTask<RenderTask2Data>(
         "Render Task 2",
         false,
-        [&](RenderTask2Data &data, CynicEngine::RenderTaskBuilder &builder)
+        [&](RenderTask2Data *data, CynicEngine::RenderTaskBuilder &builder)
         {
-            data.input1 = builder.Read(data1.output1);
-            data.input2 = builder.Read(data1.output2);
-            data.output1 = builder.Write(data1.output3);
-            data.output2 = builder.CreateResource<GLResource::Texture2DResource>("SSAO Map", GLResource::TextureDescription());
+            data->input1 = builder.Read(data1->output1);
+            data->input2 = builder.Read(data1->output2);
+            data->output1 = builder.Write(data1->output3);
+            data->output2 = builder.CreateResource<GLResource::Texture2DResource>("SSAO Map", GLResource::TextureDescription());
         },
-        [=](const RenderTask2Data &data)
+        [=](const RenderTask2Data *data)
         {
             // Perform actual rendering. You may load resources from CPU by capturing them.
-            auto actual1 = data.input1->GetActualData();
-            auto actual2 = data.input2->GetActualData();
-            auto actual3 = data.output1->GetActualData();
-            auto actual4 = data.output2->GetActualData();
+            auto actual1 = data->input1->GetActualData();
+            auto actual2 = data->input2->GetActualData();
+            auto actual3 = data->output1->GetActualData();
+            auto actual4 = data->output2->GetActualData();
         });
 
     auto data2 = RenderTask2->GetData();
-    assert(data2.input1->GetId() == 1);
-    assert(data2.input2->GetId() == 2);
-    assert(data2.output1->GetId() == 3);
-    assert(data2.output2->GetId() == 4);
+    assert(data2->input1->GetId() == 1);
+    assert(data2->input2->GetId() == 2);
+    assert(data2->output1->GetId() == 3);
+    assert(data2->output2->GetId() == 4);
 
     struct RenderTask3Data
     {
@@ -128,18 +128,18 @@ int main(int argc, char *argv[])
     auto RenderTask3 = frameGraph.AddRenderTask<RenderTask3Data>(
         "Render Task 3",
         false,
-        [&](RenderTask3Data &data, CynicEngine::RenderTaskBuilder &builder)
+        [&](RenderTask3Data *data, CynicEngine::RenderTaskBuilder &builder)
         {
-            data.input1 = builder.Read(data2.output1);
-            data.input2 = builder.Read(data2.output2);
-            data.output = builder.Write(retainedResource);
+            data->input1 = builder.Read(data2->output1);
+            data->input2 = builder.Read(data2->output2);
+            data->output = builder.Write(retainedResource);
         },
-        [=](const RenderTask3Data &data)
+        [=](const RenderTask3Data *data)
         {
             // Perform actual rendering. You may load resources from CPU by capturing them.
-            auto actual1 = data.input1->GetActualData();
-            auto actual2 = data.input2->GetActualData();
-            auto actual3 = data.output->GetActualData();
+            auto actual1 = data->input1->GetActualData();
+            auto actual2 = data->input2->GetActualData();
+            auto actual3 = data->output->GetActualData();
         });
 
     frameGraph.Compile();

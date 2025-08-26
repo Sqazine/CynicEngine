@@ -21,6 +21,7 @@ namespace CynicEngine
         IGfxCommandBuffer *BeginRenderPass(IGfxSwapChain *swapChain) override;
         IGfxCommandBuffer *EndRenderPass() override;
         IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
+        IGfxCommandBuffer *CopyBufferToImage(IGfxBuffer *src, IGfxTexture *dst, uint32_t width, uint32_t height) override;
         IGfxCommandBuffer *BindRasterPipeline(IGfxRasterPipeline *pipeline) override;
         IGfxCommandBuffer *BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer) override;
         IGfxCommandBuffer *BindIndexBuffer(const IGfxIndexBuffer *indexBuffer) override;
@@ -28,7 +29,7 @@ namespace CynicEngine
 
         IGfxCommandBuffer *Submit(GfxVulkanSemaphore *waitSemaphore = nullptr);
 
-        IGfxCommandBuffer *TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+        IGfxCommandBuffer *TransitionImageLayout(GfxVulkanTexture *texture, VkImageLayout oldLayout, VkImageLayout newLayout);
 
         GfxVulkanFence *GetFence() const { return mFence.get(); }
         GfxVulkanSemaphore *GetSignalSemaphore() const { return mSignalSemaphore.get(); }

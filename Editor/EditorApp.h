@@ -5,22 +5,25 @@
 #include <vector>
 #include "Core/Singleton.h"
 #include "Core/App.h"
+#include "Math/Matrix4.h"
 namespace CynicEngine
 {
-    class EditorApp : public App, public Singleton<EditorApp>
+    class EditorApp : public App
     {
     public:
         EditorApp() = default;
         ~EditorApp() override = default;
 
     protected:
-    
-        void Init() override;
-        void PreTick() override;
-        void Tick() override;
-        void Render() override;
-        void RenderGizmo() override;
-        void PostTick() override;
-        void Destroy() override;
+        virtual void Init() override;
+        virtual void PreTick() override;
+        virtual void Tick() override;
+        virtual void Render() override;
+        virtual void RenderGizmo() override;
+        virtual void RenderUI();
+        virtual void PostTick() override;
+        virtual void Destroy() override;
+
+        void AddEditorUIPass();
     };
 }

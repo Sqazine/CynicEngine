@@ -4,6 +4,8 @@
 #include <vector>
 #include "Core/Common.h"
 #include "Logger/Logger.h"
+#include "Gfx/IGfxDevice.h"
+#include "Gfx/IGfxBuffer.h"
 namespace CynicEngine
 {
     inline STRING_VIEW GetErrorCode(const VkResult result)
@@ -96,6 +98,7 @@ namespace CynicEngine
     enum class IGfxAddressMode;
     enum class IGfxIndexType;
     class GfxVulkanDevice;
+    class GfxVulkanBuffer;
     struct IGfxVertexDesc;
 
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type);

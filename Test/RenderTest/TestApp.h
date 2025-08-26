@@ -5,9 +5,10 @@
 #include <vector>
 #include "Core/Singleton.h"
 #include "Core/App.h"
+#include "Editor/EditorApp.h"
 namespace CynicEngine
 {
-    class TestApp : public App, public Singleton<TestApp>
+    class TestApp : public EditorApp, public Singleton<TestApp>
     {
     public:
         TestApp() = default;
@@ -19,7 +20,13 @@ namespace CynicEngine
         void Tick() override;
         void Render() override;
         void RenderGizmo() override;
+        void RenderUI() override;
         void PostTick() override;
         void Destroy() override;
+
+        bool mShowDemoWindow = true;
+        bool mShowAnotherWindow = false;
+        Vector4f mClearColor = Vector4f(0.45f, 0.55f, 0.60f, 1.00f);
     };
+
 }

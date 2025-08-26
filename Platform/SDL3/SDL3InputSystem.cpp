@@ -155,7 +155,7 @@ namespace CynicEngine
     }
 
     SDL3Mouse::SDL3Mouse()
-        : mCurPos(Vector2f::ZERO), mPrePos(Vector2f::ZERO), mMouseScrollWheel(Vector2f::ZERO), mCurButtons(0), mPreButtons(0)
+        : mCurPos(Vector2f::ZERO), mPrePos(Vector2f::ZERO), mMouseScrollWheel(Vector2f::ZERO), mCurButtons(0), mPreButtons(0), mIsRelative(false)
     {
     }
     SDL3Mouse::~SDL3Mouse()
@@ -202,7 +202,7 @@ namespace CynicEngine
     void SDL3Mouse::SetReleativeMode(Window *pWindow, bool isActive)
     {
         mIsRelative = isActive;
-        
+
         auto sdlWindow = static_cast<SDL3Window *>(pWindow)->GetHandle();
 
         if (isActive)
@@ -211,7 +211,7 @@ namespace CynicEngine
             SDL_SetWindowRelativeMouseMode(sdlWindow, false);
     }
 
-    bool SDL3Mouse::IsReleativeMode(Window* pWindow) const
+    bool SDL3Mouse::IsReleativeMode(Window *pWindow) const
     {
         return mIsRelative;
     }
@@ -313,11 +313,21 @@ namespace CynicEngine
         ((SDL3Mouse *)mMouse.get())->mCurPos = p;
     }
 
+    void SDL3InputSystem::RegisterEventCallback(std::function<void(SDL_Event)> callback)
+    {
+        mCallbacks.emplace_back(callback);
+    }
+
     void SDL3InputSystem::ProcessEvent(Window *pWindow)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+            for (const auto& callback : mCallbacks)
+            {
+                callback(event);
+            }
+
             switch (event.type)
             {
             case SDL_EVENT_MOUSE_WHEEL:

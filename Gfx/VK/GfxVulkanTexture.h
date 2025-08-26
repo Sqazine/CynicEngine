@@ -18,7 +18,8 @@ namespace CynicEngine
         VkSampler GetSampler() const { return mSampler; }
 
     private:
-        void CreateImage(VkImageUsageFlagBits usage);
+        void CreateImage(VkImageUsageFlags usage);
+        void FillData();
         void CreateImageView();
         void CreateSampler();
 

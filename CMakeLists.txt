@@ -8,6 +8,12 @@ else()
     set(CYNIC_ENGINE_LIB_NAME CynicEngine CACHE INTERNAL "CynicEngine library name")
 endif()
 
+if(MSVC OR ${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
+    set(CYNIC_EDITOR_LIB_NAME libCynicEditor CACHE INTERNAL "CynicEngine editor name")
+else()
+    set(CYNIC_EDITOR_LIB_NAME CynicEditor CACHE INTERNAL "CynicEngine editor name")
+endif()
+
 project(${PROJECT_NAME})
 
 configure_file(Config/Version.h.in generated/Version.h @ONLY)
@@ -54,6 +60,9 @@ option(CYNIC_ENGINE_BUILD_TEST "build test example" ON)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rd")
 set(SDL_INC_DIR "${THIRD_PARTY_DIR}/SDL/include")
+set(STB_INC_DIR "${THIRD_PARTY_DIR}/stb")
+set(IMGUI_INC_DIR "${THIRD_PARTY_DIR}/imgui")
+set(IMGUI_BACKEND_INC_DIR "${THIRD_PARTY_DIR}/imgui/backends")
 set(CYS_INC_DIR "${THIRD_PARTY_DIR}/CynicScript")
 set(SPIRV_REFLECT_INC_DIR "${THIRD_PARTY_DIR}/SPIRV-Reflect")
 
@@ -81,6 +90,7 @@ file(GLOB GENERATED_SRC "${GENERATED_DIR}/*.cpp" "${GENERATED_DIR}/*.h"  "${GENE
 file(GLOB CONFIG_SRC "${CMAKE_SOURCE_DIR}/Config/*.cpp" "${CMAKE_SOURCE_DIR}/Config/*.h" "${CMAKE_SOURCE_DIR}/Config/*.inl")
 file(GLOB CORE_SRC "${CMAKE_SOURCE_DIR}/Core/*.cpp" "${CMAKE_SOURCE_DIR}/Core/*.h" "${CMAKE_SOURCE_DIR}/Core/*.inl")
 file(GLOB EDITOR_SRC "${CMAKE_SOURCE_DIR}/Editor/*.cpp" "${CMAKE_SOURCE_DIR}/Editor/*.h" "${CMAKE_SOURCE_DIR}/Editor/*.inl")
+file(GLOB EDITOR_UI_PASS_SRC "${CMAKE_SOURCE_DIR}/Editor/EditorUIPass/*.cpp" "${CMAKE_SOURCE_DIR}/Editor/EditorUIPass/*.h" "${CMAKE_SOURCE_DIR}/Editor/EditorUIPass/*.inl")
 file(GLOB GFX_SRC "${CMAKE_SOURCE_DIR}/Gfx/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/*.h" "${CMAKE_SOURCE_DIR}/Gfx/*.inl")
 file(GLOB GFX_VULKAN_SRC "${CMAKE_SOURCE_DIR}/Gfx/VK/*.cpp" "${CMAKE_SOURCE_DIR}/Gfx/VK/*.h" "${CMAKE_SOURCE_DIR}/Gfx/VK/*.inl")
 file(GLOB LOGGER_SRC "${CMAKE_SOURCE_DIR}/Logger/*.cpp" "${CMAKE_SOURCE_DIR}/Logger/*.h" "${CMAKE_SOURCE_DIR}/Logger/*.inl")
@@ -89,11 +99,15 @@ file(GLOB PLATFORM_SRC "${CMAKE_SOURCE_DIR}/Platform/*.cpp" "${CMAKE_SOURCE_DIR}
 file(GLOB PLATFORM_SDL3_SRC "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.cpp" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.h" "${CMAKE_SOURCE_DIR}/Platform/SDL3/*.inl")
 file(GLOB RENDER_SRC "${CMAKE_SOURCE_DIR}/Render/*.cpp" "${CMAKE_SOURCE_DIR}/Render/*.h" "${CMAKE_SOURCE_DIR}/Render/*.inl")
 file(GLOB FRAMEGRAPH_SRC "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.cpp" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.h" "${CMAKE_SOURCE_DIR}/Render/FrameGraph/*.inl")
+file(GLOB STB_SRC "${CMAKE_SOURCE_DIR}/3rd/stb/*.cpp" "${CMAKE_SOURCE_DIR}/3rd/stb/*.h" "${CMAKE_SOURCE_DIR}/3rd/stb/*.inl")
+file(GLOB IMGUI_SRC "${CMAKE_SOURCE_DIR}/3rd/imgui/*.cpp" "${CMAKE_SOURCE_DIR}/3rd/imgui/*.h" "${CMAKE_SOURCE_DIR}/3rd/imgui/*.inl")
+file(GLOB IMGUI_BACKEND_SRC "${IMGUI_BACKEND_INC_DIR}/imgui_impl_sdl3.h" "${IMGUI_BACKEND_INC_DIR}/imgui_impl_sdl3.cpp" "${IMGUI_BACKEND_INC_DIR}/imgui_impl_vulkan.cpp" "${IMGUI_BACKEND_INC_DIR}/imgui_impl_vulkan.h")
 
 source_group("generated" FILES ${GENERATED_SRC})
 source_group("Config" FILES ${CONFIG_SRC})
 source_group("Core" FILES ${CORE_SRC})
 source_group("Editor" FILES ${EDITOR_SRC})
+source_group("Editor/EditorUIPass" FILES ${EDITOR_UI_PASS_SRC})
 source_group("Gfx" FILES ${GFX_SRC})
 source_group("Gfx/VK" FILES ${GFX_VULKAN_SRC})
 source_group("Logger" FILES ${LOGGER_SRC})
@@ -102,6 +116,9 @@ source_group("Platform" FILES ${PLATFORM_SRC})
 source_group("Platform/SDL3" FILES ${PLATFORM_SDL3_SRC})
 source_group("Render" FILES ${RENDER_SRC})
 source_group("Render/FrameGraph" FILES ${FRAMEGRAPH_SRC})
+source_group("External/stb" FILES ${STB_SRC})
+source_group("External/imgui" FILES ${IMGUI_SRC})
+source_group("External/imgui/backends" FILES ${IMGUI_BACKEND_SRC})
 
 set(CYNIC_SRC
     ${GENERATED_SRC}
@@ -115,12 +132,15 @@ set(CYNIC_SRC
     ${PLATFORM_SDL3_SRC}
     ${RENDER_SRC}
     ${FRAMEGRAPH_SRC}
+    ${STB_SRC}
 )
 
 set(CYNIC_INC_DIRS 
     ${CMAKE_SOURCE_DIR}
     ${GENERATED_DIR}
     ${CMAKE_SOURCE_DIR}/Core
+    ${CMAKE_SOURCE_DIR}/Editor
+    ${CMAKE_SOURCE_DIR}/Editor/EditorUIPass
     ${CMAKE_SOURCE_DIR}/Gfx
     ${CMAKE_SOURCE_DIR}/Gfx/VK
     ${CMAKE_SOURCE_DIR}/Logger
@@ -131,6 +151,7 @@ set(CYNIC_INC_DIRS
     ${CMAKE_SOURCE_DIR}/Render/FrameGraph
 
     ${SDL_INC_DIR}
+    ${STB_INC_DIR}
     ${CYS_INC_DIR}
     ${SPIRV_REFLECT_INC_DIR}
 )
@@ -157,15 +178,33 @@ target_include_directories(${CYNIC_ENGINE_LIB_NAME}  PUBLIC ${CYNIC_INC_DIRS})
 target_link_libraries(${CYNIC_ENGINE_LIB_NAME} PUBLIC ${THIRDPARTY_LIB})
 target_compile_definitions(${CYNIC_ENGINE_LIB_NAME} PUBLIC ${COMPILE_DEFINITIONS})
 
+list(APPEND EDITOR_SRC  
+                        ${IMGUI_SRC}
+                        ${IMGUI_BACKEND_SRC}
+)
+
+list(APPEND CYNIC_INC_DIRS ${IMGUI_INC_DIR}
+                           ${IMGUI_BACKEND_INC_DIR}
+)
+
+set(CYNIC_EDITOR_SRC
+    ${EDITOR_SRC}
+    ${EDITOR_UI_PASS_SRC}
+)
+
+add_library(${CYNIC_EDITOR_LIB_NAME} ${CYNIC_EDITOR_SRC})
+target_include_directories(${CYNIC_EDITOR_LIB_NAME} PUBLIC ${CYNIC_INC_DIRS} ${CMAKE_SOURCE_DIR}/Editor)
+target_link_libraries(${CYNIC_EDITOR_LIB_NAME} PUBLIC ${CYNIC_ENGINE_LIB_NAME} ${THIRDPARTY_LIB})
+target_compile_definitions(${CYNIC_EDITOR_LIB_NAME} PUBLIC ${COMPILE_DEFINITIONS})
+
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/Editor/EditorMainEntry.cc)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS} ${CMAKE_SOURCE_DIR}/Editor)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CYNIC_EDITOR_LIB_NAME} ${CYNIC_ENGINE_LIB_NAME} ${THIRDPARTY_LIB})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${COMPILE_DEFINITIONS})
+
 if(CYNIC_ENGINE_BUILD_TEST)
     add_subdirectory(Test)
 endif()
-
-add_executable(${PROJECT_NAME} ${EDITOR_SRC})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CYNIC_INC_DIRS} ${CMAKE_SOURCE_DIR}/Editor)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CYNIC_ENGINE_LIB_NAME} ${THIRDPARTY_LIB})
-target_compile_definitions(${PROJECT_NAME} PUBLIC ${COMPILE_DEFINITIONS})
-
 
 if(${CURRENT_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
     target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)

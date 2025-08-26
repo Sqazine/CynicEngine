@@ -5,6 +5,7 @@
 #include "Render/Camera.h"
 #include "Gfx/IGfxShader.h"
 #include "Gfx/IGfxPipeline.h"
+#include "Gfx/IGfxTexture.h"
 namespace CynicEngine
 {
     class MeshDrawPass
@@ -22,6 +23,7 @@ namespace CynicEngine
 
         std::unique_ptr<Camera> mCamera;
         std::unique_ptr<Mesh> mMesh;
+        std::unique_ptr<IGfxTexture> mColorTexture;
         std::unique_ptr<IGfxUniformBuffer> mMeshUniformDataBuffer;
         std::unique_ptr<IGfxRasterShader> mShader;
         std::unique_ptr<IGfxRasterPipeline> mRasterPipeline;

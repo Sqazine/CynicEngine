@@ -4,24 +4,12 @@ namespace CynicEngine
 {
     Camera::Camera()
     {
-        CreateRenderDataBuffer();
-        SetPosition(Vector3f::UNIT_Z);
-        SetTarget(Vector3f::ZERO);
-        SetFovByDegree(45.0f);
-        SetAspect(1.777778f);
-        SetZNear(0.1f);
-        SetZFar(1000.0f);
+        InitializeDefault(Vector3f::UNIT_Z, Vector3f::ZERO);
     }
 
     Camera::Camera(const Vector3f &position, const Vector3f &target)
     {
-        CreateRenderDataBuffer();
-        SetPosition(position);
-        SetTarget(target);
-        SetFovByDegree(45.0f);
-        SetAspect(1.777778f);
-        SetZNear(0.1f);
-        SetZFar(1000.0f);
+        InitializeDefault(position, target);
     }
 
     Camera *Camera::SetPosition(const Vector3f &position)
@@ -73,6 +61,17 @@ namespace CynicEngine
         mZFar = zFar;
         UpdateProjectionMatrix();
         return this;
+    }
+
+    void Camera::InitializeDefault(const Vector3f &position, const Vector3f &target)
+    {
+        CreateRenderDataBuffer();
+        SetPosition(position);
+        SetTarget(target);
+        SetFovByDegree(60.0f);
+        SetAspect(Renderer::GetGfxDevice()->GetSwapChain()->GetAspect());
+        SetZNear(0.1f);
+        SetZFar(1000.0f);
     }
 
     void Camera::CreateRenderDataBuffer()

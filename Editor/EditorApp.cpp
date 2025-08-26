@@ -2,12 +2,14 @@
 #include "Logger/Logger.h"
 #include "Config/AppConfig.h"
 #include "Platform/PlatformInfo.h"
-
+#include "EditorUIPass/EditorUIPass.h"
 namespace CynicEngine
 {
     void EditorApp::Init()
     {
         App::Init();
+
+        AddEditorUIPass();
     }
 
     void EditorApp::Tick()
@@ -25,6 +27,10 @@ namespace CynicEngine
         App::RenderGizmo();
     }
 
+    void EditorApp::RenderUI()
+    {
+    }
+
     void EditorApp::Destroy()
     {
         App::Destroy();
@@ -40,8 +46,26 @@ namespace CynicEngine
         App::PostTick();
     }
 
-    void MainEntry(int argc, char *argv[])
+    void EditorApp::AddEditorUIPass()
     {
-        EditorApp::GetInstance().Run();
+        GetRenderer()->AddRenderTask<EditorUIPass>(
+            "EditorUIPass",
+            true,
+            [&]()
+            {
+                return EditorUIPass::Create(this);
+            },
+            [&](EditorUIPass *task, RenderTaskBuilder &builder)
+            {
+                task->Init();
+            },
+            [&](EditorUIPass *task)
+            {
+                task->BeginRender();
+
+                this->RenderUI();
+
+                task->EndRender();
+            });
     }
 }

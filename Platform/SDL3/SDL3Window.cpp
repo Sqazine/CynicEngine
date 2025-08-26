@@ -83,6 +83,12 @@ namespace CynicEngine
         return Vector2u32(static_cast<uint32_t>(x), static_cast<uint32_t>(y));
     }
 
+    float SDL3Window::GetAspect()
+    {
+        auto size = GetSize();
+        return static_cast<float>(size.x) / static_cast<float>(size.y);
+    }
+
     SDL_Window *SDL3Window::GetHandle() const
     {
         return mHandle;
