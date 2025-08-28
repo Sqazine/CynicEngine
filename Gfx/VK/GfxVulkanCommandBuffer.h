@@ -19,6 +19,7 @@ namespace CynicEngine
         IGfxCommandBuffer *Begin() override;
         IGfxCommandBuffer *End() override;
         IGfxCommandBuffer *BeginRenderPass(IGfxSwapChain *swapChain) override;
+        IGfxCommandBuffer *BeginRenderPass(uint8_t colorAttachmentCount, GfxTextureAttachment *colorAttachments, GfxTextureAttachment *depthAttachment) override;
         IGfxCommandBuffer *EndRenderPass() override;
         IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
         IGfxCommandBuffer *CopyBufferToImage(IGfxBuffer *src, IGfxTexture *dst, uint32_t width, uint32_t height) override;

@@ -1,4 +1,5 @@
 #include "IGfxTexture.h"
+#include "IGfxDevice.h"
 #include "Config/AppConfig.h"
 #include "Logger/Logger.h"
 #include "Core/Marco.h"

@@ -86,8 +86,56 @@ namespace CynicEngine
         renderingInfo.renderArea.extent = extent;
         renderingInfo.layerCount = 1;
         renderingInfo.colorAttachmentCount = 1;
-        renderingInfo.pColorAttachments = vulkanSwapChain->GetColorAttachment();
-        renderingInfo.pDepthAttachment = vulkanSwapChain->GetDepthAttachment();
+        renderingInfo.pColorAttachments = vulkanSwapChain->GetVulkanColorAttachment();
+        renderingInfo.pDepthAttachment = vulkanSwapChain->GetVulkanDepthAttachment();
+
+        vkCmdBeginRendering(mHandle, &renderingInfo);
+
+        return this;
+    }
+
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BeginRenderPass(uint8_t colorAttachmentCount, GfxTextureAttachment *colorAttachments, GfxTextureAttachment *depthAttachment)
+    {
+        std::vector<VkRenderingAttachmentInfo> rawColorAttachments(colorAttachmentCount);
+        for (size_t i = 0; i < colorAttachmentCount; ++i)
+        {
+            ZeroVulkanStruct(rawColorAttachments[i], VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
+            rawColorAttachments[i].imageView = static_cast<GfxVulkanTexture *>(colorAttachments[i].texture)->GetView();
+            rawColorAttachments[i].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            rawColorAttachments[i].resolveMode = VK_RESOLVE_MODE_NONE;
+            rawColorAttachments[i].resolveImageView = nullptr;
+            rawColorAttachments[i].resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            rawColorAttachments[i].loadOp = ToVkAttachmentOp(colorAttachments[i].loadOp);
+            rawColorAttachments[i].storeOp = ToVkAttachmentOp(colorAttachments[i].storeOp);
+			rawColorAttachments[i].clearValue.color.float32[0] = colorAttachments[i].clearValue.color.x;
+			rawColorAttachments[i].clearValue.color.float32[1] = colorAttachments[i].clearValue.color.y;
+			rawColorAttachments[i].clearValue.color.float32[2] = colorAttachments[i].clearValue.color.z;
+			rawColorAttachments[i].clearValue.color.float32[3] = colorAttachments[i].clearValue.color.w;
+        }
+
+        VkRenderingAttachmentInfo rawDepthAttachment;
+        ZeroVulkanStruct(rawDepthAttachment, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
+        rawDepthAttachment.imageView = static_cast<GfxVulkanTexture *>(depthAttachment->texture)->GetView();
+        rawDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        rawDepthAttachment.resolveMode = VK_RESOLVE_MODE_NONE;
+        rawDepthAttachment.resolveImageView = nullptr;
+        rawDepthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        rawDepthAttachment.loadOp = ToVkAttachmentOp(depthAttachment->loadOp);
+        rawDepthAttachment.storeOp = ToVkAttachmentOp(depthAttachment->storeOp);
+        rawDepthAttachment.clearValue = {{1.0f, 0.0f}};
+
+        VkExtent2D extent = {depthAttachment->texture->GetDesc().width, depthAttachment->texture->GetDesc().height};
+
+        VkRenderingInfo renderingInfo;
+        ZeroVulkanStruct(renderingInfo, VK_STRUCTURE_TYPE_RENDERING_INFO);
+        renderingInfo.pNext = nullptr;
+        renderingInfo.flags = 0;
+        renderingInfo.renderArea.offset = {0, 0};
+        renderingInfo.renderArea.extent = extent;
+        renderingInfo.layerCount = 1;
+        renderingInfo.colorAttachmentCount = colorAttachmentCount;
+        renderingInfo.pColorAttachments = rawColorAttachments.data();
+        renderingInfo.pDepthAttachment = &rawDepthAttachment;
 
         vkCmdBeginRendering(mHandle, &renderingInfo);
         VkViewport viewport{};
@@ -106,6 +154,7 @@ namespace CynicEngine
 
         return this;
     }
+
     IGfxCommandBuffer *GfxVulkanCommandBuffer::EndRenderPass()
     {
         vkCmdEndRendering(mHandle);
@@ -230,7 +279,7 @@ namespace CynicEngine
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = 1;
         region.imageOffset = {0, 0, 0};
-        region.imageExtent = {width,height,1};
+        region.imageExtent = {width, height, 1};
 
         vkCmdCopyBufferToImage(mHandle, srcVulkanBuffer->GetHandle(), dstVulkanTexture->GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 

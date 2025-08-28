@@ -156,4 +156,55 @@ namespace CynicEngine
 
         return result;
     }
+
+    VkAttachmentLoadOp ToVkAttachmentOp(AttachmentLoadOp loadOp)
+    {
+        switch (loadOp)
+        {
+        case AttachmentLoadOp::LOAD:
+            return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case AttachmentLoadOp::CLEAR:
+            return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case AttachmentLoadOp::DONT_CARE:
+            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown AttachmentOp"));
+            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        }
+    }
+
+    VkAttachmentStoreOp ToVkAttachmentOp(AttachmentStoreOp storeOp)
+    {
+        switch (storeOp)
+        {
+        case AttachmentStoreOp::STORE:
+            return VK_ATTACHMENT_STORE_OP_STORE;
+        case AttachmentStoreOp::DONT_CARE:
+            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown AttachmentOp"));
+            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        }
+    }
+
+    VkClearValue ToVkClearValue(GfxClearValue clearValue)
+    {
+        VkClearValue result;
+        *result.color.float32 = *clearValue.color.valuesRawArray;
+        return result;
+    }
+
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxTextureAttachment &attachment)
+    {
+        VkRenderingAttachmentInfo result;
+        result.imageView = static_cast<GfxVulkanTexture *>(attachment.texture)->GetView();
+        result.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        result.resolveMode = VK_RESOLVE_MODE_NONE;
+        result.resolveImageView = nullptr;
+        result.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        result.loadOp = ToVkAttachmentOp(attachment.loadOp);
+        result.storeOp = ToVkAttachmentOp(attachment.storeOp);
+        result.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
+        return result;
+    }
 }

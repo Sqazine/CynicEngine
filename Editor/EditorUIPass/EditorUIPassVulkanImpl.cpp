@@ -26,17 +26,16 @@ namespace CynicEngine
     EditorUIPassVulkanImpl::EditorUIPassVulkanImpl(EditorApp *editorApp)
         : mEditorApp(editorApp)
     {
-        auto sdlInputSystem = static_cast<SDL3InputSystem*>(mEditorApp->GetInputSystem());
+        auto sdlInputSystem = static_cast<SDL3InputSystem *>(mEditorApp->GetInputSystem());
         sdlInputSystem->RegisterEventCallback([](SDL_Event event)
-                                              { 
-                                                ImGui_ImplSDL3_ProcessEvent(&event); 
-                                            });
+                                              { ImGui_ImplSDL3_ProcessEvent(&event); });
     }
 
     EditorUIPassVulkanImpl::~EditorUIPassVulkanImpl()
     {
         GfxVulkanDevice *vulkanDevice = static_cast<GfxVulkanDevice *>(Renderer::GetGfxDevice());
         vulkanDevice->WaitIdle();
+        vkDestroyDescriptorPool(vulkanDevice->GetLogicDevice(), mDescriptorPool, nullptr);
     }
 
     void EditorUIPassVulkanImpl::Init()
@@ -63,8 +62,7 @@ namespace CynicEngine
 
         GfxVulkanDevice *vulkanDevice = static_cast<GfxVulkanDevice *>(Renderer::GetGfxDevice());
 
-        VkDescriptorPool descriptorPool;
-        VK_CHECK(vkCreateDescriptorPool(vulkanDevice->GetLogicDevice(), &poolInfo, nullptr, &descriptorPool))
+        VK_CHECK(vkCreateDescriptorPool(vulkanDevice->GetLogicDevice(), &poolInfo, nullptr, &mDescriptorPool))
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -104,7 +102,7 @@ namespace CynicEngine
         init_info.QueueFamily = vulkanDevice->GetPhysicalDeviceSpec().queueFamilyIndices.graphicsFamilyIdx.value();
         init_info.Queue = vulkanDevice->GetGraphicsQueue();
         init_info.PipelineCache = VK_NULL_HANDLE;
-        init_info.DescriptorPool = descriptorPool;
+        init_info.DescriptorPool = mDescriptorPool;
         init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         init_info.Allocator = nullptr;
         init_info.MinImageCount = vulkanDevice->GetSwapChain()->GetBackBufferCount();
@@ -146,6 +144,9 @@ namespace CynicEngine
         if (!is_minimized)
         {
             auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
+            swapChain->SetColorAttachmentLoadOp(AttachmentLoadOp::LOAD);
+            swapChain->SetDepthAttachmentLoadOp(AttachmentLoadOp::LOAD);
+
             auto vulkanCommandBuffer = static_cast<GfxVulkanCommandBuffer *>(swapChain->GetCurrentBackCommandBuffer());
 
             vulkanCommandBuffer->BeginRenderPass(swapChain);

@@ -36,4 +36,17 @@ namespace CynicEngine
         MIRRORED_REPEAT,
         CLAMP_TO_EDGE,
     };
+
+    enum class AttachmentLoadOp
+    {
+        LOAD,
+        CLEAR,
+        DONT_CARE,
+    };
+
+    enum class AttachmentStoreOp
+    {
+        STORE,
+        DONT_CARE,
+    };
 }

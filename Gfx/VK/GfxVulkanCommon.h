@@ -6,6 +6,7 @@
 #include "Logger/Logger.h"
 #include "Gfx/IGfxDevice.h"
 #include "Gfx/IGfxBuffer.h"
+#include "Gfx/IGfxTexture.h"
 namespace CynicEngine
 {
     inline STRING_VIEW GetErrorCode(const VkResult result)
@@ -114,5 +115,10 @@ namespace CynicEngine
 
     VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc);
     std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc);
+    
+    VkAttachmentLoadOp ToVkAttachmentOp(AttachmentLoadOp loadOp);
+    VkAttachmentStoreOp ToVkAttachmentOp(AttachmentStoreOp storeOp);
+    VkClearValue ToVkClearValue(GfxClearValue clearValue);
 
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxTextureAttachment& attachment);
 } // namespace CynicEngine

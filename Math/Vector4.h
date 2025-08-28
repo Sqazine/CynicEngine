@@ -24,6 +24,10 @@ namespace CynicEngine
 			{
 				std::array<T, 4> values;
 			};
+			struct
+			{
+				 T valuesRawArray[4];
+			};
 		};
 
 		Vector4();

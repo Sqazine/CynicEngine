@@ -1,6 +1,6 @@
 #pragma once
-#include "IGfxDevice.h"
 #include "IGfxCommon.h"
+#include "Math/Vector4.h"
 namespace CynicEngine
 {
     struct GfxTextureDesc
@@ -21,6 +21,7 @@ namespace CynicEngine
         IGfxAddressMode addressModeW{IGfxAddressMode::REPEAT};
     };
 
+    class IGfxDevice;
     class IGfxTexture
     {
     public:
@@ -34,5 +35,25 @@ namespace CynicEngine
 
     protected:
         GfxTextureDesc mDesc;
+    };
+
+    struct GfxDepthStencilClearValue
+    {
+        float depth;
+        uint32_t stencil;
+    };
+
+    union GfxClearValue
+    {
+        Vector4f color;
+        GfxDepthStencilClearValue depthStencil;
+    };
+
+    struct GfxTextureAttachment
+    {
+        IGfxTexture *texture{nullptr};
+        AttachmentLoadOp loadOp{AttachmentLoadOp::DONT_CARE};
+        AttachmentStoreOp storeOp{AttachmentStoreOp::DONT_CARE};
+        GfxClearValue clearValue{Vector4f::ZERO};
     };
 }
