@@ -42,6 +42,11 @@ namespace CynicEngine
     void MeshDrawPass::Execute()
     {
         auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
+        swapChain->GetColorAttachment().loadOp=AttachmentLoadOp::CLEAR;
+        swapChain->GetColorAttachment().storeOp=AttachmentStoreOp::STORE;
+        
+        swapChain->GetDepthAttachment().loadOp=AttachmentLoadOp::CLEAR;
+        swapChain->GetDepthAttachment().storeOp=AttachmentStoreOp::STORE;
 
         auto cmdBuffer = Renderer::GetGfxDevice()->GetCurrentBackCommandBuffer();
         cmdBuffer

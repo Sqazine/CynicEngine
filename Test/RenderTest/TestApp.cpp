@@ -26,7 +26,7 @@ namespace CynicEngine
     {
         App::Render();
 
-        Renderer::GetGfxDevice()->GetSwapChain()->SetClearColor(mClearColor);
+        Renderer::GetGfxDevice()->GetSwapChain()->GetColorAttachment().clearValue.color=mClearColor;
     }
 
     void TestApp::RenderGizmo()
@@ -34,6 +34,10 @@ namespace CynicEngine
     }
 
     void TestApp::RenderUI()
+    {
+    }
+
+    void TestApp::RenderEditorUI()
     {
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (mShowDemoWindow)

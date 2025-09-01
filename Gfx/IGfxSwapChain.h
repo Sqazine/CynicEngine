@@ -22,22 +22,8 @@ namespace CynicEngine
         Window *GetWindow() const { return mWindow; }
         float GetAspect() const { return mWindow->GetAspect(); }
 
-        const GfxTextureAttachment &GetColorAttachment() { return mColorAttachment; }
-        const GfxTextureAttachment &GetDepthAttachment() { return mDepthAttachment; }
-
-        virtual void SetColorAttachmentLoadOp(AttachmentLoadOp op);
-        virtual AttachmentLoadOp GetColorAttachmentLoadOp() const;
-
-        virtual void SetColorAttachmentStoreOp(AttachmentStoreOp op);
-        virtual AttachmentStoreOp GetColorAttachmentStoreOp() const;
-
-        virtual void SetDepthAttachmentLoadOp(AttachmentLoadOp op);
-        virtual AttachmentLoadOp GetDepthAttachmentLoadOp() const;
-
-        virtual void SetDepthAttachmentStoreOp(AttachmentStoreOp op);
-        virtual AttachmentStoreOp GetDepthAttachmentStoreOp() const;
-
-        virtual void SetClearColor(const Vector4f& color) =0 ;
+        GfxTextureAttachment &GetColorAttachment() { return mColorAttachment; }
+        GfxTextureAttachment &GetDepthAttachment() { return mDepthAttachment; }
 
     protected:
         Window *mWindow;

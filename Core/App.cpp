@@ -66,6 +66,10 @@ namespace CynicEngine
 	{
 	}
 
+	void App::RenderUI()
+	{
+	}
+
 	void App::Destroy()
 	{
 		PlatformInfo::GetInstance().Destroy();
@@ -95,6 +99,7 @@ namespace CynicEngine
 		mRenderer->BeginFrame();
 		Render();
 		RenderGizmo();
+		RenderUI();
 		mRenderer->EndFrame();
 	}
 }

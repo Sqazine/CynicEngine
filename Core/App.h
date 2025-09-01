@@ -31,6 +31,7 @@ namespace CynicEngine
         virtual void Tick();
         virtual void Render();
         virtual void RenderGizmo();
+        virtual void RenderUI();
         virtual void PostTick();
         virtual void Destroy();
 

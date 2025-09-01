@@ -20,7 +20,8 @@ namespace CynicEngine
         virtual void Tick() override;
         virtual void Render() override;
         virtual void RenderGizmo() override;
-        virtual void RenderUI();
+        virtual void RenderUI() override;
+        virtual void RenderEditorUI();
         virtual void PostTick() override;
         virtual void Destroy() override;
 

@@ -29,6 +29,11 @@ namespace CynicEngine
 
     void EditorApp::RenderUI()
     {
+        App::RenderUI();
+    }
+
+    void EditorApp::RenderEditorUI()
+    {
     }
 
     void EditorApp::Destroy()
@@ -59,11 +64,11 @@ namespace CynicEngine
             {
                 task->Init();
             },
-            [&](EditorUIPass *task)
+            [this](EditorUIPass *task)
             {
                 task->BeginRender();
 
-                this->RenderUI();
+                RenderEditorUI();
 
                 task->EndRender();
             });

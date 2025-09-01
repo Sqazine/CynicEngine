@@ -144,8 +144,8 @@ namespace CynicEngine
         if (!is_minimized)
         {
             auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
-            swapChain->SetColorAttachmentLoadOp(AttachmentLoadOp::LOAD);
-            swapChain->SetDepthAttachmentLoadOp(AttachmentLoadOp::LOAD);
+            swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::LOAD;
+            swapChain->GetDepthAttachment().loadOp =  AttachmentLoadOp::LOAD;
 
             auto vulkanCommandBuffer = static_cast<GfxVulkanCommandBuffer *>(swapChain->GetCurrentBackCommandBuffer());
 

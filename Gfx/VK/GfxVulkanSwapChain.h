@@ -29,16 +29,6 @@ namespace CynicEngine
 
         uint8_t GetBackBufferCount() const override;
 
-		void SetColorAttachmentLoadOp(AttachmentLoadOp op) override;
-
-		void SetColorAttachmentStoreOp(AttachmentStoreOp op) override;
-
-		void SetDepthAttachmentLoadOp(AttachmentLoadOp op) override;
-
-		void SetDepthAttachmentStoreOp(AttachmentStoreOp op) override;
-
-        void SetClearColor(const Vector4f& clearColor) override;
-
         const VkSwapchainKHR &GetHandle() const { return mHandle; }
         uint8_t GetCurrentBackBufferIndex() const;
         VkExtent2D GetExtent() const;
@@ -47,10 +37,6 @@ namespace CynicEngine
         GfxVulkanTexture *GetCurrentSwapChainBackTexture() const;
         VkFormat GetColorTextureFormat() const { return mSurfaceFormat.format; }
         VkFormat GetDepthTextureFormat() const { return ToVkFormat(mDepthBackTexture->GetDesc().format); }
-
-        VkRenderingAttachmentInfo *GetVulkanColorAttachment() { return &mVulkanColorAttachment; }
-        VkRenderingAttachmentInfo *GetVulkanDepthAttachment() { return &mVulkanDepthAttachment; }
-
     private:
         void CreateSurface();
         void ObtainPresentQueue();
@@ -58,7 +44,7 @@ namespace CynicEngine
         void CreateBackTextures();
         void CreateCommandBuffers();
         void CreateSyncObjects();
-        void InitAttachments();
+        void SetAttachments();
 
         GfxVulkanCommandBuffer * GetCurrentVulkanBackCommandBuffer()const;
 
@@ -96,8 +82,5 @@ namespace CynicEngine
 
         std::unique_ptr<GfxVulkanTexture> mColorBackTexture;
         std::unique_ptr<GfxVulkanTexture> mDepthBackTexture;
-
-        VkRenderingAttachmentInfo mVulkanColorAttachment;
-        VkRenderingAttachmentInfo mVulkanDepthAttachment;
     };
 }

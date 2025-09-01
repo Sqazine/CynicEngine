@@ -21,6 +21,7 @@ namespace CynicEngine
         void Render() override;
         void RenderGizmo() override;
         void RenderUI() override;
+        void RenderEditorUI() override;
         void PostTick() override;
         void Destroy() override;
 

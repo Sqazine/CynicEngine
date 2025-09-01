@@ -204,7 +204,10 @@ namespace CynicEngine
         result.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         result.loadOp = ToVkAttachmentOp(attachment.loadOp);
         result.storeOp = ToVkAttachmentOp(attachment.storeOp);
-        result.clearValue = {{0.2f, 0.3f, 0.5f, 1.0f}};
+        result.clearValue.color.float32[0] = attachment.clearValue.color.x;
+        result.clearValue.color.float32[1] = attachment.clearValue.color.y;
+        result.clearValue.color.float32[2] = attachment.clearValue.color.z;
+        result.clearValue.color.float32[3] = attachment.clearValue.color.w;
         return result;
     }
 }
