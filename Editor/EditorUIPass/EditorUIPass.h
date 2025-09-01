@@ -13,6 +13,6 @@ namespace CynicEngine
 
         virtual void Init() = 0;
         virtual void BeginRender() = 0;
-        virtual void EndRender() = 0;
+        virtual void EndRender(bool onlyEditorPass) = 0;
     };
 }

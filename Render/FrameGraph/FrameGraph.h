@@ -21,7 +21,7 @@ namespace CynicEngine
         FrameGraph &operator=(FrameGraph &&) = default;
 
         template <typename DataType, typename... ArgTypes>
-        RenderTask<DataType>* AddRenderTask(ArgTypes... args)
+        RenderTask<DataType> *AddRenderTask(ArgTypes... args)
         {
             mRenderTasks.emplace_back(std::make_unique<RenderTask<DataType>>(args...));
 
@@ -36,21 +36,23 @@ namespace CynicEngine
         template <typename DescriptionType, typename ActualType>
         Resource<DescriptionType, ActualType> *AddRetainedResource(std::string_view name, const DescriptionType &description, ActualType *actual = nullptr)
         {
-            mResources[name]= std::make_unique<Resource<DescriptionType, ActualType>>(name, description, actual);
+            mResources[name] = std::make_unique<Resource<DescriptionType, ActualType>>(name, description, actual);
             return static_cast<Resource<DescriptionType, ActualType> *>(mResources[name].get());
         }
 
         template <typename DescriptionType, typename ActualType>
-        std::vector<Resource<DescriptionType, ActualType> *> AddRetainedResource(std::string_view name, const DescriptionType &description, std::vector<ActualType *> &actuals={})
+        std::vector<Resource<DescriptionType, ActualType> *> AddRetainedResource(std::string_view name, const DescriptionType &description, std::vector<ActualType *> &actuals = {})
         {
             std::vector<Resource<DescriptionType, ActualType> *> result;
-            for(auto& actual:actuals)
+            for (auto &actual : actuals)
             {
                 mResources[name] = std::make_unique<Resource<DescriptionType, ActualType>>(name, description, actual);
                 result.emplace_back(static_cast<Resource<DescriptionType, ActualType> *>(mResources[name]));
             }
             return result;
         }
+
+        size_t GetTaskCount() const { return mRenderTasks.size(); }
 
         void Compile()
         {
@@ -197,12 +199,12 @@ namespace CynicEngine
 
         void Execute()
         {
-            if(!mIsCompiled)
+            if (!mIsCompiled)
             {
                 Compile();
                 mIsCompiled = true;
             }
-            
+
             for (auto &step : mTimeline)
             {
                 for (auto resource : step.realizedResources)
@@ -278,7 +280,7 @@ namespace CynicEngine
 
         bool mIsCompiled{false};
         std::vector<std::unique_ptr<RenderTaskBase>> mRenderTasks;
-        std::unordered_map<std::string_view,std::unique_ptr<ResourceBase>> mResources;
+        std::unordered_map<std::string_view, std::unique_ptr<ResourceBase>> mResources;
         std::vector<Step> mTimeline;
     };
 

@@ -25,6 +25,6 @@ namespace CynicEngine
         virtual void PostTick() override;
         virtual void Destroy() override;
 
-        void AddEditorUIPass();
+        void AddEditorUIPass(FrameGraph& frameGraph);
     };
 }

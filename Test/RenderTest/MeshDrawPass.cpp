@@ -20,14 +20,14 @@ namespace CynicEngine
         mCamera->SetFovByDegree(60.0f);
         mMesh.reset(Mesh::CreateBuiltinMesh(MeshType::TRIANGLE));
 
-        GfxTextureDesc textureDesc=ReadTexture(ASSETS_DIR "uv.png");
-        mColorTexture.reset(IGfxTexture::Create(Renderer::GetGfxDevice(),textureDesc));
+        GfxTextureDesc textureDesc = ReadTexture(ASSETS_DIR "uv.png");
+        mColorTexture.reset(IGfxTexture::Create(Renderer::GetGfxDevice(), textureDesc));
 
         IGfxBufferDesc desc{};
         desc.bufferSize = sizeof(MeshUniformData);
         desc.elementSize = sizeof(MeshUniformData);
         desc.data = &mMeshUniformData;
-        mMeshUniformDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(),desc));
+        mMeshUniformDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(), desc));
 
         auto vertShaderContent = ReadFile(SHADER_DIR "meshDrawPass.vert.slang.spv");
         auto fragShaderContent = ReadFile(SHADER_DIR "meshDrawPass.frag.slang.spv");
@@ -42,11 +42,11 @@ namespace CynicEngine
     void MeshDrawPass::Execute()
     {
         auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
-        swapChain->GetColorAttachment().loadOp=AttachmentLoadOp::CLEAR;
-        swapChain->GetColorAttachment().storeOp=AttachmentStoreOp::STORE;
-        
-        swapChain->GetDepthAttachment().loadOp=AttachmentLoadOp::CLEAR;
-        swapChain->GetDepthAttachment().storeOp=AttachmentStoreOp::STORE;
+        swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::CLEAR;
+        swapChain->GetColorAttachment().storeOp = AttachmentStoreOp::STORE;
+
+        swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::CLEAR;
+        swapChain->GetDepthAttachment().storeOp = AttachmentStoreOp::STORE;
 
         auto cmdBuffer = Renderer::GetGfxDevice()->GetCurrentBackCommandBuffer();
         cmdBuffer
@@ -58,9 +58,9 @@ namespace CynicEngine
             ->EndRenderPass();
     }
 
-    void AddMeshDrawPass(Renderer *renderer)
+    void AddMeshDrawPass(FrameGraph &fragmeGraph)
     {
-        renderer->AddRenderTask<MeshDrawPass>(
+        fragmeGraph.AddRenderTask<MeshDrawPass>(
             "MeshDrawPass",
             true,
             [&](MeshDrawPass *task, RenderTaskBuilder &builder)

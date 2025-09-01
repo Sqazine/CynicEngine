@@ -29,5 +29,5 @@ namespace CynicEngine
         std::unique_ptr<IGfxRasterPipeline> mRasterPipeline;
     };
 
-    void AddMeshDrawPass(Renderer *renderer);
+    void AddMeshDrawPass(FrameGraph &framgGraph);
 }

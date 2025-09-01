@@ -9,7 +9,7 @@ namespace CynicEngine
     {
         App::Init();
 
-        AddEditorUIPass();
+        AddEditorUIPass(mRenderer->GetFrameGraph());
     }
 
     void EditorApp::Tick()
@@ -51,9 +51,10 @@ namespace CynicEngine
         App::PostTick();
     }
 
-    void EditorApp::AddEditorUIPass()
+    void EditorApp::AddEditorUIPass(FrameGraph &frameGraph)
     {
-        GetRenderer()->AddRenderTask<EditorUIPass>(
+        bool onlyEditorPass = frameGraph.GetTaskCount() == 0;
+        frameGraph.AddRenderTask<EditorUIPass>(
             "EditorUIPass",
             true,
             [&]()
@@ -64,13 +65,13 @@ namespace CynicEngine
             {
                 task->Init();
             },
-            [this](EditorUIPass *task)
+            [this, onlyEditorPass](EditorUIPass *task)
             {
                 task->BeginRender();
 
                 RenderEditorUI();
 
-                task->EndRender();
+                task->EndRender(onlyEditorPass);
             });
     }
 }

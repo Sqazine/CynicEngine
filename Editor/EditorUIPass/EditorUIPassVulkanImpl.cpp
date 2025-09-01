@@ -35,6 +35,11 @@ namespace CynicEngine
     {
         GfxVulkanDevice *vulkanDevice = static_cast<GfxVulkanDevice *>(Renderer::GetGfxDevice());
         vulkanDevice->WaitIdle();
+        
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+
         vkDestroyDescriptorPool(vulkanDevice->GetLogicDevice(), mDescriptorPool, nullptr);
     }
 
@@ -55,7 +60,8 @@ namespace CynicEngine
         };
 
         VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        ZeroVulkanStruct(poolInfo,VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
+        poolInfo.flags=VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
         poolInfo.maxSets = 256 * poolSizes.size();
@@ -135,7 +141,7 @@ namespace CynicEngine
         ImGui::NewFrame();
     }
 
-    void EditorUIPassVulkanImpl::EndRender()
+    void EditorUIPassVulkanImpl::EndRender(bool onlyEditorPass)
     {
         // Rendering
         ImGui::Render();
@@ -144,8 +150,19 @@ namespace CynicEngine
         if (!is_minimized)
         {
             auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
-            swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::LOAD;
-            swapChain->GetDepthAttachment().loadOp =  AttachmentLoadOp::LOAD;
+            if(onlyEditorPass)
+            {
+                swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::CLEAR;
+                swapChain->GetColorAttachment().storeOp = AttachmentStoreOp::STORE;
+                
+                swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::CLEAR;
+                swapChain->GetDepthAttachment().storeOp = AttachmentStoreOp::STORE;
+            }
+            else 
+            {
+                swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::LOAD;
+                swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::LOAD;
+            }
 
             auto vulkanCommandBuffer = static_cast<GfxVulkanCommandBuffer *>(swapChain->GetCurrentBackCommandBuffer());
 

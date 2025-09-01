@@ -21,11 +21,7 @@ namespace CynicEngine
         virtual void Render();
         void EndFrame();
 
-        template <typename DataType, typename... ArgTypes>
-        RenderTask<DataType> *AddRenderTask(ArgTypes... args)
-        {
-            return mFrameGraph.AddRenderTask<DataType>(args...);
-        }
+        FrameGraph &GetFrameGraph() { return mFrameGraph; }
 
     private:
         Window *mWindow;

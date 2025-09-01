@@ -12,7 +12,7 @@ namespace CynicEngine
 
         void Init() override;
         void BeginRender() override;
-        void EndRender() override;
+        void EndRender(bool onlyEditorPass) override;
 
     private:
         EditorApp *mEditorApp;
