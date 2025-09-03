@@ -2,7 +2,7 @@
 #include "GfxVulkanDevice.h"
 #include "Gfx/IGfxCommandBuffer.h"
 #include "Gfx/IGfxTexture.h"
-#include "Gfx/IGfxVertexDesc.h"
+#include "Gfx/IGfxVertexBinding.h"
 namespace CynicEngine
 {
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type)
@@ -130,17 +130,31 @@ namespace CynicEngine
         }
     }
 
-    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc)
+    VkVertexInputRate GetVkVertexInput(IGfxVertexInputType type)
+    {
+        switch(type)
+        {
+            case IGfxVertexInputType::PER_VERTEX:
+                return VK_VERTEX_INPUT_RATE_VERTEX;
+            case IGfxVertexInputType::PER_INSTANCE:
+                return VK_VERTEX_INPUT_RATE_INSTANCE;
+            default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown VertexInputType!"));
+        }
+    }
+
+
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexBinding &desc)
     {
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = desc.bindingPoint;
         bindingDescription.stride = desc.size;
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        bindingDescription.inputRate = GetVkVertexInput(desc.vertexInputType);
 
         return bindingDescription;
     }
 
-    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc)
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexBinding &desc)
     {
         std::vector<VkVertexInputAttributeDescription> result;
         for (size_t i = 0; i < desc.attribs.size(); ++i)

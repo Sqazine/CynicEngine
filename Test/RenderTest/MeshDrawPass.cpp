@@ -1,6 +1,7 @@
 #include "MeshDrawPass.h"
 #include "Core/IO.h"
 #include "Gfx/IGfxCommandBuffer.h"
+#include "Gfx/IGfxPipeline.h"
 namespace CynicEngine
 {
     void MeshDrawPass::Init()
@@ -23,16 +24,21 @@ namespace CynicEngine
         GfxTextureDesc textureDesc = ReadTexture(ASSETS_DIR "uv.png");
         mColorTexture.reset(IGfxTexture::Create(Renderer::GetGfxDevice(), textureDesc));
 
-        IGfxBufferDesc desc{};
-        desc.bufferSize = sizeof(MeshUniformData);
-        desc.elementSize = sizeof(MeshUniformData);
-        desc.data = &mMeshUniformData;
-        mMeshUniformDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(), desc));
+        IGfxBufferDesc bufferDesc{};
+        bufferDesc.bufferSize = sizeof(MeshUniformData);
+        bufferDesc.elementSize = sizeof(MeshUniformData);
+        bufferDesc.data = &mMeshUniformData;
+        mMeshUniformDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(), bufferDesc));
 
         auto vertShaderContent = ReadFile(SHADER_DIR "meshDrawPass.vert.slang.spv");
         auto fragShaderContent = ReadFile(SHADER_DIR "meshDrawPass.frag.slang.spv");
         mShader.reset(IGfxRasterShader::Create(Renderer::GetGfxDevice(), vertShaderContent, fragShaderContent));
-        mRasterPipeline.reset(IGfxRasterPipeline::Create(Renderer::GetGfxDevice(), Vertex::GetVertexDesc(), mShader.get()));
+
+        IGfxRasterPipelineDesc pipelineDesc;
+        pipelineDesc.shader = mShader.get();
+        pipelineDesc.vertexBinding = Vertex::GetVertexBinding();
+
+        mRasterPipeline.reset(IGfxRasterPipeline::Create(Renderer::GetGfxDevice(), pipelineDesc));
 
         mShader->BindBuffer("cameraData", mCamera->GetRenderDataBuffer()->GetGfxBuffer());
         mShader->BindBuffer("meshUBO", mMeshUniformDataBuffer->GetGfxBuffer());

@@ -6,10 +6,10 @@
 #include "Config/GfxConfig.h"
 namespace CynicEngine
 {
-    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device, const IGfxVertexDesc &vertexDesc, IGfxRasterShader *shader)
-        : GfxVulkanObject(device), IGfxRasterPipeline(shader)
+    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device,const IGfxRasterPipelineDesc & pipelineDesc)
+        : GfxVulkanObject(device), IGfxRasterPipeline(pipelineDesc)
     {
-        Create(vertexDesc);
+        Create();
     }
 
     GfxVulkanRasterPipeline::~GfxVulkanRasterPipeline()
@@ -18,10 +18,10 @@ namespace CynicEngine
         vkDestroyPipeline(mDevice->GetLogicDevice(), mHandle, nullptr);
     }
 
-    void GfxVulkanRasterPipeline::Create(const IGfxVertexDesc &vertexDesc)
+    void GfxVulkanRasterPipeline::Create()
     {
-        mVertexInputBindingState = GetVulkanVertexInputBindingDescription(vertexDesc);
-        mVertexAttributes = GetVulkanVertexInputAttributeDescriptions(vertexDesc);
+        mVertexInputBindingState = GetVulkanVertexInputBindingDescription(mPipelineDesc.vertexBinding);
+        mVertexAttributes = GetVulkanVertexInputAttributeDescriptions(mPipelineDesc.vertexBinding);
 
         VkPipelineVertexInputStateCreateInfo vertexState;
         ZeroVulkanStruct(vertexState, VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
@@ -116,7 +116,7 @@ namespace CynicEngine
         pipelineRendering.depthAttachmentFormat = vulkanSwapChain->GetDepthTextureFormat();
         pipelineRendering.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
-        auto rawShader = static_cast<GfxVulkanRasterShader *>(mShader);
+        auto rawShader = static_cast<GfxVulkanRasterShader *>(mPipelineDesc.shader);
 
         VkGraphicsPipelineCreateInfo pipelineInfo;
         ZeroVulkanStruct(pipelineInfo, VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO);

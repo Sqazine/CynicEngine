@@ -1,18 +1,24 @@
 #pragma once
 #include "Gfx/IGfxShader.h"
-#include "Gfx/IGfxVertexDesc.h"
+#include "Gfx/IGfxVertexBinding.h"
 namespace CynicEngine
 {
+    struct IGfxRasterPipelineDesc
+    {
+        IGfxVertexBinding vertexBinding;
+        IGfxRasterShader* shader;
+    };
     class IGfxRasterPipeline
     {
     public:
-        IGfxRasterPipeline(IGfxRasterShader *shader);
+        IGfxRasterPipeline(const IGfxRasterPipelineDesc & pipelineDesc);
         virtual ~IGfxRasterPipeline() = default;
 
-        static IGfxRasterPipeline *Create(IGfxDevice *device,const IGfxVertexDesc& vertexDesc,IGfxRasterShader *shader);
+        static IGfxRasterPipeline *Create(IGfxDevice *device, const IGfxRasterPipelineDesc& pipelineDesc);
 
-        IGfxRasterShader *GetShader() const { return mShader; }
+        IGfxRasterShader *GetShader() const { return mPipelineDesc.shader; }
+
     protected:
-        IGfxRasterShader *mShader;
+        IGfxRasterPipelineDesc mPipelineDesc;
     };
 }

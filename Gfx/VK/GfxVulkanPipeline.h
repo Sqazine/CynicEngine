@@ -8,13 +8,13 @@ namespace CynicEngine
     class GfxVulkanRasterPipeline : public GfxVulkanObject, public IGfxRasterPipeline
     {
     public:
-        GfxVulkanRasterPipeline(IGfxDevice *device, const IGfxVertexDesc &vertexDesc, IGfxRasterShader *shader);
+        GfxVulkanRasterPipeline(IGfxDevice *device, const IGfxRasterPipelineDesc & pipelineDesc);
         ~GfxVulkanRasterPipeline() override;
 
         VkPipeline GetHandle() const { return mHandle; }
 
     private:
-        void Create(const IGfxVertexDesc &vertexDesc);
+        void Create();
 
         VkVertexInputBindingDescription mVertexInputBindingState{};
         std::vector<VkVertexInputAttributeDescription> mVertexAttributes{};

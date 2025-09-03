@@ -5,17 +5,24 @@
 #include "IGfxCommon.h"
 namespace CynicEngine
 {
-    struct IGfxVertexAttrib
+    struct IGfxVertexAttribute
     {
         std::string_view name;
         IGfxFormat format;
         size_t offset;
     };
 
-    struct IGfxVertexDesc
+    enum class IGfxVertexInputType
+    {
+        PER_VERTEX,
+        PER_INSTANCE,
+    };
+
+    struct IGfxVertexBinding
     {
         uint32_t bindingPoint;
         size_t size;
-        std::vector<IGfxVertexAttrib> attribs;
+        IGfxVertexInputType vertexInputType;
+        std::vector<IGfxVertexAttribute> attribs;
     };
 }

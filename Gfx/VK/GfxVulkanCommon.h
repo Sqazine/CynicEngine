@@ -100,7 +100,7 @@ namespace CynicEngine
     enum class IGfxIndexType;
     class GfxVulkanDevice;
     class GfxVulkanBuffer;
-    struct IGfxVertexDesc;
+    struct IGfxVertexBinding;
 
     uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type);
 
@@ -113,8 +113,8 @@ namespace CynicEngine
 
     VkIndexType ToVkIndexType(IGfxIndexType type);
 
-    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexDesc &desc);
-    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexDesc &desc);
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexBinding &desc);
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexBinding &desc);
     
     VkAttachmentLoadOp ToVkAttachmentOp(AttachmentLoadOp loadOp);
     VkAttachmentStoreOp ToVkAttachmentOp(AttachmentStoreOp storeOp);

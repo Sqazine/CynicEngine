@@ -5,7 +5,7 @@
 #include "Math/Vector3.h"
 #include "Math/Vector2.h"
 #include "Math/Vector4.h"
-#include "Gfx/IGfxVertexDesc.h"
+#include "Gfx/IGfxVertexBinding.h"
 #include "Gfx/IGfxBuffer.h"
 namespace CynicEngine
 {
@@ -23,50 +23,52 @@ namespace CynicEngine
             return position == other.position && normal == other.normal && tangent == other.tangent && binormal == other.binormal && color == other.color && texcoord0 == other.texcoord0;
         }
 
-        static IGfxVertexDesc GetVertexDesc()
+        static IGfxVertexBinding GetVertexBinding()
         {
-            static IGfxVertexDesc vertexDesc;
+            static IGfxVertexBinding vertexBinding;
+            vertexBinding.vertexInputType = IGfxVertexInputType::PER_VERTEX;
+
             static bool isInit = false;
 
             if (!isInit)
             {
                 isInit = true;
 
-                vertexDesc.bindingPoint = 0;
-                vertexDesc.size = sizeof(Vertex);
+                vertexBinding.bindingPoint = 0;
+                vertexBinding.size = sizeof(Vertex);
 
-                IGfxVertexAttrib attrib;
+                IGfxVertexAttribute attrib;
                 attrib.name = "POSITION";
                 attrib.format = IGfxFormat::R32G32B32_SFLOAT;
                 attrib.offset = offsetof(Vertex, position);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
 
                 attrib.name = "NORMAL";
                 attrib.format = IGfxFormat::R32G32B32_SFLOAT;
                 attrib.offset = offsetof(Vertex, normal);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
 
                 attrib.name = "TANGENT";
                 attrib.format = IGfxFormat::R32G32B32_SFLOAT;
                 attrib.offset = offsetof(Vertex, tangent);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
 
                 attrib.name = "BINORMAL";
                 attrib.format = IGfxFormat::R32G32B32_SFLOAT;
                 attrib.offset = offsetof(Vertex, binormal);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
 
                 attrib.name = "COLOR";
                 attrib.format = IGfxFormat::R32G32B32A32_SFLOAT;
                 attrib.offset = offsetof(Vertex, color);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
 
                 attrib.name = "TEXCOORD";
                 attrib.format = IGfxFormat::R32G32_SFLOAT;
                 attrib.offset = offsetof(Vertex, texcoord0);
-                vertexDesc.attribs.emplace_back(attrib);
+                vertexBinding.attribs.emplace_back(attrib);
             }
-            return vertexDesc;
+            return vertexBinding;
         }
     };
 
