@@ -25,7 +25,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
         vkUnmapMemory(device, buffer->GetMemory());
     }
 
-    inline GfxVulkanBuffer *CreateVertexBuffer(IGfxDevice *device, const IGfxBufferDesc &gfxDesc)
+    inline GfxVulkanBuffer *CreateVertexBuffer(IGfxDevice *device, const GfxBufferDesc &gfxDesc)
     {
         std::unique_ptr<GfxVulkanBuffer> stagingBuffer;
         stagingBuffer.reset(CreateStagingBuffer(device, gfxDesc.bufferSize));
@@ -39,7 +39,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);
 
-        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, IGfxCommandType::TRANSFER, true);
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, GfxCommandType::TRANSFER, true);
         commandBuffer->Begin()
             ->CopyBuffer(stagingBuffer.get(), result, desc.size)
             ->End();
@@ -50,7 +50,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
         return result;
     }
 
-    inline GfxVulkanBuffer *CreateIndexBuffer(IGfxDevice *device, const IGfxBufferDesc &gfxDesc)
+    inline GfxVulkanBuffer *CreateIndexBuffer(IGfxDevice *device, const GfxBufferDesc &gfxDesc)
     {
         std::unique_ptr<GfxVulkanBuffer> stagingBuffer;
         stagingBuffer.reset(CreateStagingBuffer(device, gfxDesc.bufferSize));
@@ -64,7 +64,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
 
         GfxVulkanBuffer *result = new GfxVulkanBuffer(device, desc);
 
-        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, IGfxCommandType::TRANSFER, true);
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(device, GfxCommandType::TRANSFER, true);
         commandBuffer->Begin()
             ->CopyBuffer(stagingBuffer.get(), result, desc.size)
             ->End();
@@ -75,7 +75,7 @@ namespace CynicEngine::GfxVulkanBufferCommon
         return result;
     }
 
-    inline GfxVulkanBuffer *CreateUniformBuffer(IGfxDevice *device, const IGfxBufferDesc &gfxDesc)
+    inline GfxVulkanBuffer *CreateUniformBuffer(IGfxDevice *device, const GfxBufferDesc &gfxDesc)
     {
         GfxVulkanBufferDesc desc;
         desc.size = gfxDesc.bufferSize;

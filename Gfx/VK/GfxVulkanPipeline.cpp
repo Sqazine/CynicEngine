@@ -6,8 +6,8 @@
 #include "Config/GfxConfig.h"
 namespace CynicEngine
 {
-    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device,const IGfxRasterPipelineDesc & pipelineDesc)
-        : GfxVulkanObject(device), IGfxRasterPipeline(pipelineDesc)
+    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device,const GfxRasterPipelineStateDesc & pipelineState)
+        : GfxVulkanObject(device), IGfxRasterPipeline(pipelineState)
     {
         Create();
     }
@@ -20,8 +20,8 @@ namespace CynicEngine
 
     void GfxVulkanRasterPipeline::Create()
     {
-        mVertexInputBindingState = GetVulkanVertexInputBindingDescription(mPipelineDesc.vertexBinding);
-        mVertexAttributes = GetVulkanVertexInputAttributeDescriptions(mPipelineDesc.vertexBinding);
+        mVertexInputBindingState = GetVulkanVertexInputBindingDescription(mPipelineStateDesc.vertexBinding);
+        mVertexAttributes = GetVulkanVertexInputAttributeDescriptions(mPipelineStateDesc.vertexBinding);
 
         VkPipelineVertexInputStateCreateInfo vertexState;
         ZeroVulkanStruct(vertexState, VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
@@ -32,8 +32,8 @@ namespace CynicEngine
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState;
         ZeroVulkanStruct(inputAssemblyState, VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
-        inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        inputAssemblyState.primitiveRestartEnable = VK_FALSE;
+        inputAssemblyState.topology = ToVkPrimitiveTopology(mPipelineStateDesc.primitiveTopology);
+        inputAssemblyState.primitiveRestartEnable = mPipelineStateDesc.primitiveRestartEnable;
 
         auto extent = static_cast<GfxVulkanSwapChain *>(mDevice->GetSwapChain())->GetExtent();
         VkViewport viewport;
@@ -59,10 +59,10 @@ namespace CynicEngine
         ZeroVulkanStruct(rasterizerState, VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
         rasterizerState.depthClampEnable = VK_FALSE;
         rasterizerState.rasterizerDiscardEnable = VK_FALSE;
-        rasterizerState.polygonMode = VK_POLYGON_MODE_FILL;
-        rasterizerState.lineWidth = 1.0f;
-        rasterizerState.cullMode = VK_CULL_MODE_NONE;
-        rasterizerState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizerState.polygonMode = ToVkPolygonMode(mPipelineStateDesc.polygonMode);
+        rasterizerState.lineWidth = mPipelineStateDesc.lineWidth;
+        rasterizerState.cullMode = ToVkCullMode(mPipelineStateDesc.cullMode);
+        rasterizerState.frontFace = ToVkFrontFace(mPipelineStateDesc.frontFace);
         rasterizerState.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multiSamplingState;
@@ -116,7 +116,7 @@ namespace CynicEngine
         pipelineRendering.depthAttachmentFormat = vulkanSwapChain->GetDepthTextureFormat();
         pipelineRendering.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
-        auto rawShader = static_cast<GfxVulkanRasterShader *>(mPipelineDesc.shader);
+        auto rawShader = static_cast<GfxVulkanRasterShader *>(mPipelineStateDesc.shader);
 
         VkGraphicsPipelineCreateInfo pipelineInfo;
         ZeroVulkanStruct(pipelineInfo, VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO);

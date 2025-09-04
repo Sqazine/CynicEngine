@@ -8,24 +8,24 @@
 #include "Config/GfxConfig.h"
 namespace CynicEngine
 {
-    VkQueue QueryQueueByCommandType(IGfxDevice *device, IGfxCommandType type)
+    VkQueue QueryQueueByCommandType(IGfxDevice *device, GfxCommandType type)
     {
         auto vulkanDevice = static_cast<GfxVulkanDevice *>(device);
         switch (type)
         {
-        case IGfxCommandType::GRAPHICS:
+        case GfxCommandType::GRAPHICS:
             return vulkanDevice->GetGraphicsQueue();
-        case IGfxCommandType::COMPUTE:
+        case GfxCommandType::COMPUTE:
             return vulkanDevice->GetComputeQueue();
-        case IGfxCommandType::TRANSFER:
+        case GfxCommandType::TRANSFER:
             return vulkanDevice->GetTransferQueue();
         default:
-            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown IGfxCommandType: {}"), static_cast<int>(type));
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown GfxCommandType: {}"), static_cast<int>(type));
             return vulkanDevice->GetGraphicsQueue();
         }
     }
 
-    GfxVulkanCommandBuffer::GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type, bool isSingleUse)
+    GfxVulkanCommandBuffer::GfxVulkanCommandBuffer(IGfxDevice *device, GfxCommandType type, bool isSingleUse)
         : GfxVulkanObject(device), mRelatedQueue(QueryQueueByCommandType(device, type)), mPoolHandle(VK_NULL_HANDLE), mHandle(VK_NULL_HANDLE)
     {
         VkCommandPoolCreateInfo poolInfo;
@@ -329,7 +329,7 @@ namespace CynicEngine
         vkCmdBindPipeline(mHandle, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanRasterPipeline->GetHandle());
         return this;
     }
-    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer)
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindVertexBuffer(const GfxVertexBuffer *vertexBuffer)
     {
         auto vulkanVertexBuffer = static_cast<const GfxVulkanBuffer *>(vertexBuffer->GetGfxBuffer());
         VkBuffer vertexBuffers[] = {vulkanVertexBuffer->GetHandle()};
@@ -337,7 +337,7 @@ namespace CynicEngine
         vkCmdBindVertexBuffers(mHandle, 0, 1, vertexBuffers, offsets);
         return this;
     }
-    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindIndexBuffer(const IGfxIndexBuffer *indexBuffer)
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BindIndexBuffer(const GfxIndexBuffer *indexBuffer)
     {
         auto vulkanIndexBuffer = static_cast<const GfxVulkanBuffer *>(indexBuffer->GetGfxBuffer());
         vkCmdBindIndexBuffer(mHandle, vulkanIndexBuffer->GetHandle(), 0, ToVkIndexType(indexBuffer->GetIndexType()));

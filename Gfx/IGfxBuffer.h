@@ -4,7 +4,7 @@
 #include <vector>
 namespace CynicEngine
 {
-    struct IGfxBufferDesc
+    struct GfxBufferDesc
     {
         size_t elementSize;
         size_t bufferSize;
@@ -22,13 +22,13 @@ namespace CynicEngine
         virtual ~IGfxBuffer() = default;
     };
 
-    class IGfxVertexBuffer
+    class GfxVertexBuffer
     {
     public:
-        IGfxVertexBuffer() = default;
-        ~IGfxVertexBuffer() { mGfxBuffer.reset(nullptr); }
+        GfxVertexBuffer() = default;
+        ~GfxVertexBuffer() { mGfxBuffer.reset(nullptr); }
 
-        static IGfxVertexBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
+        static GfxVertexBuffer *Create(IGfxDevice *device, const GfxBufferDesc &desc);
 
         IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
 
@@ -36,39 +36,34 @@ namespace CynicEngine
         std::unique_ptr<IGfxBuffer> mGfxBuffer;
     };
 
-    enum class IGfxIndexType
-    {
-        UINT16,
-        UINT32
-    };
-
-    class IGfxIndexBuffer
+    class GfxIndexBuffer
     {
     public:
-        IGfxIndexBuffer() = default;
-        ~IGfxIndexBuffer() { mGfxBuffer.reset(nullptr); }
+        GfxIndexBuffer() = default;
+        ~GfxIndexBuffer() { mGfxBuffer.reset(nullptr); }
 
-        static IGfxIndexBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
+        static GfxIndexBuffer *Create(IGfxDevice *device, const GfxBufferDesc &desc);
 
         IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
-        IGfxIndexType GetIndexType() const { return mIndexType; }
+        GfxIndexType GetIndexType() const { return mIndexType; }
         size_t GetElementCount() const { return mElementCount; }
+
     protected:
         size_t mElementCount;
-        IGfxIndexType mIndexType{IGfxIndexType::UINT32};
+        GfxIndexType mIndexType{GfxIndexType::UINT32};
 
         std::unique_ptr<IGfxBuffer> mGfxBuffer;
     };
 
-    class IGfxUniformBuffer
+    class GfxUniformBuffer
     {
     public:
-        IGfxUniformBuffer() = default;
-        ~IGfxUniformBuffer() { mGfxBuffer.reset(nullptr); }
+        GfxUniformBuffer() = default;
+        ~GfxUniformBuffer() { mGfxBuffer.reset(nullptr); }
 
-        static IGfxUniformBuffer *Create(IGfxDevice *device, const IGfxBufferDesc &desc);
+        static GfxUniformBuffer *Create(IGfxDevice *device, const GfxBufferDesc &desc);
 
-        void SetData(const IGfxBufferDesc &desc);
+        void SetData(const GfxBufferDesc &desc);
 
         const IGfxBuffer *GetGfxBuffer() const { return mGfxBuffer.get(); }
 

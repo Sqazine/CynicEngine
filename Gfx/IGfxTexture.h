@@ -11,14 +11,14 @@ namespace CynicEngine
         uint32_t height{0};
         uint32_t mipLevelCount{1};
 
-        IGfxFormat format{IGfxFormat::R8G8B8A8_SRGB};
+        GfxFormat format{GfxFormat::R8G8B8A8_SRGB};
         uint8_t sampleCount{1};
 
-        IGfxFilter magFilter{IGfxFilter::NEAREST};
-        IGfxFilter minFilter{IGfxFilter::NEAREST};
-        IGfxAddressMode addressModeU{IGfxAddressMode::REPEAT};
-        IGfxAddressMode addressModeV{IGfxAddressMode::REPEAT};
-        IGfxAddressMode addressModeW{IGfxAddressMode::REPEAT};
+        GfxFilter magFilter{GfxFilter::NEAREST};
+        GfxFilter minFilter{GfxFilter::NEAREST};
+        GfxAddressMode addressModeU{GfxAddressMode::REPEAT};
+        GfxAddressMode addressModeV{GfxAddressMode::REPEAT};
+        GfxAddressMode addressModeW{GfxAddressMode::REPEAT};
     };
 
     class IGfxDevice;
@@ -52,8 +52,8 @@ namespace CynicEngine
     struct GfxTextureAttachment
     {
         IGfxTexture *texture{nullptr};
-        AttachmentLoadOp loadOp{AttachmentLoadOp::DONT_CARE};
-        AttachmentStoreOp storeOp{AttachmentStoreOp::DONT_CARE};
+        GfxAttachmentLoadOp loadOp{GfxAttachmentLoadOp::DONT_CARE};
+        GfxAttachmentStoreOp storeOp{GfxAttachmentStoreOp::DONT_CARE};
         GfxClearValue clearValue{Vector4f::ZERO};
     };
 }

@@ -6,9 +6,9 @@
 #include "Gfx/VK/GfxVulkanBufferCommon.h"
 namespace CynicEngine
 {
-    IGfxVertexBuffer *IGfxVertexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
+    GfxVertexBuffer *GfxVertexBuffer::Create(IGfxDevice *device, const GfxBufferDesc &desc)
     {
-        IGfxVertexBuffer *vertexBuffer = new IGfxVertexBuffer();
+        GfxVertexBuffer *vertexBuffer = new GfxVertexBuffer();
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
         {
@@ -29,9 +29,9 @@ namespace CynicEngine
         return nullptr; // for avoiding compiler warning
     }
 
-    IGfxUniformBuffer *IGfxUniformBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
+    GfxUniformBuffer *GfxUniformBuffer::Create(IGfxDevice *device, const GfxBufferDesc &desc)
     {
-        IGfxUniformBuffer *uniformBuffer = new IGfxUniformBuffer();
+        GfxUniformBuffer *uniformBuffer = new GfxUniformBuffer();
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
         {
@@ -52,7 +52,7 @@ namespace CynicEngine
         return nullptr; // for avoiding compiler warning
     }
 
-    void IGfxUniformBuffer::SetData(const IGfxBufferDesc &desc)
+    void GfxUniformBuffer::SetData(const GfxBufferDesc &desc)
     {
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();
         switch (gfxConfig.backend)
@@ -72,9 +72,9 @@ namespace CynicEngine
         }
     }
     
-    IGfxIndexBuffer *IGfxIndexBuffer::Create(IGfxDevice *device, const IGfxBufferDesc &desc)
+    GfxIndexBuffer *GfxIndexBuffer::Create(IGfxDevice *device, const GfxBufferDesc &desc)
     {
-        IGfxIndexBuffer *indexBuffer = new IGfxIndexBuffer();
+        GfxIndexBuffer *indexBuffer = new GfxIndexBuffer();
         indexBuffer->mElementCount = desc.bufferSize / desc.elementSize;
 
         const GfxConfig &gfxConfig = AppConfig::GetInstance().GetGfxConfig();

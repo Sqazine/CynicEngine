@@ -13,8 +13,10 @@ namespace CynicEngine
 
         mWindow->SetTitle("TestApp");
 
-        AddMeshDrawPass(mRenderer->GetFrameGraph());
-        AddEditorUIPass(mRenderer->GetFrameGraph());
+        FrameGraph &frameGraph = mRenderer->GetFrameGraph();
+
+        AddMeshDrawPass(frameGraph);
+        AddEditorUIPass(frameGraph);
     }
 
     void TestApp::Tick()

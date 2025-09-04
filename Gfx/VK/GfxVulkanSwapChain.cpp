@@ -223,7 +223,7 @@ namespace CynicEngine
     {
         mGfxCommandBuffer.resize(mFrameOverlapCount);
         for (auto &cmdBuffer : mGfxCommandBuffer)
-            cmdBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, IGfxCommandType::GRAPHICS, false);
+            cmdBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, GfxCommandType::GRAPHICS, false);
     }
 
     void GfxVulkanSwapChain::CreateSyncObjects()

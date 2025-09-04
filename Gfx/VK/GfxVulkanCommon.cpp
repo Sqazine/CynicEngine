@@ -2,18 +2,17 @@
 #include "GfxVulkanDevice.h"
 #include "Gfx/IGfxCommandBuffer.h"
 #include "Gfx/IGfxTexture.h"
-#include "Gfx/IGfxVertexBinding.h"
 namespace CynicEngine
 {
-    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type)
+    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type)
     {
         switch (type)
         {
-        case IGfxCommandType::GRAPHICS:
+        case GfxCommandType::GRAPHICS:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.graphicsFamilyIdx.value();
-        case IGfxCommandType::COMPUTE:
+        case GfxCommandType::COMPUTE:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.computeFamilyIdx.value();
-        case IGfxCommandType::TRANSFER:
+        case GfxCommandType::TRANSFER:
             return device->GetPhysicalDeviceSpec().queueFamilyIndices.transferFamilyIdx.value();
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown GfxCommandType: {}"), static_cast<int>(type));
@@ -21,13 +20,13 @@ namespace CynicEngine
         }
     }
 
-    VkImageAspectFlagBits GetAspectFromFormat(IGfxFormat format)
+    VkImageAspectFlagBits GetAspectFromFormat(GfxFormat format)
     {
         switch (format)
         {
-        case IGfxFormat::D32_SFLOAT:
-        case IGfxFormat::D32_SFLOAT_S8_UINT:
-        case IGfxFormat::D24_UNORM_S8_UINT:
+        case GfxFormat::D32_SFLOAT:
+        case GfxFormat::D32_SFLOAT_S8_UINT:
+        case GfxFormat::D24_UNORM_S8_UINT:
             return VK_IMAGE_ASPECT_DEPTH_BIT;
         default:
             return VK_IMAGE_ASPECT_COLOR_BIT;
@@ -49,10 +48,10 @@ namespace CynicEngine
     DEF(D32_SFLOAT);          \
     DEF(D32_SFLOAT_S8_UINT);
 
-    VkFormat ToVkFormat(IGfxFormat format)
+    VkFormat ToVkFormat(GfxFormat format)
     {
-#define DEF(format)            \
-    case IGfxFormat::##format: \
+#define DEF(format)           \
+    case GfxFormat::##format: \
         return VK_FORMAT_##format
 
         switch (format)
@@ -65,26 +64,26 @@ namespace CynicEngine
 #undef DEF
     }
 
-    IGfxFormat ToFormat(VkFormat vkFormat)
+    GfxFormat ToFormat(VkFormat vkFormat)
     {
 #define DEF(format)          \
     case VK_FORMAT_##format: \
-        return IGfxFormat::##format
+        return GfxFormat::##format
 
         switch (vkFormat)
         {
             FormatDefines();
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Format"));
-            return IGfxFormat::B8G8R8A8_UNORM; // for avoiding compiler warning
+            return GfxFormat::B8G8R8A8_UNORM; // for avoiding compiler warning
         }
 #undef DEF
     }
 
-    VkFilter ToVkFilter(IGfxFilter filter)
+    VkFilter ToVkFilter(GfxFilter filter)
     {
-#define DEF(filter)            \
-    case IGfxFilter::##filter: \
+#define DEF(filter)           \
+    case GfxFilter::##filter: \
         return VK_FILTER_##filter
 
         switch (filter)
@@ -98,10 +97,10 @@ namespace CynicEngine
 #undef DEF
     }
 
-    VkSamplerAddressMode ToVkSamplerAddressMode(IGfxAddressMode addressMode)
+    VkSamplerAddressMode ToVkSamplerAddressMode(GfxAddressMode addressMode)
     {
-#define DEF(addressMode)                 \
-    case IGfxAddressMode::##addressMode: \
+#define DEF(addressMode)                \
+    case GfxAddressMode::##addressMode: \
         return VK_SAMPLER_ADDRESS_MODE_##addressMode
 
         switch (addressMode)
@@ -116,13 +115,13 @@ namespace CynicEngine
 #undef DEF
     }
 
-    VkIndexType ToVkIndexType(IGfxIndexType type)
+    VkIndexType ToVkIndexType(GfxIndexType type)
     {
         switch (type)
         {
-        case IGfxIndexType::UINT16:
+        case GfxIndexType::UINT16:
             return VK_INDEX_TYPE_UINT16;
-        case IGfxIndexType::UINT32:
+        case GfxIndexType::UINT32:
             return VK_INDEX_TYPE_UINT32;
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unsupported Vulkan index type"));
@@ -130,21 +129,20 @@ namespace CynicEngine
         }
     }
 
-    VkVertexInputRate GetVkVertexInput(IGfxVertexInputType type)
+    VkVertexInputRate GetVkVertexInput(GfxVertexInputType type)
     {
-        switch(type)
+        switch (type)
         {
-            case IGfxVertexInputType::PER_VERTEX:
-                return VK_VERTEX_INPUT_RATE_VERTEX;
-            case IGfxVertexInputType::PER_INSTANCE:
-                return VK_VERTEX_INPUT_RATE_INSTANCE;
-            default:
+        case GfxVertexInputType::PER_VERTEX:
+            return VK_VERTEX_INPUT_RATE_VERTEX;
+        case GfxVertexInputType::PER_INSTANCE:
+            return VK_VERTEX_INPUT_RATE_INSTANCE;
+        default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown VertexInputType!"));
         }
     }
 
-
-    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexBinding &desc)
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const GfxVertexBinding &desc)
     {
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = desc.bindingPoint;
@@ -154,7 +152,7 @@ namespace CynicEngine
         return bindingDescription;
     }
 
-    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexBinding &desc)
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const GfxVertexBinding &desc)
     {
         std::vector<VkVertexInputAttributeDescription> result;
         for (size_t i = 0; i < desc.attribs.size(); ++i)
@@ -171,15 +169,15 @@ namespace CynicEngine
         return result;
     }
 
-    VkAttachmentLoadOp ToVkAttachmentOp(AttachmentLoadOp loadOp)
+    VkAttachmentLoadOp ToVkAttachmentOp(GfxAttachmentLoadOp loadOp)
     {
         switch (loadOp)
         {
-        case AttachmentLoadOp::LOAD:
+        case GfxAttachmentLoadOp::LOAD:
             return VK_ATTACHMENT_LOAD_OP_LOAD;
-        case AttachmentLoadOp::CLEAR:
+        case GfxAttachmentLoadOp::CLEAR:
             return VK_ATTACHMENT_LOAD_OP_CLEAR;
-        case AttachmentLoadOp::DONT_CARE:
+        case GfxAttachmentLoadOp::DONT_CARE:
             return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown AttachmentOp"));
@@ -187,13 +185,13 @@ namespace CynicEngine
         }
     }
 
-    VkAttachmentStoreOp ToVkAttachmentOp(AttachmentStoreOp storeOp)
+    VkAttachmentStoreOp ToVkAttachmentOp(GfxAttachmentStoreOp storeOp)
     {
         switch (storeOp)
         {
-        case AttachmentStoreOp::STORE:
+        case GfxAttachmentStoreOp::STORE:
             return VK_ATTACHMENT_STORE_OP_STORE;
-        case AttachmentStoreOp::DONT_CARE:
+        case GfxAttachmentStoreOp::DONT_CARE:
             return VK_ATTACHMENT_STORE_OP_DONT_CARE;
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown AttachmentOp"));
@@ -223,5 +221,75 @@ namespace CynicEngine
         result.clearValue.color.float32[2] = attachment.clearValue.color.z;
         result.clearValue.color.float32[3] = attachment.clearValue.color.w;
         return result;
+    }
+
+    VkPrimitiveTopology ToVkPrimitiveTopology(GfxPrimitiveTopology primitiveTopology)
+    {
+#define DEF(topology)                      \
+    case GfxPrimitiveTopology::##topology: \
+        return VK_PRIMITIVE_TOPOLOGY_##topology
+
+        switch (primitiveTopology)
+        {
+            DEF(POINT_LIST);
+            DEF(LINE_LIST);
+            DEF(LINE_STRIP);
+            DEF(TRIANGLE_LIST);
+            DEF(TRIANGLE_STRIP);
+            DEF(TRIANGLE_FAN);
+            DEF(LINE_LIST_WITH_ADJACENCY);
+            DEF(LINE_STRIP_WITH_ADJACENCY);
+            DEF(TRIANGLE_LIST_WITH_ADJACENCY);
+            DEF(TRIANGLE_STRIP_WITH_ADJACENCY);
+            DEF(PATCH_LIST);
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown Primitive Topology!"));
+        }
+#undef DEF
+    }
+
+    VkFrontFace ToVkFrontFace(GfxFrontFace frontFace)
+    {
+        switch (frontFace)
+        {
+        case GfxFrontFace::CLOCKWISE:
+            return VK_FRONT_FACE_CLOCKWISE;
+        case GfxFrontFace::COUNTER_CLOCKWISE:
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown FrontFace!"));
+        }
+    }
+
+    VkPolygonMode ToVkPolygonMode(GfxPolygonMode polygonMode)
+    {
+        switch (polygonMode)
+        {
+        case GfxPolygonMode::FILL:
+            return VK_POLYGON_MODE_FILL;
+        case GfxPolygonMode::LINE:
+            return VK_POLYGON_MODE_LINE;
+        case GfxPolygonMode::POINT:
+            return VK_POLYGON_MODE_POINT;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown PolygonMode!"));
+        }
+    }
+
+    VkCullModeFlags ToVkCullMode(GfxCullMode cullMode)
+    {
+        switch (cullMode)
+        {
+        case GfxCullMode::NONE:
+            return VK_CULL_MODE_NONE;
+        case GfxCullMode::FRONT:
+            return VK_CULL_MODE_FRONT_BIT;
+        case GfxCullMode::BACK:
+            return VK_CULL_MODE_BACK_BIT;
+        case GfxCullMode::FRONT_AND_BACK:
+            return VK_CULL_MODE_FRONT_AND_BACK;
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown CullMode"));
+        }
     }
 }

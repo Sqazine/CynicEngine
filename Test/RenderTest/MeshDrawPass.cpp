@@ -24,21 +24,21 @@ namespace CynicEngine
         GfxTextureDesc textureDesc = ReadTexture(ASSETS_DIR "uv.png");
         mColorTexture.reset(IGfxTexture::Create(Renderer::GetGfxDevice(), textureDesc));
 
-        IGfxBufferDesc bufferDesc{};
+        GfxBufferDesc bufferDesc{};
         bufferDesc.bufferSize = sizeof(MeshUniformData);
         bufferDesc.elementSize = sizeof(MeshUniformData);
         bufferDesc.data = &mMeshUniformData;
-        mMeshUniformDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(), bufferDesc));
+        mMeshUniformDataBuffer.reset(GfxUniformBuffer::Create(Renderer::GetGfxDevice(), bufferDesc));
 
         auto vertShaderContent = ReadFile(SHADER_DIR "meshDrawPass.vert.slang.spv");
         auto fragShaderContent = ReadFile(SHADER_DIR "meshDrawPass.frag.slang.spv");
         mShader.reset(IGfxRasterShader::Create(Renderer::GetGfxDevice(), vertShaderContent, fragShaderContent));
 
-        IGfxRasterPipelineDesc pipelineDesc;
-        pipelineDesc.shader = mShader.get();
-        pipelineDesc.vertexBinding = Vertex::GetVertexBinding();
+        GfxRasterPipelineStateDesc pipelineState;
+        pipelineState.shader = mShader.get();
+        pipelineState.vertexBinding = Vertex::GetVertexBinding();
 
-        mRasterPipeline.reset(IGfxRasterPipeline::Create(Renderer::GetGfxDevice(), pipelineDesc));
+        mRasterPipeline.reset(IGfxRasterPipeline::Create(Renderer::GetGfxDevice(), pipelineState));
 
         mShader->BindBuffer("cameraData", mCamera->GetRenderDataBuffer()->GetGfxBuffer());
         mShader->BindBuffer("meshUBO", mMeshUniformDataBuffer->GetGfxBuffer());
@@ -48,11 +48,11 @@ namespace CynicEngine
     void MeshDrawPass::Execute()
     {
         auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
-        swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::CLEAR;
-        swapChain->GetColorAttachment().storeOp = AttachmentStoreOp::STORE;
+        swapChain->GetColorAttachment().loadOp = GfxAttachmentLoadOp::CLEAR;
+        swapChain->GetColorAttachment().storeOp = GfxAttachmentStoreOp::STORE;
 
-        swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::CLEAR;
-        swapChain->GetDepthAttachment().storeOp = AttachmentStoreOp::STORE;
+        swapChain->GetDepthAttachment().loadOp = GfxAttachmentLoadOp::CLEAR;
+        swapChain->GetDepthAttachment().storeOp = GfxAttachmentStoreOp::STORE;
 
         auto cmdBuffer = Renderer::GetGfxDevice()->GetCurrentBackCommandBuffer();
         cmdBuffer

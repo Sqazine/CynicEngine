@@ -8,7 +8,7 @@ namespace CynicEngine
     class GfxVulkanRasterPipeline : public GfxVulkanObject, public IGfxRasterPipeline
     {
     public:
-        GfxVulkanRasterPipeline(IGfxDevice *device, const IGfxRasterPipelineDesc & pipelineDesc);
+        GfxVulkanRasterPipeline(IGfxDevice *device, const GfxRasterPipelineStateDesc & pipelineState);
         ~GfxVulkanRasterPipeline() override;
 
         VkPipeline GetHandle() const { return mHandle; }

@@ -24,7 +24,7 @@ namespace CynicEngine
         std::unique_ptr<Camera> mCamera;
         std::unique_ptr<Mesh> mMesh;
         std::unique_ptr<IGfxTexture> mColorTexture;
-        std::unique_ptr<IGfxUniformBuffer> mMeshUniformDataBuffer;
+        std::unique_ptr<GfxUniformBuffer> mMeshUniformDataBuffer;
         std::unique_ptr<IGfxRasterShader> mShader;
         std::unique_ptr<IGfxRasterPipeline> mRasterPipeline;
     };

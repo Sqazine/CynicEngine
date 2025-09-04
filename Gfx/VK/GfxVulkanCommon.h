@@ -7,6 +7,8 @@
 #include "Gfx/IGfxDevice.h"
 #include "Gfx/IGfxBuffer.h"
 #include "Gfx/IGfxTexture.h"
+#include "Gfx/IGfxPipeline.h"
+#include "Gfx/IGfxCommon.h"
 namespace CynicEngine
 {
     inline STRING_VIEW GetErrorCode(const VkResult result)
@@ -93,32 +95,33 @@ namespace CynicEngine
         memset(((uint8_t *)&Struct) + sizeof(VkStructureType), 0, sizeof(T) - sizeof(VkStructureType));
     }
 
-    enum class IGfxFormat;
-    enum class IGfxCommandType;
-    enum class IGfxFilter;
-    enum class IGfxAddressMode;
-    enum class IGfxIndexType;
+
     class GfxVulkanDevice;
     class GfxVulkanBuffer;
-    struct IGfxVertexBinding;
+    struct GfxVertexBinding;
 
-    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, IGfxCommandType type);
+    uint32_t GetVulkanQueueFamilyIndex(const GfxVulkanDevice *device, GfxCommandType type);
 
-    VkImageAspectFlagBits GetAspectFromFormat(IGfxFormat format);
+    VkImageAspectFlagBits GetAspectFromFormat(GfxFormat format);
 
-    VkFormat ToVkFormat(IGfxFormat format);
-    IGfxFormat ToFormat(VkFormat vkFormat);
-    VkFilter ToVkFilter(IGfxFilter filter);
-    VkSamplerAddressMode ToVkSamplerAddressMode(IGfxAddressMode addressMode);
+    VkFormat ToVkFormat(GfxFormat format);
+    GfxFormat ToFormat(VkFormat vkFormat);
+    VkFilter ToVkFilter(GfxFilter filter);
+    VkSamplerAddressMode ToVkSamplerAddressMode(GfxAddressMode addressMode);
 
-    VkIndexType ToVkIndexType(IGfxIndexType type);
+    VkIndexType ToVkIndexType(GfxIndexType type);
 
-    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const IGfxVertexBinding &desc);
-    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const IGfxVertexBinding &desc);
+    VkVertexInputBindingDescription GetVulkanVertexInputBindingDescription(const GfxVertexBinding &desc);
+    std::vector<VkVertexInputAttributeDescription> GetVulkanVertexInputAttributeDescriptions(const GfxVertexBinding &desc);
     
-    VkAttachmentLoadOp ToVkAttachmentOp(AttachmentLoadOp loadOp);
-    VkAttachmentStoreOp ToVkAttachmentOp(AttachmentStoreOp storeOp);
+    VkAttachmentLoadOp ToVkAttachmentOp(GfxAttachmentLoadOp loadOp);
+    VkAttachmentStoreOp ToVkAttachmentOp(GfxAttachmentStoreOp storeOp);
     VkClearValue ToVkClearValue(GfxClearValue clearValue);
 
     VkRenderingAttachmentInfo ToVkAttachment(const GfxTextureAttachment& attachment);
+
+    VkPrimitiveTopology ToVkPrimitiveTopology(GfxPrimitiveTopology primitiveTopology);
+    VkFrontFace ToVkFrontFace(GfxFrontFace frontFace);
+    VkPolygonMode ToVkPolygonMode(GfxPolygonMode polygonMode);
+    VkCullModeFlags ToVkCullMode(GfxCullMode cullMode);
 } // namespace CynicEngine

@@ -32,12 +32,12 @@ namespace CynicEngine
 
         mVertices = vertices;
 
-        IGfxBufferDesc gfxDesc{};
+        GfxBufferDesc gfxDesc{};
         gfxDesc.elementSize = sizeof(Vertex);
         gfxDesc.bufferSize = mVertices.size() * gfxDesc.elementSize;
         gfxDesc.data = mVertices.data();
 
-        mVertexBuffer.reset(IGfxVertexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
+        mVertexBuffer.reset(GfxVertexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
     }
     void Mesh::SetIndices(const std::vector<uint32_t> &indices)
     {
@@ -46,12 +46,12 @@ namespace CynicEngine
 
         mIndices = indices;
 
-        IGfxBufferDesc gfxDesc{};
+        GfxBufferDesc gfxDesc{};
         gfxDesc.elementSize = sizeof(uint32_t);
         gfxDesc.bufferSize = mIndices.size() * gfxDesc.elementSize;
         gfxDesc.data = mIndices.data();
 
-        mIndexBuffer.reset(IGfxIndexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
+        mIndexBuffer.reset(GfxIndexBuffer::Create(Renderer::GetGfxDevice(), gfxDesc));
     }
 
     Mesh *Mesh::CreateBuiltinTriangle()

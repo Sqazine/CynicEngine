@@ -29,7 +29,7 @@ namespace CynicEngine
         const Matrix4f &GetViewMatrix() const { return mRenderData.viewMatrix; }
         const Matrix4f &GetProjectionMatrix() const { return mRenderData.projectionMatrix; }
 
-        const IGfxUniformBuffer *GetRenderDataBuffer() const { return mRenderDataBuffer.get(); }
+        const GfxUniformBuffer *GetRenderDataBuffer() const { return mRenderDataBuffer.get(); }
     protected:
         void InitializeDefault(const Vector3f &position, const Vector3f &target);
 
@@ -40,7 +40,7 @@ namespace CynicEngine
         };
         CameraRenderData mRenderData;
 
-        std::unique_ptr<IGfxUniformBuffer> mRenderDataBuffer;
+        std::unique_ptr<GfxUniformBuffer> mRenderDataBuffer;
 
         // ViewMatrix Data
         Vector3f mPosition;

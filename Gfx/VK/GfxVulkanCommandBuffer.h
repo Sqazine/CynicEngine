@@ -11,7 +11,7 @@ namespace CynicEngine
     class GfxVulkanCommandBuffer : public GfxVulkanObject, public IGfxCommandBuffer
     {
     public:
-        GfxVulkanCommandBuffer(IGfxDevice *device, IGfxCommandType type, bool isSingleUse);
+        GfxVulkanCommandBuffer(IGfxDevice *device, GfxCommandType type, bool isSingleUse);
         ~GfxVulkanCommandBuffer() override;
 
         VkCommandBuffer GetHandle() const { return mHandle; }
@@ -24,8 +24,8 @@ namespace CynicEngine
         IGfxCommandBuffer *CopyBuffer(IGfxBuffer *src, IGfxBuffer *dst, size_t bufferSize) override;
         IGfxCommandBuffer *CopyBufferToImage(IGfxBuffer *src, IGfxTexture *dst, uint32_t width, uint32_t height) override;
         IGfxCommandBuffer *BindRasterPipeline(IGfxRasterPipeline *pipeline) override;
-        IGfxCommandBuffer *BindVertexBuffer(const IGfxVertexBuffer *vertexBuffer) override;
-        IGfxCommandBuffer *BindIndexBuffer(const IGfxIndexBuffer *indexBuffer) override;
+        IGfxCommandBuffer *BindVertexBuffer(const GfxVertexBuffer *vertexBuffer) override;
+        IGfxCommandBuffer *BindIndexBuffer(const GfxIndexBuffer *indexBuffer) override;
         IGfxCommandBuffer *DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
 
         IGfxCommandBuffer *Submit(GfxVulkanSemaphore *waitSemaphore = nullptr);

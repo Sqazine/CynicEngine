@@ -87,7 +87,7 @@ namespace CynicEngine
 
         GfxVulkanBufferCommon::SetCpuBufferData(stagingBuffer.get(), (size_t)imageSize, mDesc.data);
 
-        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, IGfxCommandType::TRANSFER, true);
+        std::unique_ptr<GfxVulkanCommandBuffer> commandBuffer = std::make_unique<GfxVulkanCommandBuffer>(mDevice, GfxCommandType::TRANSFER, true);
         commandBuffer->Begin();
         commandBuffer->TransitionImageLayout(this, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         commandBuffer->CopyBufferToImage(stagingBuffer.get(), this, mDesc.width, mDesc.height);

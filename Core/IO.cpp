@@ -54,16 +54,16 @@ namespace CynicEngine
         switch (texChannels)
         {
         case 1:
-            result.format = IGfxFormat::R8_UNORM;
+            result.format = GfxFormat::R8_UNORM;
             break;
         case 2:
-            result.format = IGfxFormat::R8G8_UNORM;
+            result.format = GfxFormat::R8G8_UNORM;
             break;
         case 3:
-            result.format = IGfxFormat::R8G8B8_UNORM;
+            result.format = GfxFormat::R8G8B8_UNORM;
             break;
         case 4:
-            result.format = IGfxFormat::R8G8B8A8_UNORM;
+            result.format = GfxFormat::R8G8B8A8_UNORM;
             break;
         default:
 #ifdef CYNIC_ENGINE_UTF8_ENCODE

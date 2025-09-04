@@ -76,12 +76,12 @@ namespace CynicEngine
 
     void Camera::CreateRenderDataBuffer()
     {
-        IGfxBufferDesc desc{};
+        GfxBufferDesc desc{};
         desc.bufferSize = sizeof(CameraRenderData);
         desc.elementSize = sizeof(CameraRenderData);
         desc.data = &mRenderData;
 
-        mRenderDataBuffer.reset(IGfxUniformBuffer::Create(Renderer::GetGfxDevice(), desc));
+        mRenderDataBuffer.reset(GfxUniformBuffer::Create(Renderer::GetGfxDevice(), desc));
     }
 
     void Camera::UpdateViewMatrix()
@@ -105,7 +105,7 @@ namespace CynicEngine
 
     void Camera::UpdateRenderData()
     {
-        IGfxBufferDesc desc{};
+        GfxBufferDesc desc{};
         desc.bufferSize = sizeof(CameraRenderData);
         desc.elementSize = sizeof(CameraRenderData);
         desc.data = &mRenderData;

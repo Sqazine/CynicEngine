@@ -152,16 +152,16 @@ namespace CynicEngine
             auto swapChain = Renderer::GetGfxDevice()->GetSwapChain();
             if(onlyEditorPass)
             {
-                swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::CLEAR;
-                swapChain->GetColorAttachment().storeOp = AttachmentStoreOp::STORE;
+                swapChain->GetColorAttachment().loadOp = GfxAttachmentLoadOp::CLEAR;
+                swapChain->GetColorAttachment().storeOp = GfxAttachmentStoreOp::STORE;
                 
-                swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::CLEAR;
-                swapChain->GetDepthAttachment().storeOp = AttachmentStoreOp::STORE;
+                swapChain->GetDepthAttachment().loadOp = GfxAttachmentLoadOp::CLEAR;
+                swapChain->GetDepthAttachment().storeOp = GfxAttachmentStoreOp::STORE;
             }
             else 
             {
-                swapChain->GetColorAttachment().loadOp = AttachmentLoadOp::LOAD;
-                swapChain->GetDepthAttachment().loadOp = AttachmentLoadOp::LOAD;
+                swapChain->GetColorAttachment().loadOp = GfxAttachmentLoadOp::LOAD;
+                swapChain->GetDepthAttachment().loadOp = GfxAttachmentLoadOp::LOAD;
             }
 
             auto vulkanCommandBuffer = static_cast<GfxVulkanCommandBuffer *>(swapChain->GetCurrentBackCommandBuffer());
