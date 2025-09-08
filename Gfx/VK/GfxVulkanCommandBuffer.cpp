@@ -82,31 +82,14 @@ namespace CynicEngine
 
         auto colorAttachment = vulkanSwapChain->GetColorAttachment();
         auto depthAttachment = vulkanSwapChain->GetDepthAttachment();
-        auto depthBackTexture = static_cast<GfxVulkanTexture*>(depthAttachment.texture);
 
         const bool useMsaa = AppConfig::GetInstance().GetGfxConfig().msaa > Msaa::X1;
 
-        VkRenderingAttachmentInfo vulkanColorAttachment;
-        ZeroVulkanStruct(vulkanColorAttachment, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
-        vulkanColorAttachment.imageView = static_cast<GfxVulkanTexture *>(colorAttachment.texture)->GetView();
-        vulkanColorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkRenderingAttachmentInfo vulkanColorAttachment = ToVkAttachment(colorAttachment);
         vulkanColorAttachment.resolveMode = useMsaa ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE;
         vulkanColorAttachment.resolveImageView = useMsaa ? vulkanSwapChain->GetCurrentSwapChainBackTexture()->GetView() : nullptr;
-        vulkanColorAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        vulkanColorAttachment.loadOp = ToVkAttachmentOp(colorAttachment.loadOp);
-        vulkanColorAttachment.storeOp = ToVkAttachmentOp(colorAttachment.storeOp);
-        vulkanColorAttachment.clearValue.color.float32[0] = colorAttachment.clearValue.color.x;
-        vulkanColorAttachment.clearValue.color.float32[1] = colorAttachment.clearValue.color.y;
-        vulkanColorAttachment.clearValue.color.float32[2] = colorAttachment.clearValue.color.z;
-        vulkanColorAttachment.clearValue.color.float32[3] = colorAttachment.clearValue.color.w;
 
-        VkRenderingAttachmentInfo vulkanDepthAttachment;
-        ZeroVulkanStruct(vulkanDepthAttachment, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
-        vulkanDepthAttachment.imageView = depthBackTexture->GetView();
-        vulkanDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        vulkanDepthAttachment.loadOp = ToVkAttachmentOp(depthAttachment.loadOp);
-        vulkanDepthAttachment.storeOp = ToVkAttachmentOp(depthAttachment.storeOp);
-        vulkanDepthAttachment.clearValue.depthStencil = {1.0f, 0};
+        VkRenderingAttachmentInfo vulkanDepthAttachment = ToVkAttachment(depthAttachment);
 
         VkRenderingInfo renderingInfo;
         ZeroVulkanStruct(renderingInfo, VK_STRUCTURE_TYPE_RENDERING_INFO);
@@ -124,7 +107,7 @@ namespace CynicEngine
         return this;
     }
 
-    IGfxCommandBuffer *GfxVulkanCommandBuffer::BeginRenderPass(uint8_t colorAttachmentCount, GfxTextureAttachment *colorAttachments, GfxTextureAttachment *depthAttachment)
+    IGfxCommandBuffer *GfxVulkanCommandBuffer::BeginRenderPass(uint8_t colorAttachmentCount, GfxColorAttachment *colorAttachments, GfxDepthStencilAttachment *depthAttachment)
     {
         std::vector<VkRenderingAttachmentInfo> rawColorAttachments(colorAttachmentCount);
         for (size_t i = 0; i < colorAttachmentCount; ++i)
@@ -137,10 +120,10 @@ namespace CynicEngine
             rawColorAttachments[i].resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             rawColorAttachments[i].loadOp = ToVkAttachmentOp(colorAttachments[i].loadOp);
             rawColorAttachments[i].storeOp = ToVkAttachmentOp(colorAttachments[i].storeOp);
-            rawColorAttachments[i].clearValue.color.float32[0] = colorAttachments[i].clearValue.color.x;
-            rawColorAttachments[i].clearValue.color.float32[1] = colorAttachments[i].clearValue.color.y;
-            rawColorAttachments[i].clearValue.color.float32[2] = colorAttachments[i].clearValue.color.z;
-            rawColorAttachments[i].clearValue.color.float32[3] = colorAttachments[i].clearValue.color.w;
+            rawColorAttachments[i].clearValue.color.float32[0] = colorAttachments[i].clearValue.x;
+            rawColorAttachments[i].clearValue.color.float32[1] = colorAttachments[i].clearValue.y;
+            rawColorAttachments[i].clearValue.color.float32[2] = colorAttachments[i].clearValue.z;
+            rawColorAttachments[i].clearValue.color.float32[3] = colorAttachments[i].clearValue.w;
         }
 
         VkRenderingAttachmentInfo rawDepthAttachment;

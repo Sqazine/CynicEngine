@@ -22,12 +22,12 @@ namespace CynicEngine
         Window *GetWindow() const { return mWindow; }
         float GetAspect() const { return mWindow->GetAspect(); }
 
-        GfxTextureAttachment &GetColorAttachment() { return mColorAttachment; }
-        GfxTextureAttachment &GetDepthAttachment() { return mDepthAttachment; }
+        GfxColorAttachment &GetColorAttachment() { return mColorAttachment; }
+        GfxDepthStencilAttachment &GetDepthAttachment() { return mDepthAttachment; }
 
     protected:
         Window *mWindow;
-        GfxTextureAttachment mColorAttachment;
-        GfxTextureAttachment mDepthAttachment;
+        GfxColorAttachment mColorAttachment;
+        GfxDepthStencilAttachment mDepthAttachment;
     };
 }

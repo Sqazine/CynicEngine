@@ -55,3 +55,13 @@
             x = nullptr; \
         }                \
     } while (false);
+
+#define ENUM_CLASS_OP(CastName, EnumName, RawEnum)                   \
+    inline EnumName operator|(EnumName lhs, EnumName rhs)            \
+    {                                                                \
+        return static_cast<EnumName>(CastName(lhs) | CastName(rhs)); \
+    }                                                                \
+    inline EnumName operator&(EnumName lhs, EnumName rhs)            \
+    {                                                                \
+        return static_cast<EnumName>(CastName(lhs) & CastName(rhs)); \
+    }

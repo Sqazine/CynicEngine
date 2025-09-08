@@ -37,23 +37,22 @@ namespace CynicEngine
         GfxTextureDesc mDesc;
     };
 
-    struct GfxDepthStencilClearValue
-    {
-        float depth;
-        uint32_t stencil;
-    };
-
-    union GfxClearValue
-    {
-        Vector4f color;
-        GfxDepthStencilClearValue depthStencil;
-    };
-
     struct GfxTextureAttachment
     {
         IGfxTexture *texture{nullptr};
         GfxAttachmentLoadOp loadOp{GfxAttachmentLoadOp::DONT_CARE};
         GfxAttachmentStoreOp storeOp{GfxAttachmentStoreOp::DONT_CARE};
-        GfxClearValue clearValue{Vector4f::ZERO};
+    };
+    struct GfxColorAttachment : public GfxTextureAttachment
+    {
+        Vector4f clearValue{Vector4f::ZERO};
+        bool blendEnable{false};
+        ColorChannelMask colorChannelMask = {ColorChannelMask::R | ColorChannelMask::G | ColorChannelMask::B | ColorChannelMask::A};
+    };
+
+    struct GfxDepthStencilAttachment : public GfxTextureAttachment
+    {
+        float depthClearValue{1.0f};
+        uint32_t stencilClearValue{0};
     };
 }

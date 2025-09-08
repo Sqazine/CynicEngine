@@ -38,6 +38,13 @@ namespace CynicEngine
     DEF(R8G8_UNORM);          \
     DEF(R8G8B8_UNORM);        \
     DEF(R8G8B8A8_UNORM);      \
+    DEF(R8_SNORM);            \
+    DEF(R8G8_SNORM);          \
+    DEF(R8G8B8_SNORM);        \
+    DEF(R8G8B8A8_SNORM);      \
+    DEF(R8_SRGB);             \
+    DEF(R8G8_SRGB);           \
+    DEF(R8G8B8_SRGB);         \
     DEF(R8G8B8A8_SRGB);       \
     DEF(B8G8R8A8_SRGB);       \
     DEF(B8G8R8A8_UNORM);      \
@@ -199,16 +206,10 @@ namespace CynicEngine
         }
     }
 
-    VkClearValue ToVkClearValue(GfxClearValue clearValue)
-    {
-        VkClearValue result;
-        *result.color.float32 = *clearValue.color.valuesRawArray;
-        return result;
-    }
-
-    VkRenderingAttachmentInfo ToVkAttachment(const GfxTextureAttachment &attachment)
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxColorAttachment &attachment)
     {
         VkRenderingAttachmentInfo result;
+        ZeroVulkanStruct(result, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
         result.imageView = static_cast<GfxVulkanTexture *>(attachment.texture)->GetView();
         result.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         result.resolveMode = VK_RESOLVE_MODE_NONE;
@@ -216,11 +217,36 @@ namespace CynicEngine
         result.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         result.loadOp = ToVkAttachmentOp(attachment.loadOp);
         result.storeOp = ToVkAttachmentOp(attachment.storeOp);
-        result.clearValue.color.float32[0] = attachment.clearValue.color.x;
-        result.clearValue.color.float32[1] = attachment.clearValue.color.y;
-        result.clearValue.color.float32[2] = attachment.clearValue.color.z;
-        result.clearValue.color.float32[3] = attachment.clearValue.color.w;
+        result.clearValue.color.float32[0] = attachment.clearValue.x;
+        result.clearValue.color.float32[1] = attachment.clearValue.y;
+        result.clearValue.color.float32[2] = attachment.clearValue.z;
+        result.clearValue.color.float32[3] = attachment.clearValue.w;
         return result;
+    }
+
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxDepthStencilAttachment &attachment)
+    {
+        VkRenderingAttachmentInfo result;
+        ZeroVulkanStruct(result, VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO);
+        result.imageView = static_cast<GfxVulkanTexture *>(attachment.texture)->GetView();
+        result.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        result.resolveMode = VK_RESOLVE_MODE_NONE;
+        result.resolveImageView = nullptr;
+        result.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        result.loadOp = ToVkAttachmentOp(attachment.loadOp);
+        result.storeOp = ToVkAttachmentOp(attachment.storeOp);
+        result.clearValue.depthStencil.depth = attachment.depthClearValue;
+        result.clearValue.depthStencil.stencil = attachment.stencilClearValue;
+        return result;
+    }
+
+    VkRenderingAttachmentInfo ToVkAttachment(GfxColorAttachment *attachment)
+    {
+        return ToVkAttachment(*attachment);
+    }
+    VkRenderingAttachmentInfo ToVkAttachment(GfxDepthStencilAttachment *attachment)
+    {
+        return ToVkAttachment(*attachment);
     }
 
     VkPrimitiveTopology ToVkPrimitiveTopology(GfxPrimitiveTopology primitiveTopology)
@@ -291,5 +317,28 @@ namespace CynicEngine
         default:
             CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown CullMode"));
         }
+    }
+
+    VkCompareOp ToVkCompareOp(CompareOp compareOp)
+    {
+#define DEF(op)           \
+    case CompareOp::##op: \
+        return VK_COMPARE_OP_##op
+
+        switch (compareOp)
+        {
+            DEF(NEVER);
+            DEF(LESS);
+            DEF(EQUAL);
+            DEF(LESS_OR_EQUAL);
+            DEF(GREATER);
+            DEF(NOT_EQUAL);
+            DEF(GREATER_OR_EQUAL);
+            DEF(ALWAYS);
+        default:
+            CYNIC_ENGINE_LOG_ERROR(TEXT("Unknown CompareOp"));
+        }
+
+#undef DEF
     }
 }

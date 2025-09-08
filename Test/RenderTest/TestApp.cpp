@@ -28,7 +28,7 @@ namespace CynicEngine
     {
         App::Render();
 
-        Renderer::GetGfxDevice()->GetSwapChain()->GetColorAttachment().clearValue.color=mClearColor;
+        Renderer::GetGfxDevice()->GetSwapChain()->GetColorAttachment().clearValue=mClearColor;
     }
 
     void TestApp::RenderGizmo()

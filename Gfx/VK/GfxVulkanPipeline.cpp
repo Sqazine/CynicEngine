@@ -6,7 +6,7 @@
 #include "Config/GfxConfig.h"
 namespace CynicEngine
 {
-    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device,const GfxRasterPipelineStateDesc & pipelineState)
+    GfxVulkanRasterPipeline::GfxVulkanRasterPipeline(IGfxDevice *device, const GfxRasterPipelineStateDesc &pipelineState)
         : GfxVulkanObject(device), IGfxRasterPipeline(pipelineState)
     {
         Create();
@@ -35,25 +35,10 @@ namespace CynicEngine
         inputAssemblyState.topology = ToVkPrimitiveTopology(mPipelineStateDesc.primitiveTopology);
         inputAssemblyState.primitiveRestartEnable = mPipelineStateDesc.primitiveRestartEnable;
 
-        auto extent = static_cast<GfxVulkanSwapChain *>(mDevice->GetSwapChain())->GetExtent();
-        VkViewport viewport;
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.width = extent.width;
-        viewport.height = extent.height;
-        viewport.minDepth = 0.0;
-        viewport.maxDepth = 1.0;
-
-        VkRect2D scissor;
-        scissor.offset = {0, 0};
-        scissor.extent = extent;
-
         VkPipelineViewportStateCreateInfo viewportState;
         ZeroVulkanStruct(viewportState, VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
         viewportState.viewportCount = 1;
-        viewportState.pViewports = &viewport;
         viewportState.scissorCount = 1;
-        viewportState.pScissors = &scissor;
 
         VkPipelineRasterizationStateCreateInfo rasterizerState;
         ZeroVulkanStruct(rasterizerState, VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
@@ -72,48 +57,51 @@ namespace CynicEngine
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState;
         ZeroVulkanStruct(depthStencilState, VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO);
-        depthStencilState.depthTestEnable = VK_TRUE;
-        depthStencilState.depthWriteEnable = VK_TRUE;
-        depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStencilState.depthTestEnable = mPipelineStateDesc.depthTest;
+        depthStencilState.depthWriteEnable = mPipelineStateDesc.depthWrite;
+        depthStencilState.depthCompareOp = ToVkCompareOp(mPipelineStateDesc.depthCompare);
         depthStencilState.depthBoundsTestEnable = VK_FALSE;
-        depthStencilState.stencilTestEnable = VK_FALSE;
-
-        VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        colorBlendAttachment.blendEnable = VK_FALSE;
-
-        VkPipelineColorBlendStateCreateInfo colorBlendState;
-        ZeroVulkanStruct(colorBlendState, VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
-        colorBlendState.logicOpEnable = VK_FALSE;
-        colorBlendState.logicOp = VK_LOGIC_OP_COPY;
-        colorBlendState.attachmentCount = 1;
-        colorBlendState.pAttachments = &colorBlendAttachment;
-        colorBlendState.blendConstants[0] = 0.0f;
-        colorBlendState.blendConstants[1] = 0.0f;
-        colorBlendState.blendConstants[2] = 0.0f;
-        colorBlendState.blendConstants[3] = 0.0f;
+        depthStencilState.stencilTestEnable = mPipelineStateDesc.stencilTest;
 
         std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR,
         };
-
-        auto vulkanSwapChain = static_cast<GfxVulkanSwapChain *>(mDevice->GetSwapChain());
-
         VkPipelineDynamicStateCreateInfo dynamicState;
         ZeroVulkanStruct(dynamicState, VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
         dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
         dynamicState.pDynamicStates = dynamicStates.data();
-        VkFormat colorAttachmentFormats[] = {
-            vulkanSwapChain->GetColorTextureFormat(),
-        };
+
+        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+        std::vector<VkFormat> colorAttachmentFormats;
+
+        for (size_t i = 0; i < mPipelineStateDesc.colorAttachmentCount; ++i)
+        {
+            auto colorAttachment = mPipelineStateDesc.colorAttachments[i];
+            VkPipelineColorBlendAttachmentState state{};
+            state.blendEnable = colorAttachment.blendEnable;
+            state.colorWriteMask = static_cast<uint32_t>(colorAttachment.colorChannelMask);
+            colorBlendAttachments.emplace_back(state);
+            colorAttachmentFormats.emplace_back(ToVkFormat(colorAttachment.texture->GetDesc().format));
+        }
+
+        VkPipelineColorBlendStateCreateInfo colorBlendState;
+        ZeroVulkanStruct(colorBlendState, VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
+        colorBlendState.logicOpEnable = VK_FALSE;
+        colorBlendState.logicOp = VK_LOGIC_OP_COPY;
+        colorBlendState.attachmentCount = colorBlendAttachments.size();
+        colorBlendState.pAttachments = colorBlendAttachments.data();
+        colorBlendState.blendConstants[0] = 0.0f;
+        colorBlendState.blendConstants[1] = 0.0f;
+        colorBlendState.blendConstants[2] = 0.0f;
+        colorBlendState.blendConstants[3] = 0.0f;
 
         VkPipelineRenderingCreateInfoKHR pipelineRendering;
         ZeroVulkanStruct(pipelineRendering, VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR);
         pipelineRendering.pNext = nullptr;
-        pipelineRendering.colorAttachmentCount = colorBlendState.attachmentCount;
-        pipelineRendering.pColorAttachmentFormats = colorAttachmentFormats;
-        pipelineRendering.depthAttachmentFormat = vulkanSwapChain->GetDepthTextureFormat();
+        pipelineRendering.colorAttachmentCount = colorAttachmentFormats.size();
+        pipelineRendering.pColorAttachmentFormats = colorAttachmentFormats.data();
+        pipelineRendering.depthAttachmentFormat = ToVkFormat(mPipelineStateDesc.depthAttachment->texture->GetDesc().format);
         pipelineRendering.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
         auto rawShader = static_cast<GfxVulkanRasterShader *>(mPipelineStateDesc.shader);

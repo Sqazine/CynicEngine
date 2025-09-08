@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <type_traits>
+#include "Core/Marco.h"
 namespace CynicEngine
 {
     enum class GfxFormat
@@ -8,6 +10,15 @@ namespace CynicEngine
         R8G8_UNORM,
         R8G8B8_UNORM,
         R8G8B8A8_UNORM,
+
+        R8_SNORM,
+        R8G8_SNORM,
+        R8G8B8_SNORM,
+        R8G8B8A8_SNORM,
+
+        R8_SRGB,
+        R8G8_SRGB,
+        R8G8B8_SRGB,
         R8G8B8A8_SRGB,
 
         B8G8R8A8_SRGB,
@@ -49,6 +60,17 @@ namespace CynicEngine
         STORE,
         DONT_CARE,
     };
+
+    enum class ColorChannelMask : uint32_t
+    {
+        R = 0x00000001,
+        G = 0x00000002,
+        B = 0x00000004,
+        A = 0x00000008
+    };
+
+#define COLOR_CHANNEL_MASK_CAST(t) (static_cast<uint32_t>(std::underlying_type<ColorChannelMask>::type(t)))
+    ENUM_CLASS_OP(COLOR_CHANNEL_MASK_CAST, ColorChannelMask, uint32_t);
 
     enum class GfxPrimitiveTopology
     {
@@ -103,5 +125,17 @@ namespace CynicEngine
         GRAPHICS,
         COMPUTE,
         TRANSFER
+    };
+
+    enum class CompareOp
+    {
+        NEVER,
+        LESS,
+        EQUAL,
+        LESS_OR_EQUAL,
+        GREATER,
+        NOT_EQUAL,
+        GREATER_OR_EQUAL,
+        ALWAYS,
     };
 }

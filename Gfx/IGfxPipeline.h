@@ -21,6 +21,11 @@ namespace CynicEngine
     struct GfxRasterPipelineStateDesc
     {
         IGfxRasterShader *shader;
+
+        uint8_t colorAttachmentCount{0}; 
+        GfxColorAttachment* colorAttachments;
+        GfxDepthStencilAttachment* depthAttachment;
+
         GfxVertexBinding vertexBinding;
         GfxPrimitiveTopology primitiveTopology{GfxPrimitiveTopology::TRIANGLE_LIST};
         bool primitiveRestartEnable{false};
@@ -28,6 +33,10 @@ namespace CynicEngine
         GfxPolygonMode polygonMode{GfxPolygonMode::FILL};
         float lineWidth{1.0f};
         GfxCullMode cullMode{GfxCullMode::NONE};
+        bool depthTest{true};
+        bool depthWrite{true};
+        CompareOp depthCompare{CompareOp::LESS};
+        bool stencilTest{false};
     };
     class IGfxRasterPipeline
     {

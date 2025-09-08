@@ -35,6 +35,9 @@ namespace CynicEngine
         mShader.reset(IGfxRasterShader::Create(Renderer::GetGfxDevice(), vertShaderContent, fragShaderContent));
 
         GfxRasterPipelineStateDesc pipelineState;
+        pipelineState.colorAttachmentCount = 1;
+        pipelineState.colorAttachments = &Renderer::GetGfxDevice()->GetSwapChain()->GetColorAttachment();
+        pipelineState.depthAttachment = &Renderer::GetGfxDevice()->GetSwapChain()->GetDepthAttachment();
         pipelineState.shader = mShader.get();
         pipelineState.vertexBinding = Vertex::GetVertexBinding();
 

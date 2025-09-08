@@ -116,12 +116,15 @@ namespace CynicEngine
     
     VkAttachmentLoadOp ToVkAttachmentOp(GfxAttachmentLoadOp loadOp);
     VkAttachmentStoreOp ToVkAttachmentOp(GfxAttachmentStoreOp storeOp);
-    VkClearValue ToVkClearValue(GfxClearValue clearValue);
 
-    VkRenderingAttachmentInfo ToVkAttachment(const GfxTextureAttachment& attachment);
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxColorAttachment& attachment);
+    VkRenderingAttachmentInfo ToVkAttachment(const GfxDepthStencilAttachment& attachment);
+        VkRenderingAttachmentInfo ToVkAttachment( GfxColorAttachment* attachment);
+    VkRenderingAttachmentInfo ToVkAttachment( GfxDepthStencilAttachment* attachment);
 
     VkPrimitiveTopology ToVkPrimitiveTopology(GfxPrimitiveTopology primitiveTopology);
     VkFrontFace ToVkFrontFace(GfxFrontFace frontFace);
     VkPolygonMode ToVkPolygonMode(GfxPolygonMode polygonMode);
     VkCullModeFlags ToVkCullMode(GfxCullMode cullMode);
+    VkCompareOp ToVkCompareOp(CompareOp compareOp);
 } // namespace CynicEngine
